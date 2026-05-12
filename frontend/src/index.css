@@ -685,16 +685,60 @@
 ═══════════════════════════════════════════════════ */
 .grid-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 1rem;
 }
 
-.grid-main {
+/* Dashboard: table spans 2 cols, chart spans 1 */
+.grid-dash {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 @media (min-width: 1024px) {
-  .grid-main { grid-template-columns: 2fr 1fr; }
+  .grid-dash { grid-template-columns: 2fr 1fr; }
+  .lg\:grid-cols-dash { grid-template-columns: 2fr 1fr !important; }
 }
+
+/* Responsive visibility */
+@media (max-width: 767px) {
+  .hidden { display: none !important; }
+  .md\:hidden { display: none !important; }
+}
+
+@media (min-width: 768px) {
+  .hidden.md\:flex { display: flex !important; }
+  .hidden.md\:block { display: block !important; }
+  .md\:flex { display: flex !important; }
+  .md\:block { display: block !important; }
+}
+
+/* ── Select base reset (fix arrow on native selects) */
+select.input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: none;
+}
+
+/* ── Ensure no default blue outline on focus for buttons */
+button:focus-visible {
+  outline: 2px solid var(--p1);
+  outline-offset: 2px;
+}
+button:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ── Smooth transition for links */
+a {
+  transition: color 0.18s ease, opacity 0.18s ease;
+}
+
+/* ── Custom select arrow color fix for dark bg */
+select option {
+  background: #0c0f1d;
+  color: var(--text-1);
+}
+

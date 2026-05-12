@@ -1,17 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Ticket, Users, BarChart2, Trash2, UserCheck } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const getToken = () => localStorage.getItem('access_token');
 
-const statusColors = {
-  'Open': 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
-  'Assigned': 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20',
-  'In Progress': 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
-  'Resolved': 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20',
-  'Closed': 'bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/20',
+const statusBadge = {
+  Open:         'badge badge-blue',
+  Assigned:     'badge badge-yellow',
+  'In Progress':'badge badge-purple',
+  Resolved:     'badge badge-green',
+  Closed:       'badge badge-gray',
+};
+
+const roleBadge = {
+  admin:   'badge badge-red',
+  support: 'badge badge-purple',
+  user:    'badge badge-blue',
 };
 
 export default function AdminPanel() {
@@ -23,14 +29,18 @@ export default function AdminPanel() {
 
   const load = async () => {
     setLoading(true);
-    const [tRes, uRes, rRes] = await Promise.all([
-      axios.get(`${API_URL}/tickets`, { headers: { Authorization: `Bearer ${getToken()}` } }),
-      axios.get(`${API_URL}/admin/users`, { headers: { Authorization: `Bearer ${getToken()}` } }),
-      axios.get(`${API_URL}/admin/reports`, { headers: { Authorization: `Bearer ${getToken()}` } }),
-    ]);
-    setTickets(tRes.data);
-    setUsers(uRes.data);
-    setReports(rRes.data);
+    try {
+      const [tRes, uRes, rRes] = await Promise.all([
+        axios.get(`${API_URL}/tickets`,         { headers: { Authorization: `Bearer ${getToken()}` } }),
+        axios.get(`${API_URL}/admin/users`,     { headers: { Authorization: `Bearer ${getToken()}` } }),
+        axios.get(`${API_URL}/admin/reports`,   { headers: { Authorization: `Bearer ${getToken()}` } }),
+      ]);
+      setTickets(tRes.data);
+      setUsers(uRes.data);
+      setReports(rRes.data);
+    } catch (err) {
+      console.error(err);
+    }
     setLoading(false);
   };
 
@@ -52,7 +62,7 @@ export default function AdminPanel() {
   };
 
   const deleteTicket = async (ticketId) => {
-    if (!window.confirm('Delete this ticket?')) return;
+    if (!window.confirm('Are you sure you want to delete this ticket?')) return;
     await axios.delete(`${API_URL}/tickets/${ticketId}`, {
       headers: { Authorization: `Bearer ${getToken()}` }
     });
@@ -61,133 +71,237 @@ export default function AdminPanel() {
 
   const supportStaff = users.filter(u => u.role === 'support' || u.role === 'admin');
 
-  if (loading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-[var(--accent)]" size={32} /></div>;
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '5rem' }}>
+        <div className="spinner" style={{ width: '36px', height: '36px', borderWidth: '3px' }} />
+      </div>
+    );
+  }
+
+  const tabs = [
+    { id: 'tickets', label: 'All Tickets', icon: <Ticket size={15} />, count: tickets.length },
+    { id: 'users',   label: 'All Users',   icon: <Users size={15} />,  count: users.length },
+  ];
 
   return (
-    <div className="max-w-6xl mx-auto pb-12">
-      <h2 className="text-2xl font-bold tracking-tight text-[var(--text-primary)] mb-6">Admin Panel</h2>
+    <div style={{ maxWidth: '1100px', margin: '0 auto', paddingBottom: '3rem' }}>
+
+      {/* Header */}
+      <div style={{ marginBottom: '1.75rem' }}>
+        <h1 className="section-title">Admin Panel</h1>
+        <p className="section-sub">Manage tickets, users, and monitor system activity.</p>
+      </div>
 
       {/* Stats */}
       {reports && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
           {[
-            { label: 'Total Tickets', value: reports.total_tickets, color: 'text-blue-600 dark:text-blue-400' },
-            { label: 'Open', value: reports.open_tickets, color: 'text-yellow-600 dark:text-yellow-400' },
-            { label: 'Resolved', value: reports.resolved_tickets, color: 'text-green-600 dark:text-green-400' },
-          ].map(s => (
-            <div key={s.label} className="glass-card p-6 flex flex-col justify-between items-start">
-              <p className="text-[var(--text-secondary)] text-sm font-medium">{s.label}</p>
-              <p className={`text-4xl font-bold mt-2 ${s.color}`}>{s.value}</p>
-            </div>
-          ))}
+            { label: 'Total Tickets', value: reports.total_tickets, icon: Ticket,    gradient: 'linear-gradient(135deg, #6366f1, #4f46e5)', glow: 'rgba(99,102,241,0.2)' },
+            { label: 'Open Tickets',  value: reports.open_tickets,  icon: BarChart2, gradient: 'linear-gradient(135deg, #f59e0b, #d97706)', glow: 'rgba(245,158,11,0.2)' },
+            { label: 'Resolved',      value: reports.resolved_tickets, icon: UserCheck, gradient: 'linear-gradient(135deg, #10b981, #059669)', glow: 'rgba(16,185,129,0.2)' },
+          ].map((s, i) => {
+            const Icon = s.icon;
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: i * 0.06 }}
+                className="stat-card"
+              >
+                <div className="stat-icon" style={{ background: s.gradient, boxShadow: `0 6px 20px ${s.glow}` }}>
+                  <Icon size={22} color="#fff" />
+                </div>
+                <div>
+                  <div className="stat-value">{s.value}</div>
+                  <div className="stat-label">{s.label}</div>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       )}
 
-      {/* Tabs */}
-      <div className="flex gap-2 mb-6 border-b border-[var(--border-color)] pb-4">
-        {['tickets', 'users'].map(t => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`px-5 py-2 rounded-lg text-sm font-medium transition-all capitalize ${tab === t ? 'bg-[var(--text-primary)] text-[var(--bg-color)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]'}`}>
-            {t === 'tickets' ? '🎫 All Tickets' : '👥 All Users'}
+      {/* Tab bar */}
+      <div style={{
+        display: 'flex',
+        gap: '6px',
+        padding: '5px',
+        background: 'var(--bg-tertiary)',
+        border: '1px solid var(--border-color)',
+        borderRadius: 'var(--radius-md)',
+        marginBottom: '1.5rem',
+        width: 'fit-content',
+      }}>
+        {tabs.map(t => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '6px',
+              padding: '0.45rem 1rem',
+              borderRadius: 'var(--radius-sm)',
+              fontSize: '0.875rem',
+              fontWeight: 600,
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              background: tab === t.id ? 'var(--bg-secondary)' : 'transparent',
+              color: tab === t.id ? 'var(--text-primary)' : 'var(--text-secondary)',
+              boxShadow: tab === t.id ? 'var(--shadow-sm)' : 'none',
+            }}
+          >
+            {t.icon}
+            {t.label}
+            <span style={{
+              marginLeft: '2px',
+              background: tab === t.id ? 'var(--primary-light)' : 'var(--border-color)',
+              color: tab === t.id ? 'var(--primary)' : 'var(--text-muted)',
+              borderRadius: '99px',
+              padding: '0 6px',
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              minWidth: '20px',
+              textAlign: 'center',
+            }}>
+              {t.count}
+            </span>
           </button>
         ))}
       </div>
 
+      {/* Tickets tab */}
       {tab === 'tickets' && (
-        <div className="space-y-4">
-          {tickets.map(ticket => (
-            <motion.div key={ticket.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="glass-card p-5 hover:bg-[var(--bg-secondary)] transition-colors">
-              <div className="flex items-start justify-between gap-4 flex-wrap">
-                <div className="flex-1 min-w-[250px]">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-[var(--accent)] text-xs font-mono font-medium">{ticket.ticket_number}</span>
-                    <span className={`px-2.5 py-0.5 rounded-md text-xs font-medium border ${statusColors[ticket.status] || statusColors['Open']}`}>{ticket.status}</span>
-                    <span className="text-xs text-[var(--text-secondary)]">by <span className="font-medium text-[var(--text-primary)]">{ticket.author_name || 'Unknown'}</span></span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {tickets.map((ticket, i) => (
+            <motion.div
+              key={ticket.id}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2, delay: i * 0.03 }}
+              className="card"
+              style={{ padding: '1.125rem 1.25rem' }}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                {/* Info */}
+                <div style={{ flex: 1, minWidth: '260px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.4rem', flexWrap: 'wrap' }}>
+                    <span style={{ fontFamily: 'monospace', fontSize: '0.72rem', fontWeight: 700, color: 'var(--primary)', background: 'var(--primary-light)', padding: '2px 8px', borderRadius: '4px' }}>
+                      {ticket.ticket_number}
+                    </span>
+                    <span className={statusBadge[ticket.status] || 'badge badge-gray'}>{ticket.status}</span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      by <strong style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>{ticket.author_name || 'Unknown'}</strong>
+                    </span>
                   </div>
-                  <h3 className="text-[var(--text-primary)] font-semibold mb-1">{ticket.subject}</h3>
-                  <p className="text-[var(--text-secondary)] text-sm line-clamp-2">{ticket.description}</p>
+                  <h3 style={{ fontWeight: 600, fontSize: '0.9375rem', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
+                    {ticket.subject}
+                  </h3>
+                  <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    {ticket.description}
+                  </p>
                 </div>
 
-                <div className="flex items-center gap-3 flex-wrap">
-                  {/* Assign Staff */}
+                {/* Controls */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', flexShrink: 0 }}>
                   <select
                     defaultValue=""
                     onChange={e => assignStaff(ticket.id, e.target.value)}
-                    className="input-field !w-auto !py-1.5 !px-3 text-sm"
+                    className="input-field"
+                    style={{ width: 'auto', fontSize: '0.8125rem', padding: '0.4rem 0.7rem' }}
                   >
-                    <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Assign staff...</option>
+                    <option value="">Assign staff…</option>
                     {supportStaff.map(u => (
-                      <option key={u.id} value={u.id} className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{u.full_name}</option>
+                      <option key={u.id} value={u.id}
+                        style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
+                      >
+                        {u.full_name}
+                      </option>
                     ))}
                   </select>
 
-                  {/* Update Status */}
                   <select
                     value={ticket.status}
                     onChange={e => updateStatus(ticket.id, e.target.value)}
-                    className="input-field !w-auto !py-1.5 !px-3 text-sm"
+                    className="input-field"
+                    style={{ width: 'auto', fontSize: '0.8125rem', padding: '0.4rem 0.7rem' }}
                   >
-                    <option className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Open</option>
-                    <option className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Assigned</option>
-                    <option className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">In Progress</option>
-                    <option className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Resolved</option>
-                    <option className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Closed</option>
+                    {['Open', 'Assigned', 'In Progress', 'Resolved', 'Closed'].map(s => (
+                      <option key={s} style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}>{s}</option>
+                    ))}
                   </select>
 
-                  {/* Delete */}
-                  <button onClick={() => deleteTicket(ticket.id)}
-                    className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:bg-red-500/10 hover:text-red-500 transition-colors"
-                    title="Delete Ticket"
+                  <button
+                    onClick={() => deleteTicket(ticket.id)}
+                    className="btn-danger btn-sm"
+                    title="Delete ticket"
+                    style={{ padding: '0.4rem 0.6rem' }}
                   >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                    <Trash2 size={15} />
                   </button>
                 </div>
               </div>
             </motion.div>
           ))}
           {tickets.length === 0 && (
-            <div className="text-center py-12 text-[var(--text-secondary)]">No tickets found.</div>
+            <div className="card" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+              No tickets found.
+            </div>
           )}
         </div>
       )}
 
+      {/* Users tab */}
       {tab === 'users' && (
-        <div className="glass-card overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="border-b border-[var(--border-color)] bg-[var(--bg-secondary)]">
-                <tr className="text-[var(--text-secondary)]">
-                  <th className="px-6 py-4 font-medium">Name</th>
-                  <th className="px-6 py-4 font-medium">Email</th>
-                  <th className="px-6 py-4 font-medium">Role</th>
-                  <th className="px-6 py-4 font-medium">Phone</th>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="card"
+          style={{ overflow: 'hidden' }}
+        >
+          <div style={{ overflowX: 'auto' }}>
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Phone</th>
                 </tr>
               </thead>
               <tbody>
                 {users.map(user => (
-                  <tr key={user.id} className="border-b border-[var(--border-color)] hover:bg-[var(--bg-secondary)] transition-colors">
-                    <td className="px-6 py-4 font-medium text-[var(--text-primary)]">{user.full_name}</td>
-                    <td className="px-6 py-4 text-[var(--text-secondary)]">{user.email}</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2.5 py-1 rounded-md text-xs font-medium border ${
-                        user.role === 'admin' ? 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20' :
-                        user.role === 'support' ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20' :
-                        'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
-                      }`}>{user.role}</span>
+                  <tr key={user.id}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{
+                          width: '30px', height: '30px', borderRadius: '50%',
+                          background: 'linear-gradient(135deg, var(--primary), var(--accent))',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          color: '#fff', fontSize: '0.7rem', fontWeight: 700, flexShrink: 0,
+                        }}>
+                          {user.full_name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                        </div>
+                        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{user.full_name}</span>
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-[var(--text-secondary)]">{user.phone || '—'}</td>
+                    <td style={{ color: 'var(--text-secondary)' }}>{user.email}</td>
+                    <td><span className={roleBadge[user.role] || 'badge badge-gray'}>{user.role}</span></td>
+                    <td style={{ color: 'var(--text-muted)' }}>{user.phone || '—'}</td>
                   </tr>
                 ))}
                 {users.length === 0 && (
                   <tr>
-                    <td colSpan="4" className="py-8 text-center text-[var(--text-secondary)]">No users found</td>
+                    <td colSpan={4} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2.5rem' }}>
+                      No users found.
+                    </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   );

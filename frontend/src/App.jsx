@@ -26,7 +26,7 @@ function App() {
           <div className="min-h-screen relative text-[var(--text-primary)]">
             <div className="bg-minimal"></div>
             <Navbar />
-            <div className="pt-20 px-4 md:px-8 max-w-7xl mx-auto py-8">
+            <div style={{ paddingTop: '84px', paddingBottom: '2rem', maxWidth: '1280px', margin: '0 auto', paddingLeft: '1.5rem', paddingRight: '1.5rem' }}>
               <Routes>
                 <Route path="/" element={<Navigate to="/dashboard" />} />
                 <Route path="/login" element={<Login />} />

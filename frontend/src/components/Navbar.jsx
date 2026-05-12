@@ -1,91 +1,212 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { ThemeContext } from '../context/ThemeContext';
-import { LogOut, User as UserIcon, TicketIcon, LayoutDashboard, PlusCircle, ShieldCheck, Sun, Moon } from 'lucide-react';
+import {
+  LogOut, User as UserIcon, TicketIcon, LayoutDashboard,
+  PlusCircle, ShieldCheck, Sun, Moon, Menu, X
+} from 'lucide-react';
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
   const { isDarkMode, toggleTheme } = useContext(ThemeContext);
   const navigate = useNavigate();
   const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
+    setMobileOpen(false);
   };
 
   const navLinks = user ? [
-    { to: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={16} /> },
-    { to: '/raise-ticket', label: 'Raise Ticket', icon: <PlusCircle size={16} /> },
-    { to: '/my-tickets', label: 'My Tickets', icon: <TicketIcon size={16} /> },
-    ...(user.role === 'admin' ? [{ to: '/admin', label: 'Admin', icon: <ShieldCheck size={16} /> }] : []),
+    { to: '/dashboard',    label: 'Dashboard',   icon: <LayoutDashboard size={15} /> },
+    { to: '/raise-ticket', label: 'Raise Ticket', icon: <PlusCircle size={15} /> },
+    { to: '/my-tickets',   label: 'My Tickets',   icon: <TicketIcon size={15} /> },
+    ...(user.role === 'admin' ? [{ to: '/admin', label: 'Admin', icon: <ShieldCheck size={15} /> }] : []),
   ] : [];
 
+  const initials = user?.full_name
+    ? user.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : '';
+
   return (
-    <nav className="fixed w-full top-0 z-50 glass-card !rounded-none !border-t-0 !border-x-0 border-b">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link to="/" className="text-xl font-bold flex items-center gap-2">
-            <span className="text-[var(--accent)]">●</span> 
-            <span className="text-[var(--text-primary)]">SupportPortal</span>
-          </Link>
+    <>
+      <nav
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 50,
+          background: 'var(--glass-bg)',
+          borderBottom: '1px solid var(--border-color)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+        }}
+      >
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '60px' }}>
 
-          {/* Nav Links */}
-          {user && (
-            <div className="hidden md:flex items-center gap-2">
-              {navLinks.map(link => (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
-                    location.pathname === link.to
-                      ? 'bg-[var(--bg-secondary)] text-[var(--primary)] shadow-sm border border-[var(--border-color)]'
-                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] border border-transparent'
-                  }`}
-                >
-                  {link.icon}
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          )}
-
-          {/* Right Side */}
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={toggleTheme}
-              className="p-2 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] transition-colors"
-              aria-label="Toggle Theme"
-            >
-              {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-
-            {user ? (
-              <div className="flex items-center gap-4 border-l border-[var(--border-color)] pl-4">
-                <div className="flex items-center gap-2 text-sm text-[var(--text-primary)]">
-                  <div className="w-8 h-8 rounded-full bg-[var(--bg-secondary)] border border-[var(--border-color)] flex items-center justify-center text-[var(--text-secondary)]">
-                    <UserIcon size={16} />
-                  </div>
-                  <span className="hidden md:block font-medium">{user.full_name}</span>
-                </div>
-                <button onClick={handleLogout}
-                  className="p-2 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-red-500 transition-colors"
-                  title="Logout">
-                  <LogOut size={18} />
-                </button>
+            {/* Logo */}
+            <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+              <div style={{
+                width: '32px', height: '32px', borderRadius: '10px',
+                background: 'linear-gradient(135deg, var(--primary), var(--accent))',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(99,102,241,0.3)',
+                flexShrink: 0,
+              }}>
+                <TicketIcon size={16} color="#fff" />
               </div>
-            ) : (
-              <div className="flex items-center gap-3 border-l border-[var(--border-color)] pl-4">
-                <Link to="/login" className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">Login</Link>
-                <Link to="/register" className="btn-primary !px-4 !py-1.5 !text-sm">Register</Link>
+              <span style={{
+                fontWeight: 700,
+                fontSize: '1rem',
+                color: 'var(--text-primary)',
+                letterSpacing: '-0.03em',
+              }}>
+                SupportDesk
+              </span>
+            </Link>
+
+            {/* Desktop Nav */}
+            {user && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }} className="hidden md:flex">
+                {navLinks.map(link => (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    className={`nav-link ${location.pathname === link.to ? 'active' : ''}`}
+                  >
+                    {link.icon}
+                    {link.label}
+                  </Link>
+                ))}
               </div>
             )}
+
+            {/* Right side */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {/* Theme toggle */}
+              <button
+                onClick={toggleTheme}
+                className="btn-icon"
+                aria-label="Toggle theme"
+                title={isDarkMode ? 'Light mode' : 'Dark mode'}
+              >
+                {isDarkMode ? <Sun size={17} /> : <Moon size={17} />}
+              </button>
+
+              {user ? (
+                <>
+                  {/* User avatar */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    paddingLeft: '8px',
+                    borderLeft: '1px solid var(--border-color)',
+                    marginLeft: '4px',
+                  }}>
+                    <div
+                      style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, var(--primary), var(--accent))',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#fff',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        flexShrink: 0,
+                      }}
+                      title={user.full_name}
+                    >
+                      {initials || <UserIcon size={14} />}
+                    </div>
+                    <span
+                      className="hidden md:block"
+                      style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'var(--text-primary)' }}
+                    >
+                      {user.full_name?.split(' ')[0]}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={handleLogout}
+                    className="btn-icon"
+                    title="Logout"
+                    style={{ color: 'var(--text-secondary)' }}
+                    onMouseEnter={e => { e.currentTarget.style.color = 'var(--danger)'; e.currentTarget.style.background = 'var(--danger-light)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'transparent'; }}
+                  >
+                    <LogOut size={17} />
+                  </button>
+                </>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: '8px', borderLeft: '1px solid var(--border-color)', marginLeft: '4px' }}>
+                  <Link to="/login" style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-secondary)', textDecoration: 'none' }}
+                    onMouseEnter={e => e.currentTarget.style.color = 'var(--text-primary)'}
+                    onMouseLeave={e => e.currentTarget.style.color = 'var(--text-secondary)'}
+                  >
+                    Login
+                  </Link>
+                  <Link to="/register" className="btn-primary btn-sm">
+                    Get Started
+                  </Link>
+                </div>
+              )}
+
+              {/* Mobile hamburger */}
+              {user && (
+                <button
+                  onClick={() => setMobileOpen(!mobileOpen)}
+                  className="btn-icon md:hidden"
+                  aria-label="Toggle menu"
+                  style={{ marginLeft: '4px' }}
+                >
+                  {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+                </button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </nav>
+
+        {/* Mobile Nav */}
+        {mobileOpen && user && (
+          <div style={{
+            borderTop: '1px solid var(--border-color)',
+            padding: '12px 1.5rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '4px',
+            background: 'var(--glass-bg)',
+          }}>
+            {navLinks.map(link => (
+              <Link
+                key={link.to}
+                to={link.to}
+                onClick={() => setMobileOpen(false)}
+                className={`nav-link ${location.pathname === link.to ? 'active' : ''}`}
+              >
+                {link.icon}
+                {link.label}
+              </Link>
+            ))}
+            <button
+              onClick={handleLogout}
+              className="nav-link"
+              style={{ color: 'var(--danger)', border: 'none', background: 'none', cursor: 'pointer', textAlign: 'left', marginTop: '4px' }}
+            >
+              <LogOut size={15} /> Logout
+            </button>
+          </div>
+        )}
+      </nav>
+    </>
   );
 };
 

@@ -1,25 +1,49 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
-import { Loader2 } from 'lucide-react';
+import { Loader2, X, Clock, Tag, MessageSquare, Star, ChevronRight } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const getToken = () => localStorage.getItem('access_token');
 
-const statusColors = {
-  'Open': 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
-  'Assigned': 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20',
-  'In Progress': 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
-  'Resolved': 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20',
-  'Closed': 'bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/20',
+const statusBadge = {
+  Open:         'badge badge-blue',
+  Assigned:     'badge badge-yellow',
+  'In Progress':'badge badge-purple',
+  Resolved:     'badge badge-green',
+  Closed:       'badge badge-gray',
 };
 
-const priorityColors = {
-  'Low': 'text-green-500 dark:text-green-400',
-  'Medium': 'text-yellow-500 dark:text-yellow-400',
-  'High': 'text-orange-500 dark:text-orange-400',
-  'Critical': 'text-red-500 dark:text-red-400',
+const priorityBadge = {
+  Low:      'badge badge-green',
+  Medium:   'badge badge-yellow',
+  High:     'badge badge-red',
+  Critical: 'badge badge-red',
 };
+
+const StarRating = ({ value, onChange }) => (
+  <div style={{ display: 'flex', gap: '4px' }}>
+    {[1, 2, 3, 4, 5].map(n => (
+      <button
+        key={n}
+        type="button"
+        onClick={() => onChange(n)}
+        style={{
+          background: 'none', border: 'none', cursor: 'pointer', padding: '2px',
+          fontSize: '1.5rem', lineHeight: 1,
+          opacity: n <= value ? 1 : 0.25,
+          filter: n <= value ? 'none' : 'grayscale(1)',
+          transform: 'scale(1)',
+          transition: 'transform 0.15s ease, opacity 0.15s ease',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.2)'; }}
+        onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+      >
+        ⭐
+      </button>
+    ))}
+  </div>
+);
 
 export default function MyTickets() {
   const [tickets, setTickets] = useState([]);
@@ -50,123 +74,195 @@ export default function MyTickets() {
     setFeedbackSent(true);
   };
 
-  if (loading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin text-[var(--accent)]" size={32} /></div>;
+  const closeModal = () => setSelected(null);
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '5rem' }}>
+        <div className="spinner" style={{ width: '36px', height: '36px', borderWidth: '3px' }} />
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-5xl mx-auto pb-12">
-      <h2 className="text-2xl font-bold tracking-tight text-[var(--text-primary)] mb-6">My Support Tickets</h2>
+    <div style={{ maxWidth: '860px', margin: '0 auto', paddingBottom: '3rem' }}>
 
+      {/* Header */}
+      <div style={{ marginBottom: '1.75rem' }}>
+        <h1 className="section-title">My Tickets</h1>
+        <p className="section-sub">{tickets.length} support request{tickets.length !== 1 ? 's' : ''}</p>
+      </div>
+
+      {/* List */}
       {tickets.length === 0 ? (
-        <div className="glass-card p-12 text-center text-[var(--text-secondary)]">
-          <p className="text-5xl mb-4">🎫</p>
-          <p className="text-lg">No tickets yet. Raise your first support request!</p>
+        <div className="card" style={{ padding: '4rem', textAlign: 'center' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎫</div>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9375rem' }}>
+            No tickets yet. Raise your first support request!
+          </p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {tickets.map(ticket => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {tickets.map((ticket, i) => (
             <motion.div
               key={ticket.id}
-              initial={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, x: -16 }}
               animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.25, delay: i * 0.04 }}
               onClick={() => fetchDetail(ticket.id)}
-              className="glass-card p-5 cursor-pointer hover:bg-[var(--bg-secondary)] hover:border-[var(--accent)] transition-all duration-200"
+              className="card"
+              style={{ padding: '1.125rem 1.25rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem' }}
             >
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-[var(--accent)] text-sm font-mono font-medium">{ticket.ticket_number}</span>
-                  <h3 className="text-[var(--text-primary)] font-semibold mt-1">{ticket.subject}</h3>
-                  <p className="text-[var(--text-secondary)] text-sm mt-1 line-clamp-1">{ticket.description}</p>
-                </div>
-                <div className="flex flex-col items-end gap-2">
-                  <span className={`px-2.5 py-1 rounded-md text-xs font-medium border ${statusColors[ticket.status] || statusColors['Open']}`}>
-                    {ticket.status}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.3rem', flexWrap: 'wrap' }}>
+                  <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)', background: 'var(--primary-light)', padding: '2px 8px', borderRadius: '4px' }}>
+                    {ticket.ticket_number}
                   </span>
-                  <span className={`text-xs font-semibold ${priorityColors[ticket.priority]}`}>
-                    ● {ticket.priority}
-                  </span>
+                  <span className={statusBadge[ticket.status] || 'badge badge-gray'}>{ticket.status}</span>
+                  <span className={priorityBadge[ticket.priority] || 'badge badge-gray'}>{ticket.priority}</span>
                 </div>
+                <h3 style={{ fontWeight: 600, fontSize: '0.9375rem', color: 'var(--text-primary)', marginBottom: '0.2rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {ticket.subject}
+                </h3>
+                <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {ticket.description}
+                </p>
               </div>
+              <ChevronRight size={18} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
             </motion.div>
           ))}
         </div>
       )}
 
       {/* Detail Modal */}
-      {selected && (
-        <div className="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <AnimatePresence>
+        {selected && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="glass-card p-6 md:p-8 max-w-lg w-full max-h-[85vh] overflow-y-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={closeModal}
+            style={{
+              position: 'fixed', inset: 0,
+              background: 'rgba(0,0,0,0.5)',
+              backdropFilter: 'blur(6px)',
+              WebkitBackdropFilter: 'blur(6px)',
+              zIndex: 100,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '1rem',
+            }}
           >
-            <div className="flex justify-between items-start mb-6">
-              <div>
-                <p className="text-[var(--accent)] font-mono text-sm font-medium mb-1">{selected.ticket_number}</p>
-                <h3 className="text-[var(--text-primary)] text-xl font-bold">{selected.subject}</h3>
-              </div>
-              <button onClick={() => setSelected(null)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors p-1 rounded-md hover:bg-[var(--bg-secondary)]">
-                ✕
-              </button>
-            </div>
-
-            <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg p-4 mb-6">
-              <p className="text-[var(--text-secondary)] text-sm whitespace-pre-wrap">{selected.description}</p>
-            </div>
-
-            <div className="flex gap-3 mb-6">
-              <span className={`px-2.5 py-1 rounded-md text-xs font-medium border ${statusColors[selected.status] || statusColors['Open']}`}>{selected.status}</span>
-              <span className={`text-xs font-semibold self-center ${priorityColors[selected.priority]}`}>● {selected.priority}</span>
-            </div>
-
-            {/* Logs */}
-            {selected.logs?.length > 0 && (
-              <div className="mb-6">
-                <h4 className="text-[var(--text-primary)] font-semibold mb-3 text-sm">Activity Log</h4>
-                <div className="space-y-2">
-                  {selected.logs.map(log => (
-                    <div key={log.id} className="text-xs text-[var(--text-secondary)] bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg px-3 py-2 flex items-start gap-2">
-                      <span>📋</span>
-                      <div>
-                        <p className="font-medium text-[var(--text-primary)]">{log.action}</p>
-                        <p className="mt-0.5 opacity-70">{new Date(log.createdAt).toLocaleString()}</p>
-                      </div>
-                    </div>
-                  ))}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 16 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              onClick={e => e.stopPropagation()}
+              className="card"
+              style={{ width: '100%', maxWidth: '540px', maxHeight: '88vh', overflowY: 'auto', padding: '1.75rem' }}
+            >
+              {/* Modal header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
+                <div>
+                  <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)', background: 'var(--primary-light)', padding: '2px 8px', borderRadius: '4px', display: 'inline-block', marginBottom: '0.4rem' }}>
+                    {selected.ticket_number}
+                  </span>
+                  <h2 style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+                    {selected.subject}
+                  </h2>
                 </div>
-              </div>
-            )}
-
-            {/* Feedback */}
-            {selected.status === 'Resolved' && !feedbackSent && (
-              <div className="border border-[var(--border-color)] bg-[var(--bg-secondary)] rounded-lg p-5 mt-6">
-                <h4 className="text-[var(--text-primary)] font-semibold mb-3 text-sm">⭐ Leave Feedback</h4>
-                <div className="flex gap-2 mb-4">
-                  {[1,2,3,4,5].map(r => (
-                    <button key={r} onClick={() => setFeedback({...feedback, rating: r})}
-                      className={`text-2xl transition-transform hover:scale-110 ${r <= feedback.rating ? 'opacity-100 grayscale-0' : 'opacity-30 grayscale'}`}>⭐</button>
-                  ))}
-                </div>
-                <textarea
-                  rows={3}
-                  placeholder="Any comments? (Optional)"
-                  value={feedback.comments}
-                  onChange={e => setFeedback({...feedback, comments: e.target.value})}
-                  className="input-field resize-none mb-4"
-                />
-                <button onClick={submitFeedback}
-                  className="w-full btn-primary">
-                  Submit Feedback
+                <button className="btn-icon" onClick={closeModal} aria-label="Close" style={{ flexShrink: 0 }}>
+                  <X size={18} />
                 </button>
               </div>
-            )}
-            {feedbackSent && selected.status === 'Resolved' && (
-              <div className="mt-6 p-3 bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 rounded-lg text-sm text-center">
-                ✅ Feedback submitted. Thank you!
+
+              {/* Status & Priority */}
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+                <span className={statusBadge[selected.status] || 'badge badge-gray'}>{selected.status}</span>
+                <span className={priorityBadge[selected.priority] || 'badge badge-gray'}>{selected.priority}</span>
               </div>
-            )}
+
+              {/* Description */}
+              <div style={{
+                background: 'var(--bg-tertiary)',
+                border: '1px solid var(--border-color)',
+                borderRadius: 'var(--radius-md)',
+                padding: '1rem',
+                marginBottom: '1.25rem',
+              }}>
+                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', lineHeight: 1.7 }}>
+                  {selected.description}
+                </p>
+              </div>
+
+              {/* Activity Log */}
+              {selected.logs?.length > 0 && (
+                <div style={{ marginBottom: '1.25rem' }}>
+                  <h3 style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Clock size={13} /> Activity Log
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {selected.logs.map(log => (
+                      <div key={log.id} style={{
+                        background: 'var(--bg-tertiary)',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: 'var(--radius-sm)',
+                        padding: '0.625rem 0.875rem',
+                        display: 'flex',
+                        gap: '10px',
+                        alignItems: 'flex-start',
+                      }}>
+                        <MessageSquare size={14} style={{ color: 'var(--text-muted)', marginTop: '2px', flexShrink: 0 }} />
+                        <div>
+                          <p style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'var(--text-primary)' }}>{log.action}</p>
+                          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                            {new Date(log.createdAt).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Feedback */}
+              {selected.status === 'Resolved' && !feedbackSent && (
+                <div style={{
+                  background: 'var(--bg-tertiary)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '1.25rem',
+                  marginTop: '0.5rem',
+                }}>
+                  <h3 style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Star size={15} /> Leave Feedback
+                  </h3>
+                  <StarRating value={feedback.rating} onChange={r => setFeedback({ ...feedback, rating: r })} />
+                  <textarea
+                    rows={3}
+                    placeholder="Any comments? (optional)"
+                    value={feedback.comments}
+                    onChange={e => setFeedback({ ...feedback, comments: e.target.value })}
+                    className="input-field"
+                    style={{ marginTop: '0.875rem', marginBottom: '0.875rem', resize: 'none' }}
+                  />
+                  <button onClick={submitFeedback} className="btn-primary" style={{ width: '100%' }}>
+                    Submit Feedback
+                  </button>
+                </div>
+              )}
+
+              {feedbackSent && selected.status === 'Resolved' && (
+                <div className="alert alert-success" style={{ marginTop: '0.75rem' }}>
+                  Feedback submitted — thank you!
+                </div>
+              )}
+            </motion.div>
           </motion.div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 }

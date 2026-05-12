@@ -3,7 +3,82 @@ import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Ticket, Clock, CheckCircle, Activity, Plus } from 'lucide-react';
+import { Ticket, Clock, CheckCircle, Activity, Plus, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+const statusMap = {
+  Open:      { color: 'text-blue-500',   bg: 'bg-blue-500/10',   label: 'Open' },
+  'In Progress': { color: 'text-violet-500', bg: 'bg-violet-500/10', label: 'In Progress' },
+  Resolved:  { color: 'text-green-500',  bg: 'bg-green-500/10',  label: 'Resolved' },
+  Closed:    { color: 'text-gray-400',   bg: 'bg-gray-400/10',   label: 'Closed' },
+};
+
+const getStatusBadgeClass = (status) => {
+  const m = {
+    Open:         'badge badge-blue',
+    Assigned:     'badge badge-yellow',
+    'In Progress':'badge badge-purple',
+    Resolved:     'badge badge-green',
+    Closed:       'badge badge-gray',
+  };
+  return m[status] || 'badge badge-gray';
+};
+
+const getPriorityBadgeClass = (p) => {
+  const m = { Low: 'badge badge-green', Medium: 'badge badge-yellow', High: 'badge badge-red', Critical: 'badge badge-red' };
+  return m[p] || 'badge badge-gray';
+};
+
+const statCards = (tickets) => [
+  {
+    label: 'Total Tickets',
+    value: tickets.length,
+    icon: Ticket,
+    iconBg: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+    shadow: 'rgba(99,102,241,0.2)',
+  },
+  {
+    label: 'Open',
+    value: tickets.filter(t => t.status === 'Open').length,
+    icon: Clock,
+    iconBg: 'linear-gradient(135deg, #f59e0b, #d97706)',
+    shadow: 'rgba(245,158,11,0.2)',
+  },
+  {
+    label: 'In Progress',
+    value: tickets.filter(t => t.status === 'In Progress').length,
+    icon: Activity,
+    iconBg: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+    shadow: 'rgba(139,92,246,0.2)',
+  },
+  {
+    label: 'Resolved',
+    value: tickets.filter(t => t.status === 'Resolved' || t.status === 'Closed').length,
+    icon: CheckCircle,
+    iconBg: 'linear-gradient(135deg, #10b981, #059669)',
+    shadow: 'rgba(16,185,129,0.2)',
+  },
+];
+
+const chartData = [
+  { name: 'Mon', tickets: 4 },
+  { name: 'Tue', tickets: 3 },
+  { name: 'Wed', tickets: 7 },
+  { name: 'Thu', tickets: 5 },
+  { name: 'Fri', tickets: 8 },
+];
+
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="card" style={{ padding: '0.625rem 1rem', fontSize: '0.8125rem' }}>
+        <p style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{label}</p>
+        <p style={{ color: 'var(--primary)' }}>{payload[0].value} tickets</p>
+      </div>
+    );
+  }
+  return null;
+};
 
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
@@ -11,124 +86,148 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchTickets = async () => {
-      try {
-        const res = await api.get('/tickets');
-        setTickets(res.data);
-      } catch (err) {
-        console.error('Failed to fetch tickets', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTickets();
+    api.get('/tickets')
+      .then(res => setTickets(res.data))
+      .catch(err => console.error('Failed to fetch tickets', err))
+      .finally(() => setLoading(false));
   }, []);
 
-  const stats = [
-    { title: 'Total Tickets', value: tickets.length, icon: Ticket, color: 'text-blue-500' },
-    { title: 'Open', value: tickets.filter(t => t.status === 'Open').length, icon: Clock, color: 'text-yellow-500' },
-    { title: 'In Progress', value: tickets.filter(t => t.status === 'In Progress').length, icon: Activity, color: 'text-purple-500' },
-    { title: 'Resolved', value: tickets.filter(t => t.status === 'Resolved' || t.status === 'Closed').length, icon: CheckCircle, color: 'text-green-500' },
-  ];
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+        <div className="spinner" style={{ width: '40px', height: '40px', borderWidth: '3px' }} />
+      </div>
+    );
+  }
 
-  const chartData = [
-    { name: 'Mon', tickets: 4 },
-    { name: 'Tue', tickets: 3 },
-    { name: 'Wed', tickets: 7 },
-    { name: 'Thu', tickets: 5 },
-    { name: 'Fri', tickets: 8 },
-  ];
-
-  if (loading) return <div className="flex justify-center items-center h-[60vh]"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div></div>;
+  const stats = statCards(tickets);
+  const recentTickets = tickets.slice(0, 5);
 
   return (
-    <div className="pb-12">
-      <div className="flex justify-between items-center mb-8">
+    <div style={{ paddingBottom: '3rem' }}>
+
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}
+      >
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">
-            Dashboard
-          </h1>
-          <p className="text-[var(--text-secondary)] mt-1">Welcome back, {user?.full_name}</p>
+          <h1 className="section-title">Dashboard</h1>
+          <p className="section-sub">
+            Welcome back, <strong style={{ color: 'var(--text-primary)' }}>{user?.full_name}</strong>
+          </p>
         </div>
         {user?.role === 'user' && (
-          <button className="btn-primary flex items-center gap-2">
-            <Plus size={18} /> New Ticket
-          </button>
+          <Link to="/raise-ticket" className="btn-primary">
+            <Plus size={16} /> New Ticket
+          </Link>
         )}
+      </motion.div>
+
+      {/* Stat cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+        {stats.map((s, i) => {
+          const Icon = s.icon;
+          return (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: i * 0.06 }}
+              className="stat-card"
+            >
+              <div className="stat-icon" style={{ background: s.iconBg, boxShadow: `0 6px 20px ${s.shadow}` }}>
+                <Icon size={22} color="#fff" />
+              </div>
+              <div>
+                <div className="stat-value">{s.value}</div>
+                <div className="stat-label">{s.label}</div>
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat, idx) => (
-          <motion.div
-            key={idx}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: idx * 0.1 }}
-            className="glass-card p-6 flex items-center justify-between"
-          >
-            <div>
-              <p className="text-sm text-[var(--text-secondary)] mb-1">{stat.title}</p>
-              <h3 className="text-3xl font-bold text-[var(--text-primary)]">{stat.value}</h3>
-            </div>
-            <div className={`p-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)] ${stat.color}`}>
-              <stat.icon size={24} />
-            </div>
-          </motion.div>
-        ))}
-      </div>
+      {/* Main content */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}
+        className="lg:grid-cols-3">
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 glass-card p-6 min-h-[400px]">
-          <h3 className="text-lg font-semibold mb-6 text-[var(--text-primary)]">Recent Tickets</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-[var(--border-color)]">
-                  <th className="pb-3 text-sm font-medium text-[var(--text-secondary)]">Ticket ID</th>
-                  <th className="pb-3 text-sm font-medium text-[var(--text-secondary)]">Subject</th>
-                  <th className="pb-3 text-sm font-medium text-[var(--text-secondary)]">Status</th>
-                  <th className="pb-3 text-sm font-medium text-[var(--text-secondary)]">Priority</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tickets.slice(0, 5).map((ticket) => (
-                  <tr key={ticket.id} className="border-b border-[var(--border-color)] hover:bg-[var(--bg-secondary)] transition-colors">
-                    <td className="py-4 text-sm font-medium text-[var(--text-primary)]">{ticket.ticket_number}</td>
-                    <td className="py-4 text-sm text-[var(--text-secondary)] truncate max-w-[200px]">{ticket.subject}</td>
-                    <td className="py-4">
-                      <span className={`px-2.5 py-1 rounded-md text-xs font-medium border ${
-                        ticket.status === 'Open' ? 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20' :
-                        ticket.status === 'Resolved' ? 'bg-green-500/10 text-green-600 border-green-500/20' :
-                        'bg-blue-500/10 text-blue-600 border-blue-500/20'
-                      }`}>
-                        {ticket.status}
-                      </span>
-                    </td>
-                    <td className="py-4 text-sm text-[var(--text-secondary)]">{ticket.priority}</td>
-                  </tr>
-                ))}
-                {tickets.length === 0 && (
-                  <tr>
-                    <td colSpan="4" className="py-8 text-center text-[var(--text-secondary)]">No tickets found</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+        {/* Recent Tickets table */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.1 }}
+          className="card lg:col-span-2"
+          style={{ overflow: 'hidden' }}
+        >
+          <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 style={{ fontSize: '0.9375rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+              Recent Tickets
+            </h2>
+            <Link to="/my-tickets" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8125rem', color: 'var(--primary)', fontWeight: 500, textDecoration: 'none' }}>
+              View all <ArrowRight size={13} />
+            </Link>
           </div>
-        </div>
 
-        <div className="glass-card p-6 h-[400px]">
-          <h3 className="text-lg font-semibold mb-6 text-[var(--text-primary)]">Activity Overview</h3>
-          <ResponsiveContainer width="100%" height="80%">
-            <BarChart data={chartData}>
+          {recentTickets.length === 0 ? (
+            <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+              No tickets yet. Raise your first one!
+            </div>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Ticket</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentTickets.map(ticket => (
+                    <tr key={ticket.id}>
+                      <td>
+                        <span style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 600 }}>
+                          {ticket.ticket_number}
+                        </span>
+                      </td>
+                      <td style={{ maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-secondary)' }}>
+                        {ticket.subject}
+                      </td>
+                      <td><span className={getStatusBadgeClass(ticket.status)}>{ticket.status}</span></td>
+                      <td><span className={getPriorityBadgeClass(ticket.priority)}>{ticket.priority}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </motion.div>
+
+        {/* Chart */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.18 }}
+          className="card"
+          style={{ padding: '1.25rem 1.5rem' }}
+        >
+          <h2 style={{ fontSize: '0.9375rem', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em', marginBottom: '1.5rem' }}>
+            Weekly Activity
+          </h2>
+          <ResponsiveContainer width="100%" height={240}>
+            <BarChart data={chartData} barCategoryGap="35%">
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'var(--text-secondary)'}} />
-              <YAxis axisLine={false} tickLine={false} tick={{fill: 'var(--text-secondary)'}} />
-              <Tooltip cursor={{ fill: 'var(--bg-secondary)' }} contentStyle={{ borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--glass-bg)', color: 'var(--text-primary)' }} />
-              <Bar dataKey="tickets" fill="var(--primary)" radius={[4, 4, 0, 0]} />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 12 }} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 12 }} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--bg-tertiary)', radius: 4 }} />
+              <Bar dataKey="tickets" fill="var(--primary)" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

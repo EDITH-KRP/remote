@@ -129,6 +129,57 @@ const TicketLog = sequelize.define('TicketLog', {
   updatedAt: false
 });
 
+const Feedback = sequelize.define('Feedback', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
+  },
+  ticket_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  rating: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  comments: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  }
+}, {
+  tableName: 'feedback',
+  timestamps: true,
+  createdAt: 'submitted_at',
+  updatedAt: false
+});
+
+const Notification = sequelize.define('Notification', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
+  },
+  user_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  message: {
+    type: DataTypes.STRING(255),
+    allowNull: false
+  },
+  is_read: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  }
+}, {
+  tableName: 'notifications',
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: false
+});
+
+
 // Relationships
 User.hasMany(Ticket, { foreignKey: 'user_id', as: 'tickets' });
 Ticket.belongsTo(User, { foreignKey: 'user_id', as: 'author' });
@@ -145,10 +196,18 @@ TicketLog.belongsTo(Ticket, { foreignKey: 'ticket_id', as: 'ticket' });
 User.hasMany(TicketLog, { foreignKey: 'performed_by', as: 'logs' });
 TicketLog.belongsTo(User, { foreignKey: 'performed_by', as: 'user' });
 
+Ticket.hasOne(Feedback, { foreignKey: 'ticket_id', as: 'feedback' });
+Feedback.belongsTo(Ticket, { foreignKey: 'ticket_id', as: 'ticket' });
+
+User.hasMany(Notification, { foreignKey: 'user_id', as: 'notifications' });
+Notification.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
 module.exports = {
   sequelize,
   User,
   Category,
   Ticket,
-  TicketLog
+  TicketLog,
+  Feedback,
+  Notification
 };

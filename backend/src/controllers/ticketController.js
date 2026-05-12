@@ -1,4 +1,15 @@
-const { Ticket, TicketLog, User, Category } = require('../models');
+const { Ticket, TicketLog, User, Category, Feedback } = require('../models');
+const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+  host: process.env.MAIL_SERVER || 'smtp.gmail.com',
+  port: process.env.MAIL_PORT || 587,
+  secure: false, // true for 465, false for other ports
+  auth: {
+    user: process.env.MAIL_USERNAME,
+    pass: process.env.MAIL_PASSWORD
+  }
+});
 
 exports.createTicket = async (req, res) => {
   try {
@@ -19,6 +30,17 @@ exports.createTicket = async (req, res) => {
       action: 'Ticket Created',
       performed_by: req.userId
     });
+
+    // Send Email Alert
+    const user = await User.findByPk(req.userId);
+    if (user && process.env.MAIL_USERNAME) {
+      transporter.sendMail({
+        from: process.env.MAIL_DEFAULT_SENDER || process.env.MAIL_USERNAME,
+        to: user.email,
+        subject: `Ticket Created: ${ticket_number}`,
+        html: `<h3>Your support request has been received!</h3><p><strong>Ticket Number:</strong> ${ticket_number}</p><p><strong>Subject:</strong> ${subject}</p><p>Our support team will review it shortly.</p>`
+      }).catch(err => console.error("Email error:", err));
+    }
 
     res.status(201).json(ticket);
   } catch (err) {
@@ -63,7 +85,12 @@ exports.getTickets = async (req, res) => {
 
 exports.getTicketById = async (req, res) => {
   try {
-    const ticket = await Ticket.findByPk(req.params.id);
+    const ticket = await Ticket.findByPk(req.params.id, {
+      include: [
+        { model: TicketLog, as: 'logs' },
+        { model: Feedback, as: 'feedback' }
+      ]
+    });
     if (!ticket) return res.status(404).json({ message: 'Ticket not found' });
     res.status(200).json(ticket);
   } catch (err) {
@@ -85,6 +112,17 @@ exports.updateTicket = async (req, res) => {
         action: `Status changed to ${status}`,
         performed_by: req.userId
       });
+
+      // If resolved, notify user
+      if (status === 'Resolved' && process.env.MAIL_USERNAME) {
+        const author = await User.findByPk(ticket.user_id);
+        transporter.sendMail({
+          from: process.env.MAIL_DEFAULT_SENDER || process.env.MAIL_USERNAME,
+          to: author.email,
+          subject: `Ticket Resolved: ${ticket.ticket_number}`,
+          html: `<h3>Your ticket has been marked as resolved!</h3><p>Please log in to leave feedback.</p>`
+        }).catch(err => console.error("Email error:", err));
+      }
     }
 
     if (assigned_staff_id) {
@@ -98,6 +136,28 @@ exports.updateTicket = async (req, res) => {
 
     await ticket.save();
     res.status(200).json(ticket);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.submitFeedback = async (req, res) => {
+  try {
+    const { rating, comments } = req.body;
+    const ticket = await Ticket.findByPk(req.params.id);
+    if (!ticket) return res.status(404).json({ message: 'Ticket not found' });
+
+    if (ticket.user_id !== req.userId) {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    const feedback = await Feedback.create({
+      ticket_id: ticket.id,
+      rating,
+      comments
+    });
+
+    res.status(201).json(feedback);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }

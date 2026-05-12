@@ -1,5 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
-import api from '../services/api';
+import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export const AuthContext = createContext();
 
@@ -9,14 +11,15 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token');
       if (token) {
         try {
-          const res = await api.get('/auth/profile');
+          const res = await axios.get(`${API_URL}/auth/profile`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
           setUser(res.data);
-        } catch (error) {
-          console.error('Failed to fetch user', error);
-          localStorage.removeItem('token');
+        } catch {
+          localStorage.removeItem('access_token');
         }
       }
       setLoading(false);
@@ -25,17 +28,18 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    const res = await api.post('/auth/login', { email, password });
-    localStorage.setItem('token', res.data.access_token);
+    const res = await axios.post(`${API_URL}/auth/login`, { email, password });
+    localStorage.setItem('access_token', res.data.access_token);
     setUser(res.data.user);
+    return res.data.user;
   };
 
   const register = async (userData) => {
-    await api.post('/auth/register', userData);
+    await axios.post(`${API_URL}/auth/register`, userData);
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('access_token');
     setUser(null);
   };
 

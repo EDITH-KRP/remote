@@ -31,27 +31,29 @@ const Login = () => {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="glass-card p-8 w-full max-w-md relative overflow-hidden"
+        transition={{ duration: 0.4 }}
+        className="glass-card p-8 sm:p-10 w-full max-w-md relative overflow-hidden"
       >
-        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-secondary/20 rounded-full blur-3xl -ml-16 -mb-16 pointer-events-none"></div>
-        
-        <h2 className="text-3xl font-bold text-center mb-8 bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary relative z-10">
-          Welcome Back
-        </h2>
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold tracking-tight text-[var(--text-primary)] mb-2">
+            Welcome Back
+          </h2>
+          <p className="text-[var(--text-secondary)] text-sm">
+            Sign in to your account to continue
+          </p>
+        </div>
         
         {error && (
-          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg text-sm text-center">
+          <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 rounded-lg text-sm text-center">
             {error}
           </div>
         )}
         
-        <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium mb-2">Email Address</label>
+            <label className="block text-sm font-medium mb-1.5 text-[var(--text-primary)]">Email Address</label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[var(--text-secondary)]">
                 <Mail size={18} />
               </div>
               <input
@@ -66,9 +68,9 @@ const Login = () => {
           </div>
           
           <div>
-            <label className="block text-sm font-medium mb-2">Password</label>
+            <label className="block text-sm font-medium mb-1.5 text-[var(--text-primary)]">Password</label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[var(--text-secondary)]">
                 <Lock size={18} />
               </div>
               <input
@@ -84,10 +86,10 @@ const Login = () => {
           
           <button 
             type="submit" 
-            className="w-full btn-primary flex justify-center items-center h-12"
+            className="w-full btn-primary mt-6"
             disabled={isSubmitting}
           >
-            {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : 'Sign In'}
+            {isSubmitting ? <Loader2 className="animate-spin mx-auto" size={20} /> : 'Sign In'}
           </button>
         </form>
       </motion.div>

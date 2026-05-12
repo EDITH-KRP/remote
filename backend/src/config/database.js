@@ -2,11 +2,13 @@ const { Sequelize } = require('sequelize');
 require('dotenv').config({ path: '../.env' }); // load from parent folder
 require('dotenv').config(); // load from current folder if any
 
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
+let db_url = process.env.DATABASE_URL;
+
+const sequelize = new Sequelize(db_url, {
   dialect: 'postgres',
   logging: false,
   dialectOptions: {
-    ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('supabase') ? {
+    ssl: db_url && db_url.includes('supabase') ? {
       require: true,
       rejectUnauthorized: false
     } : false

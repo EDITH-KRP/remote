@@ -2,171 +2,161 @@ import React, { useContext, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { ThemeContext } from '../context/ThemeContext';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-  LogOut, User as UserIcon, TicketIcon, LayoutDashboard,
-  PlusCircle, ShieldCheck, Sun, Moon, Menu, X
+  LogOut, TicketIcon, LayoutDashboard,
+  PlusCircle, ShieldCheck, Menu, X, Zap
 } from 'lucide-react';
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
-  const { isDarkMode, toggleTheme } = useContext(ThemeContext);
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-    setMobileOpen(false);
-  };
+  const handleLogout = () => { logout(); navigate('/login'); setMobileOpen(false); };
 
   const navLinks = user ? [
-    { to: '/dashboard',    label: 'Dashboard',   icon: <LayoutDashboard size={15} /> },
-    { to: '/raise-ticket', label: 'Raise Ticket', icon: <PlusCircle size={15} /> },
-    { to: '/my-tickets',   label: 'My Tickets',   icon: <TicketIcon size={15} /> },
-    ...(user.role === 'admin' ? [{ to: '/admin', label: 'Admin', icon: <ShieldCheck size={15} /> }] : []),
+    { to: '/dashboard',    label: 'Dashboard',    icon: <LayoutDashboard size={14} /> },
+    { to: '/raise-ticket', label: 'New Ticket',   icon: <PlusCircle size={14} /> },
+    { to: '/my-tickets',   label: 'My Tickets',   icon: <TicketIcon size={14} /> },
+    ...(user.role === 'admin' ? [{ to: '/admin', label: 'Admin', icon: <ShieldCheck size={14} /> }] : []),
   ] : [];
 
   const initials = user?.full_name
     ? user.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-    : '';
+    : '?';
 
   return (
     <>
-      <nav
+      <motion.nav
+        initial={{ y: -80, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 50,
-          background: 'var(--glass-bg)',
-          borderBottom: '1px solid var(--border-color)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+          background: 'rgba(6, 8, 15, 0.75)',
+          borderBottom: '1px solid rgba(99,102,241,0.15)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
         }}
       >
+        {/* Subtle top accent line */}
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: '2px',
+          background: 'linear-gradient(90deg, transparent, rgba(99,102,241,0.6), rgba(139,92,246,0.6), transparent)',
+        }} />
+
         <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '60px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '62px' }}>
 
             {/* Logo */}
-            <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-              <div style={{
-                width: '32px', height: '32px', borderRadius: '10px',
-                background: 'linear-gradient(135deg, var(--primary), var(--accent))',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 4px 12px rgba(99,102,241,0.3)',
-                flexShrink: 0,
-              }}>
-                <TicketIcon size={16} color="#fff" />
-              </div>
+            <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <motion.div
+                whileHover={{ scale: 1.08, rotate: 5 }}
+                whileTap={{ scale: 0.95 }}
+                style={{
+                  width: '34px', height: '34px', borderRadius: '10px', flexShrink: 0,
+                  background: 'linear-gradient(135deg, #6366f1, #8b5cf6, #a78bfa)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 4px 20px rgba(99,102,241,0.5)',
+                  animation: 'pulse-glow 3s ease-in-out infinite',
+                }}
+              >
+                <Zap size={17} color="#fff" fill="#fff" />
+              </motion.div>
               <span style={{
-                fontWeight: 700,
-                fontSize: '1rem',
-                color: 'var(--text-primary)',
+                fontWeight: 800, fontSize: '1.0625rem',
+                background: 'linear-gradient(135deg, #eef0fb, #a78bfa)',
+                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
                 letterSpacing: '-0.03em',
               }}>
                 SupportDesk
               </span>
             </Link>
 
-            {/* Desktop Nav */}
+            {/* Desktop nav links */}
             {user && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }} className="hidden md:flex">
-                {navLinks.map(link => (
-                  <Link
+              <div className="hidden md:flex" style={{ alignItems: 'center', gap: '2px' }}>
+                {navLinks.map((link, i) => (
+                  <motion.div
                     key={link.to}
-                    to={link.to}
-                    className={`nav-link ${location.pathname === link.to ? 'active' : ''}`}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.07 + 0.2 }}
                   >
-                    {link.icon}
-                    {link.label}
-                  </Link>
+                    <Link
+                      to={link.to}
+                      className={`nav-link ${location.pathname === link.to ? 'active' : ''}`}
+                    >
+                      {link.icon}
+                      {link.label}
+                    </Link>
+                  </motion.div>
                 ))}
               </div>
             )}
 
-            {/* Right side */}
+            {/* Right */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              {/* Theme toggle */}
-              <button
-                onClick={toggleTheme}
-                className="btn-icon"
-                aria-label="Toggle theme"
-                title={isDarkMode ? 'Light mode' : 'Dark mode'}
-              >
-                {isDarkMode ? <Sun size={17} /> : <Moon size={17} />}
-              </button>
-
               {user ? (
                 <>
-                  {/* User avatar */}
                   <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    paddingLeft: '8px',
-                    borderLeft: '1px solid var(--border-color)',
-                    marginLeft: '4px',
+                    display: 'flex', alignItems: 'center', gap: '10px',
+                    paddingLeft: '12px', borderLeft: '1px solid rgba(99,102,241,0.15)',
                   }}>
-                    <div
+                    {/* Avatar */}
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
                       style={{
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '50%',
-                        background: 'linear-gradient(135deg, var(--primary), var(--accent))',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: '#fff',
-                        fontSize: '0.75rem',
-                        fontWeight: 700,
-                        flexShrink: 0,
+                        width: '34px', height: '34px', borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        color: '#fff', fontSize: '0.75rem', fontWeight: 800,
+                        boxShadow: '0 4px 16px rgba(99,102,241,0.4)',
+                        cursor: 'default',
+                        border: '2px solid rgba(99,102,241,0.3)',
                       }}
-                      title={user.full_name}
                     >
-                      {initials || <UserIcon size={14} />}
-                    </div>
-                    <span
-                      className="hidden md:block"
-                      style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'var(--text-primary)' }}
-                    >
+                      {initials}
+                    </motion.div>
+                    <span className="hidden md:block" style={{ fontSize: '0.85rem', fontWeight: 600, color: 'rgba(238,240,251,0.8)' }}>
                       {user.full_name?.split(' ')[0]}
                     </span>
                   </div>
 
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={handleLogout}
                     className="btn-icon"
                     title="Logout"
-                    style={{ color: 'var(--text-secondary)' }}
-                    onMouseEnter={e => { e.currentTarget.style.color = 'var(--danger)'; e.currentTarget.style.background = 'var(--danger-light)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'transparent'; }}
+                    style={{ color: 'var(--text-2)' }}
+                    onMouseEnter={e => { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.background = 'rgba(248,113,113,0.1)'; e.currentTarget.style.borderColor = 'rgba(248,113,113,0.2)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-2)'; e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; }}
                   >
-                    <LogOut size={17} />
-                  </button>
+                    <LogOut size={16} />
+                  </motion.button>
                 </>
               ) : (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: '8px', borderLeft: '1px solid var(--border-color)', marginLeft: '4px' }}>
-                  <Link to="/login" style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-secondary)', textDecoration: 'none' }}
-                    onMouseEnter={e => e.currentTarget.style.color = 'var(--text-primary)'}
-                    onMouseLeave={e => e.currentTarget.style.color = 'var(--text-secondary)'}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: '12px', borderLeft: '1px solid rgba(99,102,241,0.15)' }}>
+                  <Link to="/login" style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-2)', textDecoration: 'none' }}
+                    onMouseEnter={e => e.currentTarget.style.color = 'var(--text-1)'}
+                    onMouseLeave={e => e.currentTarget.style.color = 'var(--text-2)'}
                   >
-                    Login
+                    Sign in
                   </Link>
-                  <Link to="/register" className="btn-primary btn-sm">
+                  <Link to="/register" className="btn btn-primary btn-sm">
                     Get Started
                   </Link>
                 </div>
               )}
 
-              {/* Mobile hamburger */}
+              {/* Mobile menu button */}
               {user && (
                 <button
                   onClick={() => setMobileOpen(!mobileOpen)}
                   className="btn-icon md:hidden"
-                  aria-label="Toggle menu"
-                  style={{ marginLeft: '4px' }}
                 >
                   {mobileOpen ? <X size={18} /> : <Menu size={18} />}
                 </button>
@@ -175,37 +165,39 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile Nav */}
-        {mobileOpen && user && (
-          <div style={{
-            borderTop: '1px solid var(--border-color)',
-            padding: '12px 1.5rem',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '4px',
-            background: 'var(--glass-bg)',
-          }}>
-            {navLinks.map(link => (
-              <Link
-                key={link.to}
-                to={link.to}
-                onClick={() => setMobileOpen(false)}
-                className={`nav-link ${location.pathname === link.to ? 'active' : ''}`}
-              >
-                {link.icon}
-                {link.label}
-              </Link>
-            ))}
-            <button
-              onClick={handleLogout}
-              className="nav-link"
-              style={{ color: 'var(--danger)', border: 'none', background: 'none', cursor: 'pointer', textAlign: 'left', marginTop: '4px' }}
+        {/* Mobile menu */}
+        <AnimatePresence>
+          {mobileOpen && user && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.25 }}
+              style={{
+                overflow: 'hidden',
+                borderTop: '1px solid rgba(99,102,241,0.12)',
+                background: 'rgba(6,8,15,0.95)',
+              }}
             >
-              <LogOut size={15} /> Logout
-            </button>
-          </div>
-        )}
-      </nav>
+              <div style={{ padding: '12px 1.5rem', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {navLinks.map(link => (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    onClick={() => setMobileOpen(false)}
+                    className={`nav-link ${location.pathname === link.to ? 'active' : ''}`}
+                  >
+                    {link.icon} {link.label}
+                  </Link>
+                ))}
+                <button onClick={handleLogout} className="nav-link" style={{ color: '#f87171', marginTop: '8px' }}>
+                  <LogOut size={14} /> Logout
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.nav>
     </>
   );
 };

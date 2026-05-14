@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { X, Clock, MessageSquare, Star, ChevronRight, TicketIcon, Paperclip, Send, Search, Filter } from 'lucide-react';
+import io from 'socket.io-client';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const getToken = () => localStorage.getItem('access_token');
@@ -57,14 +58,29 @@ export default function MyTickets() {
   const [search, setSearch]         = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
 
-  useEffect(() => {
-    axios.get(`${API_URL}/tickets`, {
-      headers: { Authorization: `Bearer ${getToken()}` }
-    }).then(r => { setTickets(r.data); setLoading(false); })
-      .catch(() => setLoading(false));
-  }, []);
+  const loadTickets = async (silent = false) => {
+    if (!silent) setLoading(true);
+    try {
+      const r = await axios.get(`${API_URL}/tickets`, {
+        headers: { Authorization: `Bearer ${getToken()}` }
+      });
+      setTickets(r.data);
+    } catch (err) {}
+    if (!silent) setLoading(false);
+  };
 
-  const fetchDetail = async (id) => {
+  useEffect(() => {
+    loadTickets();
+    const socketUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '') : 'http://localhost:5000';
+    const socket = io(socketUrl);
+    socket.on('tickets:update', () => {
+      loadTickets(true);
+      if (selected) fetchDetail(selected.id, true);
+    });
+    return () => socket.disconnect();
+  }, [selected]);
+
+  const fetchDetail = async (id, silent = false) => {
     const [tRes, cRes] = await Promise.all([
       axios.get(`${API_URL}/tickets/${id}`, { headers: { Authorization: `Bearer ${getToken()}` } }),
       axios.get(`${API_URL}/tickets/${id}/comments`, { headers: { Authorization: `Bearer ${getToken()}` } })

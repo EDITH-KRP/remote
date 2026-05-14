@@ -135,7 +135,7 @@ const Dashboard = () => {
   const [activityData, setActivityData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const loadData = () => {
     Promise.all([
       api.get('/tickets'),
       api.get('/tickets/activity?range=7')
@@ -144,6 +144,16 @@ const Dashboard = () => {
       setActivityData(aRes.data);
     }).catch(console.error)
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadData();
+    const socketUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '') : 'http://localhost:5000';
+    const socket = io(socketUrl);
+    socket.on('tickets:update', () => {
+      loadData();
+    });
+    return () => socket.disconnect();
   }, []);
 
   if (loading) return (

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { Ticket, Users, BarChart2, UserCheck, ShieldCheck, Trash2, ChevronDown, Download } from 'lucide-react';
+import io from 'socket.io-client';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const getToken = () => localStorage.getItem('access_token');
@@ -37,8 +38,8 @@ export default function AdminPanel() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab]         = useState('tickets');
 
-  const load = async () => {
-    setLoading(true);
+  const load = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const [tR, uR, rR] = await Promise.all([
         axios.get(`${API_URL}/tickets`,       { headers: { Authorization: `Bearer ${getToken()}` } }),
@@ -47,10 +48,18 @@ export default function AdminPanel() {
       ]);
       setTickets(tR.data); setUsers(uR.data); setReports(rR.data);
     } catch (e) { console.error(e); }
-    setLoading(false);
+    if (!silent) setLoading(false);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { 
+    load(); 
+    const socketUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '') : 'http://localhost:5000';
+    const socket = io(socketUrl);
+    socket.on('tickets:update', () => {
+      load(true);
+    });
+    return () => socket.disconnect();
+  }, []);
 
   const updateStatus = async (id, status) => {
     await axios.put(`${API_URL}/tickets/${id}`, { status }, { headers: { Authorization: `Bearer ${getToken()}` } });

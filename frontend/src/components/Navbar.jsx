@@ -22,7 +22,8 @@ const Navbar = () => {
   React.useEffect(() => {
     if (user) {
       api.get('/notifications').then(res => setNotifications(res.data)).catch(() => {});
-      const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5000');
+      const socketUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '') : 'http://localhost:5000';
+      const socket = io(socketUrl);
       socket.on(`notification:${user.id}`, (data) => {
         setNotifications(prev => [{ id: Date.now(), ...data, is_read: false }, ...prev]);
       });

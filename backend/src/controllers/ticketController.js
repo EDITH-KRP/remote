@@ -116,6 +116,8 @@ exports.createComment = async (req, res) => {
       include: [{ model: User, as: 'author', attributes: ['id', 'full_name', 'role'] }]
     });
 
+    emitTicketsUpdate(req, { event: 'comment_added', ticketId: ticket.id });
+
     // Notify ticket owner if support replies
     if (user.id !== ticket.user_id && !comment.is_internal) {
       await Notification.create({

@@ -176,6 +176,16 @@ const Login = () => {
                 </div>
               </div>
 
+              {/* Forgot password */}
+              <div style={{ textAlign: 'right', marginTop: '-0.5rem' }}>
+                <Link to="/forgot-password" style={{
+                  fontSize: '0.8rem', fontWeight: 600,
+                  color: 'var(--p3)', textDecoration: 'none',
+                }}>
+                  Forgot password?
+                </Link>
+              </div>
+
               {/* Submit */}
               <motion.button
                 whileHover={{ scale: 1.02, y: -1 }}

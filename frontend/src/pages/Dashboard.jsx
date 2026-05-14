@@ -7,6 +7,7 @@ import {
 } from 'recharts';
 import { Ticket, Clock, CheckCircle, Activity, Plus, TrendingUp, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import io from 'socket.io-client';
 
 /* ── helpers ─────────────────────────────────── */
 const statusBadge = {

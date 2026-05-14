@@ -179,6 +179,35 @@ const Notification = sequelize.define('Notification', {
   updatedAt: false
 });
 
+const TicketComment = sequelize.define('TicketComment', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
+  },
+  ticket_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  author_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  body: {
+    type: DataTypes.TEXT,
+    allowNull: false
+  },
+  is_internal: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  }
+}, {
+  tableName: 'ticket_comments',
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at'
+});
+
 
 // Relationships
 User.hasMany(Ticket, { foreignKey: 'user_id', as: 'tickets' });
@@ -202,6 +231,12 @@ Feedback.belongsTo(Ticket, { foreignKey: 'ticket_id', as: 'ticket' });
 User.hasMany(Notification, { foreignKey: 'user_id', as: 'notifications' });
 Notification.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
+Ticket.hasMany(TicketComment, { foreignKey: 'ticket_id', as: 'comments' });
+TicketComment.belongsTo(Ticket, { foreignKey: 'ticket_id', as: 'ticket' });
+
+User.hasMany(TicketComment, { foreignKey: 'author_id', as: 'authored_comments' });
+TicketComment.belongsTo(User, { foreignKey: 'author_id', as: 'author' });
+
 module.exports = {
   sequelize,
   User,
@@ -209,5 +244,6 @@ module.exports = {
   Ticket,
   TicketLog,
   Feedback,
-  Notification
+  Notification,
+  TicketComment
 };

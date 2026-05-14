@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
-import { Ticket, Users, BarChart2, UserCheck, ShieldCheck, Trash2, ChevronDown } from 'lucide-react';
+import { Ticket, Users, BarChart2, UserCheck, ShieldCheck, Trash2, ChevronDown, Download } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const getToken = () => localStorage.getItem('access_token');
@@ -68,6 +68,15 @@ export default function AdminPanel() {
   };
 
   const staff = users.filter(u => u.role === 'support' || u.role === 'admin');
+
+  const handleExport = () => {
+    window.open(`${API_URL}/admin/export?token=${getToken()}`, '_blank');
+  };
+
+  const updateUserRole = async (userId, role) => {
+    await axios.patch(`${API_URL}/admin/users/${userId}/role`, { role }, { headers: { Authorization: `Bearer ${getToken()}` } });
+    load();
+  };
 
   if (loading) return (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'58vh', gap:'1rem' }}>
@@ -202,6 +211,17 @@ export default function AdminPanel() {
             </span>
           </motion.button>
         ))}
+        <div style={{ marginLeft: 'auto' }}>
+          <motion.button
+            onClick={handleExport}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="btn btn-secondary"
+            style={{ padding: '0.45rem 1rem', fontSize: '0.845rem' }}
+          >
+            <Download size={14} /> Export CSV
+          </motion.button>
+        </div>
       </div>
 
       {/* ── Content ─────────────────────────────────── */}
@@ -372,7 +392,21 @@ export default function AdminPanel() {
                           </div>
                         </td>
                         <td style={{ color:'var(--text-2)', fontSize:'0.875rem' }}>{u.email}</td>
-                        <td><span className={roleBadge[u.role] || 'badge badge-gray'}>{u.role}</span></td>
+                        <td>
+                          <div style={{ position:'relative' }}>
+                            <select
+                              value={u.role}
+                              onChange={e => updateUserRole(u.id, e.target.value)}
+                              className="input"
+                              style={{ fontSize:'0.8rem', padding:'0.3rem 2rem 0.3rem 0.5rem', width:'auto', cursor:'pointer', appearance:'none', WebkitAppearance:'none', background: 'transparent', border: '1px solid rgba(99,102,241,0.2)' }}
+                            >
+                              {['user','support','admin'].map(r => (
+                                <option key={r} value={r} style={{ background:'#0c0f1d' }}>{r}</option>
+                              ))}
+                            </select>
+                            <ChevronDown size={12} style={{ position:'absolute', right:'0.5rem', top:'50%', transform:'translateY(-50%)', pointerEvents:'none', color:'var(--text-3)' }} />
+                          </div>
+                        </td>
                         <td style={{ color:'var(--text-3)', fontSize:'0.875rem', paddingRight:'1.5rem' }}>{u.phone || '—'}</td>
                       </motion.tr>
                     );

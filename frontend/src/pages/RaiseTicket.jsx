@@ -16,6 +16,7 @@ const priorities = [
 export default function RaiseTicket({ onSuccess }) {
   const [categories, setCategories] = useState([]);
   const [form, setForm] = useState({ subject: '', description: '', priority: 'Low', category_id: '' });
+  const [attachment, setAttachment] = useState(null);
   const [loading, setLoading]   = useState(false);
   const [success, setSuccess]   = useState(null);
   const [error, setError]       = useState(null);
@@ -31,13 +32,22 @@ export default function RaiseTicket({ onSuccess }) {
     e.preventDefault();
     setLoading(true); setError(null);
     try {
-      const payload = { subject: form.subject, description: form.description, priority: form.priority };
-      if (form.category_id) payload.category_id = form.category_id;
-      const res = await axios.post(`${API_URL}/tickets/create`, payload, {
-        headers: { Authorization: `Bearer ${getToken()}` }
+      const formData = new FormData();
+      formData.append('subject', form.subject);
+      formData.append('description', form.description);
+      formData.append('priority', form.priority);
+      if (form.category_id) formData.append('category_id', form.category_id);
+      if (attachment) formData.append('attachment', attachment);
+
+      const res = await axios.post(`${API_URL}/tickets/create`, formData, {
+        headers: { 
+          Authorization: `Bearer ${getToken()}`,
+          'Content-Type': 'multipart/form-data'
+        }
       });
       setSuccess(`Ticket ${res.data.ticket_number} submitted successfully!`);
       setForm({ subject: '', description: '', priority: 'Low', category_id: '' });
+      setAttachment(null);
       setCharCount(0);
       if (onSuccess) onSuccess();
     } catch (err) {
@@ -232,6 +242,19 @@ export default function RaiseTicket({ onSuccess }) {
                   <ChevronDown size={13} style={{ position: 'absolute', right: '0.7rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-3)' }} />
                 </div>
               </div>
+            </motion.div>
+
+            {/* Attachment */}
+            <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.28 }}>
+              <label className="input-label" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <FileText size={11} /> Attachment (Optional)
+              </label>
+              <input
+                type="file"
+                className="input"
+                style={{ padding: '0.5rem' }}
+                onChange={e => setAttachment(e.target.files[0])}
+              />
             </motion.div>
 
             {/* Divider */}

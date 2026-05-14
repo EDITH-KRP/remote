@@ -5,14 +5,38 @@ import { ThemeContext } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LogOut, TicketIcon, LayoutDashboard,
-  PlusCircle, ShieldCheck, Menu, X, Zap
+  PlusCircle, ShieldCheck, Menu, X, Zap, Bell, User as UserIcon, Moon, Sun
 } from 'lucide-react';
+import api from '../services/api';
+import io from 'socket.io-client';
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
+  const { isDarkMode, toggleTheme } = useContext(ThemeContext);
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  React.useEffect(() => {
+    if (user) {
+      api.get('/notifications').then(res => setNotifications(res.data)).catch(() => {});
+      const socket = io(import.meta.env.VITE_API_URL || 'http://localhost:5000');
+      socket.on(`notification:${user.id}`, (data) => {
+        setNotifications(prev => [{ id: Date.now(), ...data, is_read: false }, ...prev]);
+      });
+      return () => socket.disconnect();
+    }
+  }, [user]);
+
+  const unreadCount = notifications.filter(n => !n.is_read).length;
+
+  const markRead = async (id) => {
+    await api.patch(`/notifications/${id}/read`);
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+  };
+
 
   const handleLogout = () => { logout(); navigate('/login'); setMobileOpen(false); };
 
@@ -21,6 +45,7 @@ const Navbar = () => {
     { to: '/raise-ticket', label: 'New Ticket',   icon: <PlusCircle size={14} /> },
     { to: '/my-tickets',   label: 'My Tickets',   icon: <TicketIcon size={14} /> },
     ...(user.role === 'admin' ? [{ to: '/admin', label: 'Admin', icon: <ShieldCheck size={14} /> }] : []),
+    { to: '/profile',      label: 'Profile',      icon: <UserIcon size={14} /> },
   ] : [];
 
   const initials = user?.full_name
@@ -101,6 +126,69 @@ const Navbar = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               {user ? (
                 <>
+                  {/* Theme Toggle */}
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={toggleTheme}
+                    className="btn-icon"
+                    style={{ color: 'var(--text-2)' }}
+                  >
+                    {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+                  </motion.button>
+
+                  {/* Notifications */}
+                  <div style={{ position: 'relative' }}>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setShowNotifications(!showNotifications)}
+                      className="btn-icon"
+                      style={{ color: 'var(--text-2)', position: 'relative' }}
+                    >
+                      <Bell size={18} />
+                      {unreadCount > 0 && (
+                        <span style={{
+                          position: 'absolute', top: 2, right: 4, width: 8, height: 8,
+                          background: '#f87171', borderRadius: '50%', border: '2px solid #06080f'
+                        }} />
+                      )}
+                    </motion.button>
+                    <AnimatePresence>
+                      {showNotifications && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                          style={{
+                            position: 'absolute', top: '100%', right: 0, width: '300px',
+                            background: 'rgba(10,12,22,0.95)', border: '1px solid rgba(99,102,241,0.2)',
+                            borderRadius: 'var(--r-md)', padding: '1rem', marginTop: '0.5rem',
+                            backdropFilter: 'blur(16px)', zIndex: 50, maxHeight: '400px', overflowY: 'auto'
+                          }}
+                        >
+                          <h4 style={{ fontSize: '0.9rem', marginBottom: '1rem', color: 'var(--text-1)' }}>Notifications</h4>
+                          {notifications.length === 0 ? <p style={{ fontSize: '0.8rem', color: 'var(--text-3)' }}>No notifications</p> : null}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            {notifications.map(n => (
+                              <div 
+                                key={n.id} 
+                                onClick={() => markRead(n.id)}
+                                style={{ 
+                                  padding: '0.75rem', borderRadius: '6px', cursor: 'pointer',
+                                  background: n.is_read ? 'transparent' : 'rgba(99,102,241,0.1)',
+                                  border: `1px solid ${n.is_read ? 'transparent' : 'rgba(99,102,241,0.2)'}`
+                                }}
+                              >
+                                <p style={{ fontSize: '0.8rem', color: n.is_read ? 'var(--text-2)' : 'var(--text-1)' }}>{n.message}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
                   <div style={{
                     display: 'flex', alignItems: 'center', gap: '10px',
                     paddingLeft: '12px', borderLeft: '1px solid rgba(99,102,241,0.15)',

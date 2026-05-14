@@ -9,6 +9,10 @@ import RaiseTicket from './pages/RaiseTicket';
 import MyTickets from './pages/MyTickets';
 import AdminPanel from './pages/AdminPanel';
 import Navbar from './components/Navbar';
+import Profile from './pages/Profile';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import { Toaster } from 'react-hot-toast';
 
 const PrivateRoute = ({ children, adminOnly = false }) => {
   const { user, loading } = React.useContext(AuthContext);
@@ -47,13 +51,19 @@ function App() {
                 <Route path="/"             element={<Navigate to="/dashboard" />} />
                 <Route path="/login"        element={<Login />} />
                 <Route path="/register"     element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/dashboard"    element={<PrivateRoute><Dashboard /></PrivateRoute>} />
                 <Route path="/raise-ticket" element={<PrivateRoute><RaiseTicket /></PrivateRoute>} />
                 <Route path="/my-tickets"   element={<PrivateRoute><MyTickets /></PrivateRoute>} />
+                <Route path="/profile"      element={<PrivateRoute><Profile /></PrivateRoute>} />
                 <Route path="/admin"        element={<PrivateRoute adminOnly><AdminPanel /></PrivateRoute>} />
               </Routes>
             </div>
           </div>
+          <Toaster position="bottom-right" toastOptions={{
+            style: { background: '#1e293b', color: '#fff', border: '1px solid rgba(99,102,241,0.2)' }
+          }} />
         </Router>
       </AuthProvider>
     </ThemeProvider>

@@ -21,15 +21,8 @@ const priorityBadge = {
   High: 'badge badge-red',  Critical: 'badge badge-red',
 };
 
-const weekData = [
-  { day: 'Mon', created: 4, resolved: 2 },
-  { day: 'Tue', created: 7, resolved: 5 },
-  { day: 'Wed', created: 3, resolved: 3 },
-  { day: 'Thu', created: 9, resolved: 6 },
-  { day: 'Fri', created: 6, resolved: 4 },
-  { day: 'Sat', created: 2, resolved: 2 },
-  { day: 'Sun', created: 5, resolved: 3 },
-];
+// Data will be fetched from API
+
 
 const ChartTip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
@@ -139,12 +132,17 @@ const StatCard = ({ s }) => {
 const Dashboard = () => {
   const { user }   = useContext(AuthContext);
   const [tickets, setTickets] = useState([]);
+  const [activityData, setActivityData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/tickets')
-      .then(r => setTickets(r.data))
-      .catch(console.error)
+    Promise.all([
+      api.get('/tickets'),
+      api.get('/tickets/activity?range=7')
+    ]).then(([tRes, aRes]) => {
+      setTickets(tRes.data);
+      setActivityData(aRes.data);
+    }).catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
@@ -319,7 +317,7 @@ const Dashboard = () => {
           </div>
 
           <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={weekData} margin={{ top:4, right:4, left:-20, bottom:0 }}>
+            <AreaChart data={activityData} margin={{ top:4, right:4, left:-20, bottom:0 }}>
               <defs>
                 <linearGradient id="gCreated"  x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%"  stopColor="#6366f1" stopOpacity={0.35} />

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
-import { X, Clock, MessageSquare, Star, ChevronRight, TicketIcon } from 'lucide-react';
+import { X, Clock, MessageSquare, Star, ChevronRight, TicketIcon, Paperclip, Send, Search, Filter } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const getToken = () => localStorage.getItem('access_token');
@@ -52,6 +52,10 @@ export default function MyTickets() {
   const [selected, setSelected]     = useState(null);
   const [feedback, setFeedback]     = useState({ rating: 5, comments: '' });
   const [feedbackSent, setFeedbackSent] = useState(false);
+  const [comments, setComments]     = useState([]);
+  const [newComment, setNewComment] = useState('');
+  const [search, setSearch]         = useState('');
+  const [filterStatus, setFilterStatus] = useState('All');
 
   useEffect(() => {
     axios.get(`${API_URL}/tickets`, {
@@ -61,11 +65,23 @@ export default function MyTickets() {
   }, []);
 
   const fetchDetail = async (id) => {
-    const r = await axios.get(`${API_URL}/tickets/${id}`, {
+    const [tRes, cRes] = await Promise.all([
+      axios.get(`${API_URL}/tickets/${id}`, { headers: { Authorization: `Bearer ${getToken()}` } }),
+      axios.get(`${API_URL}/tickets/${id}/comments`, { headers: { Authorization: `Bearer ${getToken()}` } })
+    ]);
+    setSelected(tRes.data);
+    setComments(cRes.data);
+    setFeedbackSent(!!tRes.data.feedback);
+  };
+
+  const handleAddComment = async (e) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+    const res = await axios.post(`${API_URL}/tickets/${selected.id}/comments`, { body: newComment }, {
       headers: { Authorization: `Bearer ${getToken()}` }
     });
-    setSelected(r.data);
-    setFeedbackSent(!!r.data.feedback);
+    setComments([...comments, res.data]);
+    setNewComment('');
   };
 
   const submitFeedback = async () => {
@@ -104,6 +120,39 @@ export default function MyTickets() {
             ? `${tickets.length} ticket${tickets.length !== 1 ? 's' : ''} — click any row to view details`
             : 'No support tickets yet'}
         </p>
+
+        {/* Search & Filter */}
+        {tickets.length > 0 && (
+          <div style={{ display: 'flex', gap: '1rem', marginTop: '1.25rem', flexWrap: 'wrap' }}>
+            <div style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
+              <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
+              <input 
+                type="text" 
+                className="input" 
+                placeholder="Search tickets by subject or #..." 
+                value={search} 
+                onChange={e => setSearch(e.target.value)}
+                style={{ paddingLeft: '2.25rem' }} 
+              />
+            </div>
+            <div style={{ position: 'relative', width: '150px' }}>
+              <Filter size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
+              <select 
+                className="input" 
+                value={filterStatus} 
+                onChange={e => setFilterStatus(e.target.value)}
+                style={{ paddingLeft: '2.25rem' }}
+              >
+                <option value="All">All Statuses</option>
+                <option value="Open">Open</option>
+                <option value="Assigned">Assigned</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
+                <option value="Closed">Closed</option>
+              </select>
+            </div>
+          </div>
+        )}
       </motion.div>
 
       {/* Empty */}
@@ -133,7 +182,11 @@ export default function MyTickets() {
           variants={{ hidden: {}, show: { transition: { staggerChildren: 0.055 } } }}
           style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}
         >
-          {tickets.map(ticket => (
+          {tickets.filter(t => {
+            const matchesSearch = t.subject.toLowerCase().includes(search.toLowerCase()) || t.ticket_number.toLowerCase().includes(search.toLowerCase());
+            const matchesStatus = filterStatus === 'All' || t.status === filterStatus;
+            return matchesSearch && matchesStatus;
+          }).map(ticket => (
             <motion.div
               key={ticket.id}
               variants={{ hidden: { opacity: 0, x: -18 }, show: { opacity: 1, x: 0, transition: { duration: 0.32, ease: [0.16,1,0.3,1] } } }}
@@ -275,6 +328,58 @@ export default function MyTickets() {
                   <p style={{ fontSize: '0.875rem', color: 'var(--text-2)', whiteSpace: 'pre-wrap', lineHeight: 1.75 }}>
                     {selected.description}
                   </p>
+                </div>
+
+                {/* Attachment Link */}
+                {selected.attachment_url && (
+                  <div style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Paperclip size={14} style={{ color: 'var(--text-3)' }} />
+                    <a href={`${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000'}${selected.attachment_url}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.875rem', color: 'var(--p1)', textDecoration: 'none' }}>
+                      View Attachment
+                    </a>
+                  </div>
+                )}
+
+                {/* Comments */}
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.625rem' }}>
+                    <MessageSquare size={12} style={{ color: 'var(--text-3)' }} />
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                      Conversation ({comments.length})
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
+                    {comments.map(c => (
+                      <div key={c.id} style={{
+                        background: c.author_id === selected.user_id ? 'rgba(99,102,241,0.1)' : 'rgba(16,185,129,0.1)',
+                        border: `1px solid ${c.author_id === selected.user_id ? 'rgba(99,102,241,0.2)' : 'rgba(16,185,129,0.2)'}`,
+                        borderRadius: 'var(--r-md)', padding: '1rem',
+                        alignSelf: c.author_id === selected.user_id ? 'flex-end' : 'flex-start',
+                        maxWidth: '85%'
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-2)' }}>{c.author?.full_name}</span>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-3)' }}>{new Date(c.createdAt).toLocaleString()}</span>
+                        </div>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--text-1)', whiteSpace: 'pre-wrap' }}>{c.body}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {!['Resolved', 'Closed'].includes(selected.status) && (
+                    <form onSubmit={handleAddComment} style={{ display: 'flex', gap: '0.5rem' }}>
+                      <input 
+                        type="text" 
+                        className="input" 
+                        placeholder="Type a reply..." 
+                        value={newComment} 
+                        onChange={e => setNewComment(e.target.value)} 
+                      />
+                      <button type="submit" className="btn btn-primary" disabled={!newComment.trim()}>
+                        <Send size={15} />
+                      </button>
+                    </form>
+                  )}
                 </div>
 
                 {/* Activity log */}

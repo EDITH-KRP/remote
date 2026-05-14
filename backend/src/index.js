@@ -7,6 +7,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { Server } = require('socket.io');
 const { sequelize } = require('./models');
+require('dns').setDefaultResultOrder('ipv4first');
 
 const authRoutes   = require('./routes/auth');
 const ticketRoutes = require('./routes/tickets');
@@ -15,6 +16,9 @@ const notificationRoutes = require('./routes/notifications');
 
 const app    = express();
 const server = http.createServer(app);
+
+// Trust the first proxy (required for Render/Heroku and express-rate-limit)
+app.set('trust proxy', 1);
 
 // ── Socket.IO setup ──────────────────────────────────────────────────────────
 const io = new Server(server, {

@@ -207,11 +207,11 @@ exports.getTickets = async (req, res) => {
     ];
 
     if (user.role === 'admin') {
-      tickets = await Ticket.findAll({ include });
+      tickets = await Ticket.findAll({ include, order: [['created_at', 'DESC']] });
     } else if (user.role === 'support') {
-      tickets = await Ticket.findAll({ where: { assigned_staff_id: user.id }, include });
+      tickets = await Ticket.findAll({ where: { assigned_staff_id: user.id }, include, order: [['created_at', 'DESC']] });
     } else {
-      tickets = await Ticket.findAll({ where: { user_id: user.id }, include });
+      tickets = await Ticket.findAll({ where: { user_id: user.id }, include, order: [['created_at', 'DESC']] });
     }
 
     res.status(200).json(tickets.map(formatTicket));

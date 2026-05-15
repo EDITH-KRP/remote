@@ -4,6 +4,7 @@ import api from '../services/api';
 import { motion } from 'framer-motion';
 import { User, Phone, Lock, Save, Briefcase, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useLocation } from 'react-router-dom';
 
 export default function Profile() {
   const { user, login } = useContext(AuthContext); // Can use login/reload auth if needed, but let's just refresh page or keep state
@@ -16,6 +17,13 @@ export default function Profile() {
     newPassword: ''
   });
   const [loading, setLoading] = useState(false);
+  const location = useLocation();
+
+  React.useEffect(() => {
+    if (location.state?.message) {
+      toast.error(location.state.message, { id: 'profile-redirect' });
+    }
+  }, [location]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

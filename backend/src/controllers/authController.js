@@ -15,8 +15,12 @@ const transporter = nodemailer.createTransport({
 
 exports.register = async (req, res) => {
   try {
-    const { full_name, email, password, role, phone } = req.body;
+    const { full_name, email, password, role, employee_id, alternate_email, phone } = req.body;
     
+    if (!employee_id || !alternate_email || !phone) {
+      return res.status(400).json({ message: 'Employee ID, Alternate Email, and Phone are required' });
+    }
+
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
       return res.status(400).json({ message: 'Email already registered' });
@@ -30,7 +34,9 @@ exports.register = async (req, res) => {
       email,
       password_hash,
       role: role || 'user',
-      phone: phone || ''
+      employee_id,
+      alternate_email,
+      phone
     });
 
     res.status(201).json({ message: 'User created successfully' });
@@ -129,7 +135,7 @@ exports.resetPassword = async (req, res) => {
 
 exports.updateProfile = async (req, res) => {
   try {
-    const { full_name, phone, newPassword, currentPassword } = req.body;
+    const { full_name, employee_id, alternate_email, phone, newPassword, currentPassword } = req.body;
     const user = await User.findByPk(req.userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
@@ -141,7 +147,9 @@ exports.updateProfile = async (req, res) => {
     }
 
     if (full_name) user.full_name = full_name;
-    if (phone !== undefined) user.phone = phone;
+    if (employee_id) user.employee_id = employee_id;
+    if (alternate_email) user.alternate_email = alternate_email;
+    if (phone) user.phone = phone;
 
     await user.save();
 

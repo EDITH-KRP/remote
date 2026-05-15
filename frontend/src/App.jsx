@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import Login from './pages/Login';
@@ -16,6 +16,8 @@ import { Toaster } from 'react-hot-toast';
 
 const PrivateRoute = ({ children, adminOnly = false }) => {
   const { user, loading } = React.useContext(AuthContext);
+  const location = useLocation();
+
   if (loading) return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
       <div className="spinner" style={{ width: '44px', height: '44px', borderWidth: '3px' }} />
@@ -23,6 +25,12 @@ const PrivateRoute = ({ children, adminOnly = false }) => {
   );
   if (!user) return <Navigate to="/login" />;
   if (adminOnly && user.role !== 'admin') return <Navigate to="/dashboard" />;
+
+  const isMissingFields = !user.employee_id || !user.alternate_email || !user.phone;
+  if (isMissingFields && location.pathname !== '/profile') {
+    return <Navigate to="/profile" state={{ message: "Please complete your profile to continue." }} />;
+  }
+
   return children;
 };
 

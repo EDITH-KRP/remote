@@ -2,19 +2,21 @@ import React, { useState, useContext } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { User, Mail, Lock, Phone, ArrowRight, Zap, Sparkles } from 'lucide-react';
+import { User, Mail, Lock, Phone, ArrowRight, Zap, Sparkles, Briefcase } from 'lucide-react';
 
 const fields = [
-  { key: 'full_name', label: 'Full Name',       type: 'text',     placeholder: 'Jane Smith',       Icon: User,  required: true  },
-  { key: 'email',     label: 'Email Address',   type: 'email',    placeholder: 'jane@company.com', Icon: Mail,  required: true  },
-  { key: 'password',  label: 'Password',        type: 'password', placeholder: '••••••••',         Icon: Lock,  required: true  },
-  { key: 'phone',     label: 'Phone (optional)',type: 'tel',      placeholder: '+91 98765 43210',  Icon: Phone, required: false },
+  { key: 'full_name',       label: 'Full Name',             type: 'text',     placeholder: 'Jane Smith',       Icon: User,      required: true  },
+  { key: 'employee_id',     label: 'Employee ID',           type: 'text',     placeholder: 'EMP123',           Icon: Briefcase, required: true  },
+  { key: 'email',           label: 'Email Address',         type: 'email',    placeholder: 'jane@company.com', Icon: Mail,      required: true  },
+  { key: 'alternate_email', label: 'Alternate Email',       type: 'email',    placeholder: 'jane.alt@gmail.com', Icon: Mail,    required: true  },
+  { key: 'password',        label: 'Password',              type: 'password', placeholder: '••••••••',         Icon: Lock,      required: true  },
+  { key: 'phone',           label: 'Phone Number',          type: 'tel',      placeholder: '+91 98765 43210',  Icon: Phone,     required: true },
 ];
 
 export default function Register() {
   const { register } = useContext(AuthContext);
   const navigate     = useNavigate();
-  const [form, setForm]     = useState({ full_name: '', email: '', password: '', phone: '' });
+  const [form, setForm]     = useState({ full_name: '', employee_id: '', email: '', alternate_email: '', password: '', phone: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError]   = useState(null);
 
@@ -128,7 +130,7 @@ export default function Register() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.15 + i * 0.07, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  <label className="input-label" htmlFor={`reg-${key}`}>{label}</label>
+                  <label className="input-label" htmlFor={`reg-${key}`}>{label} <span style={{ color: '#f87171' }}>*</span></label>
                   <div style={{ position: 'relative' }}>
                     <Icon size={14} style={{
                       position: 'absolute', left: '0.875rem', top: '50%',

@@ -34,7 +34,7 @@ const formatTicket = (t) => {
 
 exports.createTicket = async (req, res) => {
   try {
-    const { ticket_type, category_id, sub_category_id, subject, short_description, description, note, impact, urgency } = req.body;
+    const { ticket_type, category_id, sub_category_id, subject, short_description, description, note, impact, urgency, state } = req.body;
 
     // ITIL Priority Matrix: auto-determine priority from impact & urgency
     const priorityMatrix = {
@@ -65,7 +65,7 @@ exports.createTicket = async (req, res) => {
       impact: impact || 'Low',
       urgency: urgency || 'Low',
       priority,
-      state: 'New',
+      state: state || 'New',
       attachment_url
     });
 

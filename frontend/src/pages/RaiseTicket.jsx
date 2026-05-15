@@ -32,6 +32,7 @@ export default function RaiseTicket({ onSuccess }) {
     note: '',
     category_id: '',
     sub_category_id: '',
+    state: 'New',
     impact: 'Low',
     urgency: 'Low'
   });
@@ -67,6 +68,7 @@ export default function RaiseTicket({ onSuccess }) {
       formData.append('short_description', form.short_description);
       formData.append('description', form.description);
       formData.append('note', form.note);
+      formData.append('state', form.state);
       formData.append('impact', form.impact);
       formData.append('urgency', form.urgency);
       if (form.category_id) formData.append('category_id', form.category_id);
@@ -83,7 +85,7 @@ export default function RaiseTicket({ onSuccess }) {
       setForm({ 
         ticket_type: 'Incident', subject: '', short_description: '', 
         description: '', note: '', category_id: '', sub_category_id: '', 
-        impact: 'Low', urgency: 'Low' 
+        state: 'New', impact: 'Low', urgency: 'Low' 
       });
       setAttachment(null);
       setCharCount(0);
@@ -303,6 +305,19 @@ export default function RaiseTicket({ onSuccess }) {
                       {subCategories.map(sc => (
                         <option key={sc.id} value={sc.id} style={{ background: '#0c0f1d' }}>{sc.name}</option>
                       ))}
+                    </select>
+                    <ChevronDown size={13} style={{ position: 'absolute', right: '0.7rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-3)' }} />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="input-label" htmlFor="t-state">State</label>
+                  <div style={{ position: 'relative' }}>
+                    <select id="t-state" value={form.state} onChange={e => setForm({...form, state: e.target.value})} className="input" style={{ paddingRight: '2rem', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none' }}>
+                      <option value="New" style={{ background: '#0c0f1d' }}>New</option>
+                      <option value="In Progress" style={{ background: '#0c0f1d' }}>In Progress</option>
+                      <option value="On Hold" style={{ background: '#0c0f1d' }}>On Hold</option>
+                      <option value="Resolved" style={{ background: '#0c0f1d' }}>Resolved</option>
                     </select>
                     <ChevronDown size={13} style={{ position: 'absolute', right: '0.7rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-3)' }} />
                   </div>

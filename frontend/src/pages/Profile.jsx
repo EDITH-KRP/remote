@@ -53,31 +53,34 @@ export default function Profile() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
             <div>
-              <label className="input-label"><Briefcase size={12} style={{ display: 'inline', marginRight: '4px' }} /> Employee ID</label>
+              <label className="input-label"><Briefcase size={12} style={{ display: 'inline', marginRight: '4px' }} /> Employee ID <span style={{ color: '#f87171' }}>*</span></label>
               <input 
                 type="text" 
                 className="input" 
                 value={form.employee_id}
                 onChange={e => setForm({...form, employee_id: e.target.value})}
+                required
               />
             </div>
             <div>
-              <label className="input-label"><Mail size={12} style={{ display: 'inline', marginRight: '4px' }} /> Alternate Email</label>
+              <label className="input-label"><Mail size={12} style={{ display: 'inline', marginRight: '4px' }} /> Alternate Email <span style={{ color: '#f87171' }}>*</span></label>
               <input 
                 type="email" 
                 className="input" 
                 value={form.alternate_email}
                 onChange={e => setForm({...form, alternate_email: e.target.value})}
+                required
               />
             </div>
           </div>
           <div>
-            <label className="input-label"><Phone size={12} style={{ display: 'inline', marginRight: '4px' }} /> Phone Number</label>
+            <label className="input-label"><Phone size={12} style={{ display: 'inline', marginRight: '4px' }} /> Phone Number <span style={{ color: '#f87171' }}>*</span></label>
             <input 
               type="text" 
               className="input" 
               value={form.phone}
               onChange={e => setForm({...form, phone: e.target.value})}
+              required
             />
           </div>
           <div className="sep" style={{ margin: '1rem 0' }}></div>

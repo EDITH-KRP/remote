@@ -1,4 +1,4 @@
-const { Ticket, TicketLog, User, Category, Feedback, Notification, TicketComment } = require('../models');
+const { Ticket, TicketLog, User, Category, SubCategory, Feedback, Notification, TicketComment } = require('../models');
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
@@ -34,8 +34,18 @@ const formatTicket = (t) => {
 
 exports.createTicket = async (req, res) => {
   try {
-    const { category_id, subject, description, priority } = req.body;
-    const ticket_number = `TKT-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+    const { ticket_type, category_id, sub_category_id, subject, short_description, description, note, impact, urgency } = req.body;
+
+    // ITIL Priority Matrix: auto-determine priority from impact & urgency
+    const priorityMatrix = {
+      'High-High': 'Critical', 'High-Medium': 'High', 'High-Low': 'Medium',
+      'Medium-High': 'High', 'Medium-Medium': 'Medium', 'Medium-Low': 'Low',
+      'Low-High': 'Medium', 'Low-Medium': 'Low', 'Low-Low': 'Low'
+    };
+    const priority = priorityMatrix[`${impact || 'Low'}-${urgency || 'Low'}`] || 'Low';
+
+    const prefix = ticket_type === 'Request' ? 'REQ' : 'INC';
+    const ticket_number = `${prefix}-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
 
     let attachment_url = null;
     if (req.file) {
@@ -44,17 +54,24 @@ exports.createTicket = async (req, res) => {
 
     const ticket = await Ticket.create({
       ticket_number,
+      ticket_type: ticket_type || 'Incident',
       user_id:     req.userId,
-      category_id,
+      category_id: category_id || null,
+      sub_category_id: sub_category_id || null,
       subject,
+      short_description: short_description || null,
       description,
-      priority: priority || 'Low',
+      note: note || null,
+      impact: impact || 'Low',
+      urgency: urgency || 'Low',
+      priority,
+      state: 'New',
       attachment_url
     });
 
     await TicketLog.create({
       ticket_id:    ticket.id,
-      action:       'Ticket Created',
+      action:       `${ticket_type || 'Incident'} Created`,
       performed_by: req.userId
     });
 
@@ -64,12 +81,12 @@ exports.createTicket = async (req, res) => {
       transporter.sendMail({
         from:    process.env.MAIL_DEFAULT_SENDER || process.env.MAIL_USERNAME,
         to:      user.email,
-        subject: `Ticket Created: ${ticket_number}`,
-        html:    `<h3>Your support request has been received!</h3><p><strong>Ticket Number:</strong> ${ticket_number}</p><p><strong>Subject:</strong> ${subject}</p><p>Our support team will review it shortly.</p>`
+        subject: `${ticket_type || 'Ticket'} Created: ${ticket_number}`,
+        html:    `<h3>Your ${ticket_type || 'support'} request has been received!</h3><p><strong>Ticket Number:</strong> ${ticket_number}</p><p><strong>Subject:</strong> ${subject}</p><p><strong>Priority:</strong> ${priority}</p><p>Our support team will review it shortly.</p>`
       }).catch(err => console.error('Email error:', err));
     }
 
-    // 🔴 Real-time: broadcast new ticket to all clients
+    // Real-time: broadcast new ticket to all clients
     emitTicketsUpdate(req, { event: 'created', ticketId: ticket.id });
 
     res.status(201).json(ticket);

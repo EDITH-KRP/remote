@@ -25,6 +25,7 @@ router.use(authMiddleware);
 
 // Categories - accessible to ALL authenticated users for the raise ticket form
 router.get('/categories', adminController.handleCategories);
+router.get('/sub-categories', adminController.handleSubCategories);
 
 router.post('/create', upload.single('attachment'), ticketController.createTicket);
 router.get('/activity', ticketController.getActivity);

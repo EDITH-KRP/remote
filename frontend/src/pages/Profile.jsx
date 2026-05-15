@@ -2,13 +2,15 @@ import React, { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
 import { motion } from 'framer-motion';
-import { User, Phone, Lock, Save } from 'lucide-react';
+import { User, Phone, Lock, Save, Briefcase, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Profile() {
   const { user, login } = useContext(AuthContext); // Can use login/reload auth if needed, but let's just refresh page or keep state
   const [form, setForm] = useState({
     full_name: user?.full_name || '',
+    employee_id: user?.employee_id || '',
+    alternate_email: user?.alternate_email || '',
     phone: user?.phone || '',
     currentPassword: '',
     newPassword: ''
@@ -48,6 +50,26 @@ export default function Profile() {
               onChange={e => setForm({...form, full_name: e.target.value})}
               required
             />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+            <div>
+              <label className="input-label"><Briefcase size={12} style={{ display: 'inline', marginRight: '4px' }} /> Employee ID</label>
+              <input 
+                type="text" 
+                className="input" 
+                value={form.employee_id}
+                onChange={e => setForm({...form, employee_id: e.target.value})}
+              />
+            </div>
+            <div>
+              <label className="input-label"><Mail size={12} style={{ display: 'inline', marginRight: '4px' }} /> Alternate Email</label>
+              <input 
+                type="email" 
+                className="input" 
+                value={form.alternate_email}
+                onChange={e => setForm({...form, alternate_email: e.target.value})}
+              />
+            </div>
           </div>
           <div>
             <label className="input-label"><Phone size={12} style={{ display: 'inline', marginRight: '4px' }} /> Phone Number</label>

@@ -11,10 +11,18 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING(100),
     allowNull: false
   },
+  employee_id: {
+    type: DataTypes.STRING(50),
+    allowNull: true
+  },
   email: {
     type: DataTypes.STRING(120),
     allowNull: false,
     unique: true
+  },
+  alternate_email: {
+    type: DataTypes.STRING(120),
+    allowNull: true
   },
   password_hash: {
     type: DataTypes.STRING(255),
@@ -54,6 +62,25 @@ const Category = sequelize.define('Category', {
   timestamps: false
 });
 
+const SubCategory = sequelize.define('SubCategory', {
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
+  },
+  category_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  name: {
+    type: DataTypes.STRING(100),
+    allowNull: false
+  }
+}, {
+  tableName: 'sub_categories',
+  timestamps: false
+});
+
 const Ticket = sequelize.define('Ticket', {
   id: {
     type: DataTypes.INTEGER,
@@ -65,11 +92,20 @@ const Ticket = sequelize.define('Ticket', {
     allowNull: false,
     unique: true
   },
+  ticket_type: {
+    type: DataTypes.STRING(20),
+    allowNull: false,
+    defaultValue: 'Incident'  // 'Incident' or 'Request'
+  },
   user_id: {
     type: DataTypes.INTEGER,
     allowNull: false
   },
   category_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  sub_category_id: {
     type: DataTypes.INTEGER,
     allowNull: true
   },
@@ -81,13 +117,33 @@ const Ticket = sequelize.define('Ticket', {
     type: DataTypes.STRING(200),
     allowNull: false
   },
+  short_description: {
+    type: DataTypes.STRING(300),
+    allowNull: true
+  },
   description: {
     type: DataTypes.TEXT,
     allowNull: false
   },
+  note: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  impact: {
+    type: DataTypes.STRING(20),
+    defaultValue: 'Low'   // Low, Medium, High
+  },
+  urgency: {
+    type: DataTypes.STRING(20),
+    defaultValue: 'Low'   // Low, Medium, High
+  },
   priority: {
     type: DataTypes.STRING(20),
     defaultValue: 'Low'
+  },
+  state: {
+    type: DataTypes.STRING(30),
+    defaultValue: 'New'   // New, In Progress, On Hold, Resolved, Closed
   },
   status: {
     type: DataTypes.STRING(20),
@@ -219,6 +275,12 @@ Ticket.belongsTo(User, { foreignKey: 'assigned_staff_id', as: 'assigned_staff' }
 Category.hasMany(Ticket, { foreignKey: 'category_id', as: 'tickets' });
 Ticket.belongsTo(Category, { foreignKey: 'category_id', as: 'category' });
 
+Category.hasMany(SubCategory, { foreignKey: 'category_id', as: 'sub_categories' });
+SubCategory.belongsTo(Category, { foreignKey: 'category_id', as: 'category' });
+
+SubCategory.hasMany(Ticket, { foreignKey: 'sub_category_id', as: 'tickets' });
+Ticket.belongsTo(SubCategory, { foreignKey: 'sub_category_id', as: 'sub_category' });
+
 Ticket.hasMany(TicketLog, { foreignKey: 'ticket_id', as: 'logs' });
 TicketLog.belongsTo(Ticket, { foreignKey: 'ticket_id', as: 'ticket' });
 
@@ -241,6 +303,7 @@ module.exports = {
   sequelize,
   User,
   Category,
+  SubCategory,
   Ticket,
   TicketLog,
   Feedback,

@@ -14,5 +14,7 @@ router.get('/activity', adminController.getActivity);
 router.get('/export', adminController.exportTickets);
 router.get('/categories', adminController.handleCategories);
 router.post('/categories', adminController.handleCategories);
+router.get('/sub-categories', adminController.handleSubCategories);
+router.post('/sub-categories', adminController.handleSubCategories);
 
 module.exports = router;

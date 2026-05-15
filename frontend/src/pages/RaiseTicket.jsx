@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
-import { Send, Tag, AlertCircle, CheckCircle2, Flame, ChevronDown, FileText, AlignLeft } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
+import { Send, Tag, AlertCircle, CheckCircle2, Flame, ChevronDown, FileText, AlignLeft, User, Briefcase, Mail, Clock } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const getToken = () => localStorage.getItem('access_token');
+
+const priorityMatrix = {
+  'High-High': 'Critical', 'High-Medium': 'High', 'High-Low': 'Medium',
+  'Medium-High': 'High', 'Medium-Medium': 'Medium', 'Medium-Low': 'Low',
+  'Low-High': 'Medium', 'Low-Medium': 'Low', 'Low-Low': 'Low'
+};
 
 const priorities = [
   { value: 'Low',      dot: '🟢', color: '#34d399', bg: 'rgba(52,211,153,0.1)',  border: 'rgba(52,211,153,0.25)'  },
@@ -14,8 +21,20 @@ const priorities = [
 ];
 
 export default function RaiseTicket({ onSuccess }) {
+  const { user } = React.useContext(AuthContext);
   const [categories, setCategories] = useState([]);
-  const [form, setForm] = useState({ subject: '', description: '', priority: 'Low', category_id: '' });
+  const [subCategories, setSubCategories] = useState([]);
+  const [form, setForm] = useState({ 
+    ticket_type: 'Incident',
+    subject: '', 
+    short_description: '',
+    description: '', 
+    note: '',
+    category_id: '',
+    sub_category_id: '',
+    impact: 'Low',
+    urgency: 'Low'
+  });
   const [attachment, setAttachment] = useState(null);
   const [loading, setLoading]   = useState(false);
   const [success, setSuccess]   = useState(null);
@@ -28,15 +47,30 @@ export default function RaiseTicket({ onSuccess }) {
     }).then(r => setCategories(r.data)).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    if (form.category_id) {
+      axios.get(`${API_URL}/tickets/sub-categories?category_id=${form.category_id}`, {
+        headers: { Authorization: `Bearer ${getToken()}` }
+      }).then(r => setSubCategories(r.data)).catch(() => {});
+    } else {
+      setSubCategories([]);
+    }
+  }, [form.category_id]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true); setError(null);
     try {
       const formData = new FormData();
+      formData.append('ticket_type', form.ticket_type);
       formData.append('subject', form.subject);
+      formData.append('short_description', form.short_description);
       formData.append('description', form.description);
-      formData.append('priority', form.priority);
+      formData.append('note', form.note);
+      formData.append('impact', form.impact);
+      formData.append('urgency', form.urgency);
       if (form.category_id) formData.append('category_id', form.category_id);
+      if (form.sub_category_id) formData.append('sub_category_id', form.sub_category_id);
       if (attachment) formData.append('attachment', attachment);
 
       const res = await axios.post(`${API_URL}/tickets/create`, formData, {
@@ -46,7 +80,11 @@ export default function RaiseTicket({ onSuccess }) {
         }
       });
       setSuccess(`Ticket ${res.data.ticket_number} submitted successfully!`);
-      setForm({ subject: '', description: '', priority: 'Low', category_id: '' });
+      setForm({ 
+        ticket_type: 'Incident', subject: '', short_description: '', 
+        description: '', note: '', category_id: '', sub_category_id: '', 
+        impact: 'Low', urgency: 'Low' 
+      });
       setAttachment(null);
       setCharCount(0);
       if (onSuccess) onSuccess();
@@ -56,7 +94,8 @@ export default function RaiseTicket({ onSuccess }) {
     setLoading(false);
   };
 
-  const curPriority = priorities.find(p => p.value === form.priority);
+  const curPriorityValue = priorityMatrix[`${form.impact}-${form.urgency}`] || 'Low';
+  const curPriority = priorities.find(p => p.value === curPriorityValue);
 
   return (
     <motion.div
@@ -133,20 +172,55 @@ export default function RaiseTicket({ onSuccess }) {
         }}>
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-            {/* Subject */}
-            <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.12 }}>
-              <label className="input-label" htmlFor="t-subject" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <FileText size={11} /> Subject <span style={{ color: '#f87171', marginLeft: '1px' }}>*</span>
-              </label>
-              <input
-                id="t-subject"
-                type="text"
-                required
-                placeholder="Brief summary of the issue"
-                value={form.subject}
-                onChange={e => setForm({ ...form, subject: e.target.value })}
-                className="input"
-              />
+            {/* Profile Autofill Readonly */}
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: 'var(--r-md)', border: '1px solid var(--border)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+              <div>
+                <label className="input-label"><User size={11} style={{display:'inline'}}/> Name</label>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-1)', fontWeight: 500 }}>{user?.full_name}</div>
+              </div>
+              <div>
+                <label className="input-label"><Briefcase size={11} style={{display:'inline'}}/> Employee ID</label>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-1)' }}>{user?.employee_id || '—'}</div>
+              </div>
+              <div>
+                <label className="input-label"><Mail size={11} style={{display:'inline'}}/> Email</label>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-1)' }}>{user?.email}</div>
+              </div>
+              <div>
+                <label className="input-label"><Mail size={11} style={{display:'inline'}}/> Alternate Email</label>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-1)' }}>{user?.alternate_email || '—'}</div>
+              </div>
+              <div>
+                <label className="input-label"><Clock size={11} style={{display:'inline'}}/> Date & Time</label>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-1)' }}>{new Date().toLocaleString()}</div>
+              </div>
+            </div>
+
+            {/* Ticket Type */}
+            <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
+              <label className="input-label">Ticket Type</label>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--text-1)', cursor: 'pointer' }}>
+                  <input type="radio" name="ticket_type" value="Incident" checked={form.ticket_type === 'Incident'} onChange={e => setForm({...form, ticket_type: e.target.value})} /> Incident
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--text-1)', cursor: 'pointer' }}>
+                  <input type="radio" name="ticket_type" value="Request" checked={form.ticket_type === 'Request'} onChange={e => setForm({...form, ticket_type: e.target.value})} /> Request
+                </label>
+              </div>
+            </motion.div>
+
+            {/* Subject and Short Description */}
+            <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.12 }} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div>
+                <label className="input-label" htmlFor="t-subject" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <FileText size={11} /> Subject <span style={{ color: '#f87171', marginLeft: '1px' }}>*</span>
+                </label>
+                <input id="t-subject" type="text" required placeholder="Brief summary" value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })} className="input" />
+              </div>
+              <div>
+                <label className="input-label" htmlFor="t-sdesc">Short Description</label>
+                <input id="t-sdesc" type="text" placeholder="One sentence summary" value={form.short_description} onChange={e => setForm({ ...form, short_description: e.target.value })} className="input" />
+              </div>
             </motion.div>
 
             {/* Description */}
@@ -162,84 +236,127 @@ export default function RaiseTicket({ onSuccess }) {
               <textarea
                 id="t-desc"
                 required
-                rows={6}
+                rows={4}
                 maxLength={1000}
                 placeholder="Describe the problem in detail — what happened, what you expected, any error messages…"
                 value={form.description}
                 onChange={e => { setForm({ ...form, description: e.target.value }); setCharCount(e.target.value.length); }}
                 className="input"
-                style={{ resize: 'vertical', lineHeight: 1.7, minHeight: '130px' }}
+                style={{ resize: 'vertical', lineHeight: 1.7, minHeight: '100px' }}
               />
             </motion.div>
 
-            {/* Priority + Category row */}
+            {/* Note */}
+            <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.22 }}>
+              <label className="input-label" htmlFor="t-note">Additional Note (Optional)</label>
+              <textarea
+                id="t-note"
+                rows={2}
+                placeholder="Any extra context or troubleshooting already done..."
+                value={form.note}
+                onChange={e => setForm({ ...form, note: e.target.value })}
+                className="input"
+                style={{ resize: 'vertical', minHeight: '60px' }}
+              />
+            </motion.div>
+
+            {/* Categories & Urgency/Impact row */}
             <motion.div
               initial={{ opacity: 0, x: -12 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.26 }}
               style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', alignItems: 'start' }}
             >
-              {/* Priority */}
-              <div>
-                <label className="input-label" htmlFor="t-priority" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <Flame size={11} /> Priority
-                </label>
-                <div style={{ position: 'relative' }}>
-                  <select
-                    id="t-priority"
-                    value={form.priority}
-                    onChange={e => setForm({ ...form, priority: e.target.value })}
-                    className="input"
-                    style={{ paddingRight: '2rem', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none' }}
-                  >
-                    {priorities.map(p => (
-                      <option key={p.value} value={p.value} style={{ background: '#0c0f1d' }}>
-                        {p.dot} {p.value}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown size={13} style={{ position: 'absolute', right: '0.7rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-3)' }} />
+              {/* Category */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div>
+                  <label className="input-label" htmlFor="t-category">Category</label>
+                  <div style={{ position: 'relative' }}>
+                    <select
+                      id="t-category"
+                      value={form.category_id}
+                      onChange={e => setForm({ ...form, category_id: e.target.value, sub_category_id: '' })}
+                      className="input"
+                      style={{ paddingRight: '2rem', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none' }}
+                    >
+                      <option value="" style={{ background: '#0c0f1d' }}>— Select category</option>
+                      {categories.map(c => (
+                        <option key={c.id} value={c.id} style={{ background: '#0c0f1d' }}>{c.category_name}</option>
+                      ))}
+                    </select>
+                    <ChevronDown size={13} style={{ position: 'absolute', right: '0.7rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-3)' }} />
+                  </div>
                 </div>
-                {/* Animated priority pill */}
-                <AnimatePresence mode="wait">
-                  <motion.span
-                    key={form.priority}
-                    initial={{ opacity: 0, scale: 0.88, y: 4 }}
-                    animate={{ opacity: 1, scale: 1,    y: 0 }}
-                    exit={{   opacity: 0, scale: 0.88, y: 4 }}
-                    transition={{ duration: 0.18 }}
-                    style={{
-                      display: 'inline-flex', alignItems: 'center', gap: '5px',
-                      marginTop: '8px',
-                      padding: '3px 10px', borderRadius: '99px',
-                      background: curPriority.bg,
-                      border: `1px solid ${curPriority.border}`,
-                      color: curPriority.color,
-                      fontSize: '0.72rem', fontWeight: 700,
-                    }}
-                  >
-                    <Tag size={10} /> {curPriority.value} Priority
-                  </motion.span>
-                </AnimatePresence>
+
+                <div>
+                  <label className="input-label" htmlFor="t-sub-category">Sub Category</label>
+                  <div style={{ position: 'relative' }}>
+                    <select
+                      id="t-sub-category"
+                      value={form.sub_category_id}
+                      onChange={e => setForm({ ...form, sub_category_id: e.target.value })}
+                      className="input"
+                      style={{ paddingRight: '2rem', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none' }}
+                      disabled={!form.category_id}
+                    >
+                      <option value="" style={{ background: '#0c0f1d' }}>— Select sub-category</option>
+                      {subCategories.map(sc => (
+                        <option key={sc.id} value={sc.id} style={{ background: '#0c0f1d' }}>{sc.name}</option>
+                      ))}
+                    </select>
+                    <ChevronDown size={13} style={{ position: 'absolute', right: '0.7rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-3)' }} />
+                  </div>
+                </div>
               </div>
 
-              {/* Category */}
-              <div>
-                <label className="input-label" htmlFor="t-category">Category</label>
-                <div style={{ position: 'relative' }}>
-                  <select
-                    id="t-category"
-                    value={form.category_id}
-                    onChange={e => setForm({ ...form, category_id: e.target.value })}
-                    className="input"
-                    style={{ paddingRight: '2rem', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none' }}
-                  >
-                    <option value="" style={{ background: '#0c0f1d' }}>— Select category</option>
-                    {categories.map(c => (
-                      <option key={c.id} value={c.id} style={{ background: '#0c0f1d' }}>{c.category_name}</option>
-                    ))}
-                  </select>
-                  <ChevronDown size={13} style={{ position: 'absolute', right: '0.7rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-3)' }} />
+              {/* Impact / Urgency */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div>
+                    <label className="input-label" htmlFor="t-impact">Impact</label>
+                    <div style={{ position: 'relative' }}>
+                      <select id="t-impact" value={form.impact} onChange={e => setForm({...form, impact: e.target.value})} className="input" style={{ paddingRight: '2rem', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none' }}>
+                        <option value="Low" style={{ background: '#0c0f1d' }}>Low</option>
+                        <option value="Medium" style={{ background: '#0c0f1d' }}>Medium</option>
+                        <option value="High" style={{ background: '#0c0f1d' }}>High</option>
+                      </select>
+                      <ChevronDown size={13} style={{ position: 'absolute', right: '0.7rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-3)' }} />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="input-label" htmlFor="t-urgency">Urgency</label>
+                    <div style={{ position: 'relative' }}>
+                      <select id="t-urgency" value={form.urgency} onChange={e => setForm({...form, urgency: e.target.value})} className="input" style={{ paddingRight: '2rem', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none' }}>
+                        <option value="Low" style={{ background: '#0c0f1d' }}>Low</option>
+                        <option value="Medium" style={{ background: '#0c0f1d' }}>Medium</option>
+                        <option value="High" style={{ background: '#0c0f1d' }}>High</option>
+                      </select>
+                      <ChevronDown size={13} style={{ position: 'absolute', right: '0.7rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-3)' }} />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="input-label">Auto-Priority</label>
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={curPriorityValue}
+                      initial={{ opacity: 0, scale: 0.88, y: 4 }}
+                      animate={{ opacity: 1, scale: 1,    y: 0 }}
+                      exit={{   opacity: 0, scale: 0.88, y: 4 }}
+                      transition={{ duration: 0.18 }}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '5px',
+                        padding: '6px 12px', borderRadius: '99px',
+                        background: curPriority.bg,
+                        border: `1px solid ${curPriority.border}`,
+                        color: curPriority.color,
+                        fontSize: '0.8rem', fontWeight: 700,
+                      }}
+                    >
+                      <Tag size={12} /> {curPriority.value} Priority
+                    </motion.span>
+                  </AnimatePresence>
                 </div>
               </div>
             </motion.div>

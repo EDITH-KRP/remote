@@ -1,4 +1,4 @@
-const { Ticket, User, Category } = require('../models');
+const { Ticket, User, Category, SubCategory } = require('../models');
 
 exports.getUsers = async (req, res) => {
   try {
@@ -115,8 +115,26 @@ exports.handleCategories = async (req, res) => {
       const newCategory = await Category.create({ category_name, description });
       return res.status(201).json(newCategory);
     }
-    const categories = await Category.findAll();
+    const categories = await Category.findAll({
+      include: [{ model: SubCategory, as: 'sub_categories' }]
+    });
     res.status(200).json(categories);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.handleSubCategories = async (req, res) => {
+  try {
+    if (req.method === 'POST') {
+      const { category_id, name } = req.body;
+      const sub = await SubCategory.create({ category_id, name });
+      return res.status(201).json(sub);
+    }
+    const { category_id } = req.query;
+    const where = category_id ? { category_id } : {};
+    const subs = await SubCategory.findAll({ where });
+    res.status(200).json(subs);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }

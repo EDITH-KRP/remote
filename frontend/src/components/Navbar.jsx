@@ -42,9 +42,11 @@ const Navbar = () => {
   const handleLogout = () => { logout(); navigate('/login'); setMobileOpen(false); };
 
   const navLinks = user ? [
-    { to: '/dashboard',    label: 'Dashboard',    icon: <LayoutDashboard size={14} /> },
-    { to: '/raise-ticket', label: 'New Ticket',   icon: <PlusCircle size={14} /> },
-    { to: '/my-tickets',   label: 'My Tickets',   icon: <TicketIcon size={14} /> },
+    ...(user.role !== 'admin' ? [
+      { to: '/dashboard',    label: 'Dashboard',    icon: <LayoutDashboard size={14} /> },
+      { to: '/raise-ticket', label: 'New Ticket',   icon: <PlusCircle size={14} /> },
+      { to: '/my-tickets',   label: 'My Tickets',   icon: <TicketIcon size={14} /> },
+    ] : []),
     ...(user.role === 'admin' ? [{ to: '/admin', label: 'Admin', icon: <ShieldCheck size={14} /> }] : []),
     { to: '/profile',      label: 'Profile',      icon: <UserIcon size={14} /> },
   ] : [];

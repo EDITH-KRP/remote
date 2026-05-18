@@ -77,6 +77,10 @@ export default function AdminPanel() {
   };
 
   const staff = users.filter(u => u.role === 'support' || u.role === 'admin');
+  
+  const networkDeptUsers = staff.filter(u => u.full_name?.toLowerCase().includes('prajwal'));
+  const windowsDeptUsers = staff.filter(u => u.full_name?.toLowerCase().includes('thanuja'));
+  const otherStaff = staff.filter(u => !u.full_name?.toLowerCase().includes('prajwal') && !u.full_name?.toLowerCase().includes('thanuja'));
 
   const handleExport = () => {
     window.open(`${API_URL}/admin/export?token=${getToken()}`, '_blank');
@@ -296,9 +300,27 @@ export default function AdminPanel() {
                           style={{ fontSize:'0.8rem', padding:'0.42rem 2rem 0.42rem 0.75rem', width:'auto', cursor:'pointer', appearance:'none', WebkitAppearance:'none' }}
                         >
                           <option value="">Assign staff…</option>
-                          {staff.map(u => (
-                            <option key={u.id} value={u.id} style={{ background:'#0c0f1d' }}>{u.full_name}</option>
-                          ))}
+                          {networkDeptUsers.length > 0 && (
+                            <optgroup label="Network Dept">
+                              {networkDeptUsers.map(u => (
+                                <option key={u.id} value={u.id} style={{ background:'#0c0f1d' }}>{u.full_name}</option>
+                              ))}
+                            </optgroup>
+                          )}
+                          {windowsDeptUsers.length > 0 && (
+                            <optgroup label="Windows Dept">
+                              {windowsDeptUsers.map(u => (
+                                <option key={u.id} value={u.id} style={{ background:'#0c0f1d' }}>{u.full_name}</option>
+                              ))}
+                            </optgroup>
+                          )}
+                          {otherStaff.length > 0 && (
+                            <optgroup label="Staff">
+                              {otherStaff.map(u => (
+                                <option key={u.id} value={u.id} style={{ background:'#0c0f1d' }}>{u.full_name}</option>
+                              ))}
+                            </optgroup>
+                          )}
                         </select>
                         <ChevronDown size={12} style={{ position:'absolute', right:'0.5rem', top:'50%', transform:'translateY(-50%)', pointerEvents:'none', color:'var(--text-3)' }} />
                       </div>

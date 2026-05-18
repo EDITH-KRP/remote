@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
-import { Ticket, Users, BarChart2, UserCheck, ShieldCheck, Trash2, ChevronDown, Download } from 'lucide-react';
+import { Ticket, Users, BarChart2, UserCheck, ShieldCheck, Trash2, ChevronDown, Download, X } from 'lucide-react';
 import io from 'socket.io-client';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -255,11 +255,7 @@ export default function AdminPanel() {
               variants={{ hidden:{}, show:{ transition:{ staggerChildren:0.05 } } }}
               style={{ display:'flex', flexDirection:'column', gap:'0.75rem' }}
             >
-              {tickets.map(ticket => {
-                const isExpanded = expandedTicketId === ticket.id;
-                const authorUser = users.find(u => u.id === ticket.user_id) || {};
-                
-                return (
+              {tickets.map(ticket => (
                 <motion.div
                   key={ticket.id}
                   variants={cardVariants}
@@ -273,7 +269,7 @@ export default function AdminPanel() {
                     transition:'all 0.22s ease',
                     cursor: 'pointer',
                   }}
-                  onClick={() => setExpandedTicketId(isExpanded ? null : ticket.id)}
+                  onClick={() => setExpandedTicketId(ticket.id)}
                 >
                   <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:'1.25rem', flexWrap:'wrap' }}>
                     {/* Info col */}
@@ -290,45 +286,10 @@ export default function AdminPanel() {
                       </h3>
                       <p style={{
                         fontSize:'0.8rem', color:'var(--text-3)', lineHeight:1.55,
-                        display: isExpanded ? 'block' : '-webkit-box', WebkitLineClamp: isExpanded ? 'unset' : 2, WebkitBoxOrient:'vertical', overflow:'hidden',
-                        whiteSpace: isExpanded ? 'pre-wrap' : 'normal'
+                        display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden',
                       }}>
                         {ticket.description}
                       </p>
-                      
-                      <AnimatePresence>
-                        {isExpanded && (
-                          <motion.div 
-                            initial={{ opacity: 0, height: 0 }} 
-                            animate={{ opacity: 1, height: 'auto' }} 
-                            exit={{ opacity: 0, height: 0 }}
-                            style={{ overflow: 'hidden' }}
-                          >
-                            <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(99,102,241,0.1)' }}>
-                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-                                <div>
-                                  <h4 style={{ fontSize: '0.8rem', color: 'var(--text-2)', marginBottom: '8px' }}>Ticket Details</h4>
-                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                    <p style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}><strong style={{ color: 'var(--text-2)' }}>Priority:</strong> {ticket.priority || 'N/A'}</p>
-                                    <p style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}><strong style={{ color: 'var(--text-2)' }}>Impact:</strong> {ticket.impact || 'N/A'}</p>
-                                    <p style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}><strong style={{ color: 'var(--text-2)' }}>Urgency:</strong> {ticket.urgency || 'N/A'}</p>
-                                    {ticket.note && <p style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginTop: '4px' }}><strong style={{ color: 'var(--text-2)' }}>Note:</strong> {ticket.note}</p>}
-                                  </div>
-                                </div>
-                                <div>
-                                  <h4 style={{ fontSize: '0.8rem', color: 'var(--text-2)', marginBottom: '8px' }}>User Details</h4>
-                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                    <p style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}><strong style={{ color: 'var(--text-2)' }}>Name:</strong> {authorUser.full_name || ticket.author_name || 'N/A'}</p>
-                                    <p style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}><strong style={{ color: 'var(--text-2)' }}>Email:</strong> {authorUser.email || 'N/A'}</p>
-                                    <p style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}><strong style={{ color: 'var(--text-2)' }}>Phone:</strong> {authorUser.phone || 'N/A'}</p>
-                                    <p style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}><strong style={{ color: 'var(--text-2)' }}>Emp ID:</strong> {authorUser.employee_id || 'N/A'}</p>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
                     </div>
 
                     {/* Controls col */}
@@ -395,7 +356,7 @@ export default function AdminPanel() {
                     </div>
                   </div>
                 </motion.div>
-              )})}
+              ))}
 
               {tickets.length === 0 && (
                 <div style={{
@@ -490,6 +451,80 @@ export default function AdminPanel() {
                 </tbody>
               </table>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {expandedTicketId && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 999,
+              background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem'
+            }}
+            onClick={() => setExpandedTicketId(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              style={{
+                background: 'rgba(10,12,22,0.95)', border: '1px solid rgba(99,102,241,0.2)',
+                borderRadius: 'var(--r-lg)', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto',
+                boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', padding: '2rem', position: 'relative'
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              <button 
+                onClick={() => setExpandedTicketId(null)}
+                style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'transparent', border: 'none', color: 'var(--text-3)', cursor: 'pointer' }}
+              >
+                <X size={20} />
+              </button>
+              
+              {(() => {
+                const ticket = tickets.find(t => t.id === expandedTicketId);
+                if (!ticket) return null;
+                const authorUser = users.find(u => u.id === ticket.user_id) || {};
+                return (
+                  <>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1rem' }}>
+                      <span className="ticket-chip">{ticket.ticket_number}</span>
+                      <span className={statusBadge[ticket.status] || 'badge badge-gray'}>{ticket.status}</span>
+                    </div>
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-1)', marginBottom: '1rem' }}>{ticket.subject}</h2>
+                    <p style={{ fontSize: '0.9rem', color: 'var(--text-2)', lineHeight: 1.6, marginBottom: '2rem', whiteSpace: 'pre-wrap' }}>
+                      {ticket.description}
+                    </p>
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', borderTop: '1px solid rgba(99,102,241,0.1)', paddingTop: '1.5rem' }}>
+                      <div>
+                        <h4 style={{ fontSize: '0.85rem', color: 'var(--text-1)', marginBottom: '12px', fontWeight: 600 }}>Ticket Details</h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          <p style={{ fontSize: '0.8rem', color: 'var(--text-3)' }}><strong style={{ color: 'var(--text-2)' }}>Priority:</strong> {ticket.priority || 'N/A'}</p>
+                          <p style={{ fontSize: '0.8rem', color: 'var(--text-3)' }}><strong style={{ color: 'var(--text-2)' }}>Impact:</strong> {ticket.impact || 'N/A'}</p>
+                          <p style={{ fontSize: '0.8rem', color: 'var(--text-3)' }}><strong style={{ color: 'var(--text-2)' }}>Urgency:</strong> {ticket.urgency || 'N/A'}</p>
+                          {ticket.note && <p style={{ fontSize: '0.8rem', color: 'var(--text-3)' }}><strong style={{ color: 'var(--text-2)' }}>Note:</strong> {ticket.note}</p>}
+                        </div>
+                      </div>
+                      <div>
+                        <h4 style={{ fontSize: '0.85rem', color: 'var(--text-1)', marginBottom: '12px', fontWeight: 600 }}>User Details</h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          <p style={{ fontSize: '0.8rem', color: 'var(--text-3)' }}><strong style={{ color: 'var(--text-2)' }}>Name:</strong> {authorUser.full_name || ticket.author_name || 'N/A'}</p>
+                          <p style={{ fontSize: '0.8rem', color: 'var(--text-3)' }}><strong style={{ color: 'var(--text-2)' }}>Email:</strong> {authorUser.email || 'N/A'}</p>
+                          <p style={{ fontSize: '0.8rem', color: 'var(--text-3)' }}><strong style={{ color: 'var(--text-2)' }}>Phone:</strong> {authorUser.phone || 'N/A'}</p>
+                          <p style={{ fontSize: '0.8rem', color: 'var(--text-3)' }}><strong style={{ color: 'var(--text-2)' }}>Emp ID:</strong> {authorUser.employee_id || 'N/A'}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -74,6 +74,7 @@ export default function AdminPanel() {
   const deleteTicket = async (id) => {
     if (!window.confirm('Delete this ticket?')) return;
     await axios.delete(`${API_URL}/tickets/${id}`, { headers: { Authorization: `Bearer ${getToken()}` } });
+    if (expandedTicketId === id) setExpandedTicketId(null);
     load();
   };
 
@@ -291,69 +292,6 @@ export default function AdminPanel() {
                         {ticket.description}
                       </p>
                     </div>
-
-                    {/* Controls col */}
-                    <div style={{ display:'flex', alignItems:'center', gap:'8px', flexWrap:'wrap', flexShrink:0 }} onClick={e => e.stopPropagation()}>
-                      {/* Assign */}
-                      <div style={{ position:'relative' }}>
-                        <select
-                          defaultValue=""
-                          onChange={e => assignStaff(ticket.id, e.target.value)}
-                          className="input"
-                          style={{ fontSize:'0.8rem', padding:'0.42rem 2rem 0.42rem 0.75rem', width:'auto', cursor:'pointer', appearance:'none', WebkitAppearance:'none' }}
-                        >
-                          <option value="">Assign staff…</option>
-                          {networkDeptUsers.length > 0 && (
-                            <optgroup label="Network Dept">
-                              {networkDeptUsers.map(u => (
-                                <option key={u.id} value={u.id} style={{ background:'#0c0f1d' }}>{u.full_name}</option>
-                              ))}
-                            </optgroup>
-                          )}
-                          {windowsDeptUsers.length > 0 && (
-                            <optgroup label="Windows Dept">
-                              {windowsDeptUsers.map(u => (
-                                <option key={u.id} value={u.id} style={{ background:'#0c0f1d' }}>{u.full_name}</option>
-                              ))}
-                            </optgroup>
-                          )}
-                          {otherStaff.length > 0 && (
-                            <optgroup label="Staff">
-                              {otherStaff.map(u => (
-                                <option key={u.id} value={u.id} style={{ background:'#0c0f1d' }}>{u.full_name}</option>
-                              ))}
-                            </optgroup>
-                          )}
-                        </select>
-                        <ChevronDown size={12} style={{ position:'absolute', right:'0.5rem', top:'50%', transform:'translateY(-50%)', pointerEvents:'none', color:'var(--text-3)' }} />
-                      </div>
-
-                      {/* Status */}
-                      <div style={{ position:'relative' }}>
-                        <select
-                          value={ticket.status}
-                          onChange={e => updateStatus(ticket.id, e.target.value)}
-                          className="input"
-                          style={{ fontSize:'0.8rem', padding:'0.42rem 2rem 0.42rem 0.75rem', width:'auto', cursor:'pointer', appearance:'none', WebkitAppearance:'none' }}
-                        >
-                          {['Open','Assigned','In Progress','Resolved','Closed'].map(s => (
-                            <option key={s} style={{ background:'#0c0f1d' }}>{s}</option>
-                          ))}
-                        </select>
-                        <ChevronDown size={12} style={{ position:'absolute', right:'0.5rem', top:'50%', transform:'translateY(-50%)', pointerEvents:'none', color:'var(--text-3)' }} />
-                      </div>
-
-                      {/* Delete */}
-                      <motion.button
-                        whileHover={{ scale:1.06 }} whileTap={{ scale:0.95 }}
-                        onClick={() => deleteTicket(ticket.id)}
-                        className="btn-danger btn-sm"
-                        title="Delete ticket"
-                        style={{ padding:'0.42rem 0.65rem', borderRadius:'var(--r-sm)', flexShrink:0 }}
-                      >
-                        <Trash2 size={14} />
-                      </motion.button>
-                    </div>
                   </div>
                 </motion.div>
               ))}
@@ -520,6 +458,70 @@ export default function AdminPanel() {
                           <p style={{ fontSize: '0.8rem', color: 'var(--text-3)' }}><strong style={{ color: 'var(--text-2)' }}>Emp ID:</strong> {authorUser.employee_id || 'N/A'}</p>
                         </div>
                       </div>
+                    </div>
+                    
+                    {/* Controls col in Modal */}
+                    <div style={{ display:'flex', alignItems:'center', gap:'12px', flexWrap:'wrap', marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(99,102,241,0.1)' }}>
+                      <h4 style={{ fontSize: '0.85rem', color: 'var(--text-1)', fontWeight: 600, marginRight: 'auto' }}>Actions</h4>
+                      {/* Assign */}
+                      <div style={{ position:'relative' }}>
+                        <select
+                          value={ticket.assigned_staff_id || ""}
+                          onChange={e => assignStaff(ticket.id, e.target.value)}
+                          className="input"
+                          style={{ fontSize:'0.8rem', padding:'0.42rem 2rem 0.42rem 0.75rem', width:'auto', cursor:'pointer', appearance:'none', WebkitAppearance:'none' }}
+                        >
+                          <option value="">Assign staff…</option>
+                          {networkDeptUsers.length > 0 && (
+                            <optgroup label="Network Dept">
+                              {networkDeptUsers.map(u => (
+                                <option key={u.id} value={u.id} style={{ background:'#0c0f1d' }}>{u.full_name}</option>
+                              ))}
+                            </optgroup>
+                          )}
+                          {windowsDeptUsers.length > 0 && (
+                            <optgroup label="Windows Dept">
+                              {windowsDeptUsers.map(u => (
+                                <option key={u.id} value={u.id} style={{ background:'#0c0f1d' }}>{u.full_name}</option>
+                              ))}
+                            </optgroup>
+                          )}
+                          {otherStaff.length > 0 && (
+                            <optgroup label="Staff">
+                              {otherStaff.map(u => (
+                                <option key={u.id} value={u.id} style={{ background:'#0c0f1d' }}>{u.full_name}</option>
+                              ))}
+                            </optgroup>
+                          )}
+                        </select>
+                        <ChevronDown size={12} style={{ position:'absolute', right:'0.5rem', top:'50%', transform:'translateY(-50%)', pointerEvents:'none', color:'var(--text-3)' }} />
+                      </div>
+
+                      {/* Status */}
+                      <div style={{ position:'relative' }}>
+                        <select
+                          value={ticket.status}
+                          onChange={e => updateStatus(ticket.id, e.target.value)}
+                          className="input"
+                          style={{ fontSize:'0.8rem', padding:'0.42rem 2rem 0.42rem 0.75rem', width:'auto', cursor:'pointer', appearance:'none', WebkitAppearance:'none' }}
+                        >
+                          {['Open','Assigned','In Progress','Resolved','Closed'].map(s => (
+                            <option key={s} style={{ background:'#0c0f1d' }}>{s}</option>
+                          ))}
+                        </select>
+                        <ChevronDown size={12} style={{ position:'absolute', right:'0.5rem', top:'50%', transform:'translateY(-50%)', pointerEvents:'none', color:'var(--text-3)' }} />
+                      </div>
+
+                      {/* Delete */}
+                      <motion.button
+                        whileHover={{ scale:1.06 }} whileTap={{ scale:0.95 }}
+                        onClick={() => deleteTicket(ticket.id)}
+                        className="btn-danger btn-sm"
+                        title="Delete ticket"
+                        style={{ padding:'0.42rem 0.65rem', borderRadius:'var(--r-sm)' }}
+                      >
+                        <Trash2 size={14} />
+                      </motion.button>
                     </div>
                   </>
                 );

@@ -37,6 +37,7 @@ export default function AdminPanel() {
   const [reports, setReports] = useState(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab]         = useState('tickets');
+  const [expandedTicketId, setExpandedTicketId] = useState(null);
 
   const load = async (silent = false) => {
     if (!silent) setLoading(true);
@@ -254,7 +255,11 @@ export default function AdminPanel() {
               variants={{ hidden:{}, show:{ transition:{ staggerChildren:0.05 } } }}
               style={{ display:'flex', flexDirection:'column', gap:'0.75rem' }}
             >
-              {tickets.map(ticket => (
+              {tickets.map(ticket => {
+                const isExpanded = expandedTicketId === ticket.id;
+                const authorUser = users.find(u => u.id === ticket.user_id) || {};
+                
+                return (
                 <motion.div
                   key={ticket.id}
                   variants={cardVariants}
@@ -266,7 +271,9 @@ export default function AdminPanel() {
                     padding:'1.125rem 1.375rem',
                     backdropFilter:'blur(20px)',
                     transition:'all 0.22s ease',
+                    cursor: 'pointer',
                   }}
+                  onClick={() => setExpandedTicketId(isExpanded ? null : ticket.id)}
                 >
                   <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:'1.25rem', flexWrap:'wrap' }}>
                     {/* Info col */}
@@ -283,14 +290,49 @@ export default function AdminPanel() {
                       </h3>
                       <p style={{
                         fontSize:'0.8rem', color:'var(--text-3)', lineHeight:1.55,
-                        display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden',
+                        display: isExpanded ? 'block' : '-webkit-box', WebkitLineClamp: isExpanded ? 'unset' : 2, WebkitBoxOrient:'vertical', overflow:'hidden',
+                        whiteSpace: isExpanded ? 'pre-wrap' : 'normal'
                       }}>
                         {ticket.description}
                       </p>
+                      
+                      <AnimatePresence>
+                        {isExpanded && (
+                          <motion.div 
+                            initial={{ opacity: 0, height: 0 }} 
+                            animate={{ opacity: 1, height: 'auto' }} 
+                            exit={{ opacity: 0, height: 0 }}
+                            style={{ overflow: 'hidden' }}
+                          >
+                            <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(99,102,241,0.1)' }}>
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+                                <div>
+                                  <h4 style={{ fontSize: '0.8rem', color: 'var(--text-2)', marginBottom: '8px' }}>Ticket Details</h4>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                    <p style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}><strong style={{ color: 'var(--text-2)' }}>Priority:</strong> {ticket.priority || 'N/A'}</p>
+                                    <p style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}><strong style={{ color: 'var(--text-2)' }}>Impact:</strong> {ticket.impact || 'N/A'}</p>
+                                    <p style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}><strong style={{ color: 'var(--text-2)' }}>Urgency:</strong> {ticket.urgency || 'N/A'}</p>
+                                    {ticket.note && <p style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginTop: '4px' }}><strong style={{ color: 'var(--text-2)' }}>Note:</strong> {ticket.note}</p>}
+                                  </div>
+                                </div>
+                                <div>
+                                  <h4 style={{ fontSize: '0.8rem', color: 'var(--text-2)', marginBottom: '8px' }}>User Details</h4>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                    <p style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}><strong style={{ color: 'var(--text-2)' }}>Name:</strong> {authorUser.full_name || ticket.author_name || 'N/A'}</p>
+                                    <p style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}><strong style={{ color: 'var(--text-2)' }}>Email:</strong> {authorUser.email || 'N/A'}</p>
+                                    <p style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}><strong style={{ color: 'var(--text-2)' }}>Phone:</strong> {authorUser.phone || 'N/A'}</p>
+                                    <p style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}><strong style={{ color: 'var(--text-2)' }}>Emp ID:</strong> {authorUser.employee_id || 'N/A'}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
 
                     {/* Controls col */}
-                    <div style={{ display:'flex', alignItems:'center', gap:'8px', flexWrap:'wrap', flexShrink:0 }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:'8px', flexWrap:'wrap', flexShrink:0 }} onClick={e => e.stopPropagation()}>
                       {/* Assign */}
                       <div style={{ position:'relative' }}>
                         <select
@@ -353,7 +395,7 @@ export default function AdminPanel() {
                     </div>
                   </div>
                 </motion.div>
-              ))}
+              )})}
 
               {tickets.length === 0 && (
                 <div style={{

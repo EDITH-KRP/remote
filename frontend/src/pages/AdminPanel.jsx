@@ -472,27 +472,33 @@ export default function AdminPanel() {
                           style={{ fontSize:'0.8rem', padding:'0.42rem 2rem 0.42rem 0.75rem', width:'auto', cursor:'pointer', appearance:'none', WebkitAppearance:'none' }}
                         >
                           <option value="">Assign staff…</option>
-                          {networkDeptUsers.length > 0 && (
-                            <optgroup label="Network Dept">
-                              {networkDeptUsers.map(u => (
+                          <optgroup label="Network Dept">
+                            {networkDeptUsers.length > 0 ? (
+                              networkDeptUsers.map(u => (
                                 <option key={u.id} value={u.id} style={{ background:'#0c0f1d' }}>{u.full_name}</option>
-                              ))}
-                            </optgroup>
-                          )}
-                          {windowsDeptUsers.length > 0 && (
-                            <optgroup label="Windows Dept">
-                              {windowsDeptUsers.map(u => (
+                              ))
+                            ) : (
+                              <option disabled style={{ background:'#0c0f1d' }}>No members in this group</option>
+                            )}
+                          </optgroup>
+                          <optgroup label="Windows Dept">
+                            {windowsDeptUsers.length > 0 ? (
+                              windowsDeptUsers.map(u => (
                                 <option key={u.id} value={u.id} style={{ background:'#0c0f1d' }}>{u.full_name}</option>
-                              ))}
-                            </optgroup>
-                          )}
-                          {otherStaff.length > 0 && (
-                            <optgroup label="Staff">
-                              {otherStaff.map(u => (
+                              ))
+                            ) : (
+                              <option disabled style={{ background:'#0c0f1d' }}>No members in this group</option>
+                            )}
+                          </optgroup>
+                          <optgroup label="Staff">
+                            {otherStaff.length > 0 ? (
+                              otherStaff.map(u => (
                                 <option key={u.id} value={u.id} style={{ background:'#0c0f1d' }}>{u.full_name}</option>
-                              ))}
-                            </optgroup>
-                          )}
+                              ))
+                            ) : (
+                              <option disabled style={{ background:'#0c0f1d' }}>No other staff available</option>
+                            )}
+                          </optgroup>
                         </select>
                         <ChevronDown size={12} style={{ position:'absolute', right:'0.5rem', top:'50%', transform:'translateY(-50%)', pointerEvents:'none', color:'var(--text-3)' }} />
                       </div>

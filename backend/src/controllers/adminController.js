@@ -1,4 +1,5 @@
 const { Ticket, User, Category, SubCategory } = require('../models');
+const { Op } = require('sequelize');
 
 exports.getUsers = async (req, res) => {
   try {
@@ -21,6 +22,64 @@ exports.updateUserRole = async (req, res) => {
     
     res.status(200).json(user);
   } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.updateUserDepartment = async (req, res) => {
+  try {
+    const { department } = req.body;
+    const validDepts = ['Networking', 'Windows', 'Others'];
+    if (!validDepts.includes(department)) {
+      return res.status(400).json({ message: 'Invalid department. Must be Networking, Windows, or Others.' });
+    }
+    const user = await User.findByPk(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    user.department = department;
+    await user.save();
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Returns staff grouped by department, with availability based on active tickets
+exports.getAvailableStaff = async (req, res) => {
+  try {
+    // Find all staff (support + admin)
+    const allStaff = await User.findAll({
+      where: { role: { [Op.in]: ['support', 'admin'] } },
+      attributes: { exclude: ['password_hash'] },
+    });
+
+    // Find staff IDs who currently have at least one non-closed active ticket
+    const busyTickets = await Ticket.findAll({
+      where: {
+        assigned_staff_id: { [Op.ne]: null },
+        status: { [Op.notIn]: ['Closed'] },
+      },
+      attributes: ['assigned_staff_id'],
+    });
+    const busyStaffIds = new Set(busyTickets.map(t => t.assigned_staff_id));
+
+    const DEPT_GROUPS = ['Networking', 'Windows', 'Others'];
+    const grouped = {};
+    DEPT_GROUPS.forEach(d => (grouped[d] = []));
+
+    allStaff.forEach(u => {
+      const dept = u.department || 'Others';
+      const group = DEPT_GROUPS.includes(dept) ? dept : 'Others';
+      grouped[group].push({
+        id: u.id,
+        full_name: u.full_name,
+        department: dept,
+        available: !busyStaffIds.has(u.id),
+      });
+    });
+
+    res.status(200).json(grouped);
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 };

@@ -86,20 +86,53 @@ exports.getAvailableStaff = async (req, res) => {
 
 exports.assignTicket = async (req, res) => {
   try {
-    const { ticket_id, staff_id } = req.body;
+    const { ticket_id, staff_id, assigned_group } = req.body;
     const ticket = await Ticket.findByPk(ticket_id);
     if (!ticket) return res.status(404).json({ message: 'Ticket not found' });
 
-    ticket.assigned_staff_id = staff_id;
-    ticket.status = 'Assigned';
+    if (assigned_group !== undefined) {
+      ticket.assigned_group = assigned_group || null;
+      // If we change the group, we check if the currently assigned staff belongs to this new group.
+      // If not, we clear the assigned staff.
+      if (ticket.assigned_staff_id && assigned_group) {
+        const staff = await User.findByPk(ticket.assigned_staff_id);
+        if (staff && staff.department !== assigned_group) {
+          ticket.assigned_staff_id = null;
+        }
+      }
+    }
+    
+    if (staff_id !== undefined) {
+      ticket.assigned_staff_id = staff_id || null;
+      if (staff_id) {
+        // If we assign a specific staff member, automatically set the group to their department.
+        const staff = await User.findByPk(staff_id);
+        if (staff) {
+          ticket.assigned_group = staff.department || 'Others';
+        }
+      }
+    }
+
+    // Update ticket status to Assigned if either group or staff is assigned, otherwise if both are cleared set back to Open
+    if (ticket.assigned_group || ticket.assigned_staff_id) {
+      if (ticket.status === 'Open') {
+        ticket.status = 'Assigned';
+      }
+    } else {
+      if (ticket.status === 'Assigned') {
+        ticket.status = 'Open';
+      }
+    }
+
     await ticket.save();
 
     // 🔴 Real-time: broadcast assignment to all clients
     const io = req.app.locals.io;
-    if (io) io.emit('tickets:update', { event: 'updated', ticketId: ticket.id, status: 'Assigned' });
+    if (io) io.emit('tickets:update', { event: 'updated', ticketId: ticket.id, status: ticket.status });
 
     res.status(200).json({ message: 'Ticket assigned successfully', ticket });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 };

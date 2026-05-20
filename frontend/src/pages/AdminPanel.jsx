@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { Ticket, Users, BarChart2, UserCheck, ShieldCheck, Trash2, ChevronDown, Download, X, MoreHorizontal } from "lucide-react";
@@ -69,9 +69,13 @@ export default function AdminPanel() {
     updateStatus(parseInt(draggableId), destination.droppableId);
   };
 
+  const assignGroup = async (ticketId, group) => {
+    await axios.post(`${API_URL}/admin/assign-ticket`, { ticket_id: ticketId, assigned_group: group || null }, { headers:{ Authorization:`Bearer ${getToken()}` } });
+    load();
+  };
+
   const assignStaff = async (ticketId, staffId) => {
-    if (!staffId) return;
-    await axios.post(`${API_URL}/admin/assign-ticket`, { ticket_id:ticketId, staff_id:staffId }, { headers:{ Authorization:`Bearer ${getToken()}` } });
+    await axios.post(`${API_URL}/admin/assign-ticket`, { ticket_id: ticketId, staff_id: staffId || null }, { headers:{ Authorization:`Bearer ${getToken()}` } });
     load();
   };
 
@@ -310,33 +314,43 @@ export default function AdminPanel() {
               {/* Actions */}
               <div style={{ borderTop:"1px solid rgba(99,102,241,0.1)", paddingTop:"1.25rem", display:"flex", flexDirection:"column", gap:"10px", marginTop:"auto" }}>
                 <p style={{ fontSize:"0.78rem", fontWeight:600, color:"var(--text-1)" }}>Actions</p>
-                <div style={{ display:"flex", gap:"8px", flexWrap:"wrap" }}>
-                  {/* Assign */}
-                  <div style={{ position:"relative", flex:1 }}>
-                    <select value={selectedTicket.assigned_staff_id || ""} onChange={e => assignStaff(selectedTicket.id, e.target.value)} className="input" style={{ fontSize:"0.8rem", padding:"0.42rem 2rem 0.42rem 0.75rem", width:"100%", cursor:"pointer", appearance:"none", WebkitAppearance:"none" }}>
-                      <option value="">Assign staff…</option>
-                      {DEPT_GROUPS.map(dept => {
-                        const free = (availableStaff[dept] || []).filter(u => u.available);
-                        return (
-                          <optgroup key={dept} label={`${dept} Dept`}>
-                            {free.length > 0 ? free.map(u => <option key={u.id} value={u.id} style={{ background:"#0c0f1d" }}>{u.full_name}</option>) : <option disabled style={{ background:"#0c0f1d", color:"#666" }}>No free members</option>}
-                          </optgroup>
-                        );
-                      })}
-                    </select>
-                    <ChevronDown size={12} style={{ position:"absolute", right:"0.5rem", top:"50%", transform:"translateY(-50%)", pointerEvents:"none", color:"var(--text-3)" }} />
+                <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>
+                  <div style={{ display:"flex", gap:"8px" }}>
+                    {/* Assign Group */}
+                    <div style={{ position:"relative", flex:1 }}>
+                      <select value={selectedTicket.assigned_group || ""} onChange={e => assignGroup(selectedTicket.id, e.target.value)} className="input" style={{ fontSize:"0.8rem", padding:"0.42rem 2rem 0.42rem 0.75rem", width:"100%", cursor:"pointer", appearance:"none", WebkitAppearance:"none" }}>
+                        <option value="">Assign Group…</option>
+                        {DEPT_GROUPS.map(d => <option key={d} value={d} style={{ background:"#0c0f1d" }}>{d} Dept</option>)}
+                      </select>
+                      <ChevronDown size={12} style={{ position:"absolute", right:"0.5rem", top:"50%", transform:"translateY(-50%)", pointerEvents:"none", color:"var(--text-3)" }} />
+                    </div>
+                    {/* Assigned Staff */}
+                    <div style={{ position:"relative", flex:1 }}>
+                      <select value={selectedTicket.assigned_staff_id || ""} onChange={e => assignStaff(selectedTicket.id, e.target.value)} className="input" style={{ fontSize:"0.8rem", padding:"0.42rem 2rem 0.42rem 0.75rem", width:"100%", cursor:"pointer", appearance:"none", WebkitAppearance:"none" }} disabled={!selectedTicket.assigned_group}>
+                        <option value="">Assigned Staff…</option>
+                        {selectedTicket.assigned_group && (availableStaff[selectedTicket.assigned_group] || [])
+                          .filter(u => u.available || u.id === selectedTicket.assigned_staff_id)
+                          .map(u => (
+                            <option key={u.id} value={u.id} style={{ background:"#0c0f1d" }}>{u.full_name}</option>
+                          ))
+                        }
+                      </select>
+                      <ChevronDown size={12} style={{ position:"absolute", right:"0.5rem", top:"50%", transform:"translateY(-50%)", pointerEvents:"none", color:"var(--text-3)" }} />
+                    </div>
                   </div>
-                  {/* Status */}
-                  <div style={{ position:"relative", flex:1 }}>
-                    <select value={selectedTicket.status} onChange={e => updateStatus(selectedTicket.id, e.target.value)} className="input" style={{ fontSize:"0.8rem", padding:"0.42rem 2rem 0.42rem 0.75rem", width:"100%", cursor:"pointer", appearance:"none", WebkitAppearance:"none" }}>
-                      {STATUSES.map(s => <option key={s} style={{ background:"#0c0f1d" }}>{s}</option>)}
-                    </select>
-                    <ChevronDown size={12} style={{ position:"absolute", right:"0.5rem", top:"50%", transform:"translateY(-50%)", pointerEvents:"none", color:"var(--text-3)" }} />
+                  <div style={{ display:"flex", gap:"8px" }}>
+                    {/* Status */}
+                    <div style={{ position:"relative", flex:1 }}>
+                      <select value={selectedTicket.status} onChange={e => updateStatus(selectedTicket.id, e.target.value)} className="input" style={{ fontSize:"0.8rem", padding:"0.42rem 2rem 0.42rem 0.75rem", width:"100%", cursor:"pointer", appearance:"none", WebkitAppearance:"none" }}>
+                        {STATUSES.map(s => <option key={s} style={{ background:"#0c0f1d" }}>{s}</option>)}
+                      </select>
+                      <ChevronDown size={12} style={{ position:"absolute", right:"0.5rem", top:"50%", transform:"translateY(-50%)", pointerEvents:"none", color:"var(--text-3)" }} />
+                    </div>
+                    {/* Delete */}
+                    <motion.button whileHover={{ scale:1.06 }} whileTap={{ scale:0.94 }} onClick={() => deleteTicket(selectedTicket.id)} className="btn-danger btn-sm" style={{ padding:"0.42rem 0.65rem", borderRadius:"var(--r-sm)" }}>
+                      <Trash2 size={14} />
+                    </motion.button>
                   </div>
-                  {/* Delete */}
-                  <motion.button whileHover={{ scale:1.06 }} whileTap={{ scale:0.94 }} onClick={() => deleteTicket(selectedTicket.id)} className="btn-danger btn-sm" style={{ padding:"0.42rem 0.65rem", borderRadius:"var(--r-sm)" }}>
-                    <Trash2 size={14} />
-                  </motion.button>
                 </div>
               </div>
             </motion.div>

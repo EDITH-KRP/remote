@@ -118,6 +118,10 @@ const Ticket = sequelize.define('Ticket', {
     type: DataTypes.INTEGER,
     allowNull: true
   },
+  assigned_group: {
+    type: DataTypes.STRING(50),
+    allowNull: true
+  },
   subject: {
     type: DataTypes.STRING(200),
     allowNull: false

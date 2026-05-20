@@ -105,6 +105,7 @@ export default function AdminPanel() {
 
   const selectedTicket = tickets.find(t => t.id === selectedId);
   const selectedAuthor = selectedTicket ? (users.find(u => u.id === selectedTicket.user_id) || {}) : {};
+  const activeGroup = selectedTicket ? (selectedTicket.assigned_group || (selectedTicket.assigned_staff_id ? (users.find(u => u.id === selectedTicket.assigned_staff_id)?.department || "Others") : "")) : "";
 
   if (loading) return (
     <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:"58vh", gap:"1rem" }}>
@@ -325,7 +326,7 @@ export default function AdminPanel() {
                   <div style={{ display:"flex", gap:"8px" }}>
                     {/* Assign Group */}
                     <div style={{ position:"relative", flex:1 }}>
-                      <select value={selectedTicket.assigned_group || ""} onChange={e => assignGroup(selectedTicket.id, e.target.value)} className="input" style={{ fontSize:"0.8rem", padding:"0.42rem 2rem 0.42rem 0.75rem", width:"100%", cursor:"pointer", appearance:"none", WebkitAppearance:"none" }}>
+                      <select value={activeGroup} onChange={e => assignGroup(selectedTicket.id, e.target.value)} className="input" style={{ fontSize:"0.8rem", padding:"0.42rem 2rem 0.42rem 0.75rem", width:"100%", cursor:"pointer", appearance:"none", WebkitAppearance:"none" }}>
                         <option value="">Assign Group…</option>
                         {DEPT_GROUPS.map(d => <option key={d} value={d} style={{ background:"#0c0f1d" }}>{d} Dept</option>)}
                       </select>
@@ -333,32 +334,42 @@ export default function AdminPanel() {
                     </div>
                     {/* Assigned Staff */}
                     <div style={{ position:"relative", flex:1 }}>
-                      <select value={selectedTicket.assigned_staff_id || ""} onChange={e => assignStaff(selectedTicket.id, e.target.value)} className="input" style={{ fontSize:"0.8rem", padding:"0.42rem 2rem 0.42rem 0.75rem", width:"100%", cursor:"pointer", appearance:"none", WebkitAppearance:"none" }} disabled={!selectedTicket.assigned_group}>
+                      <select value={selectedTicket.assigned_staff_id || ""} onChange={e => assignStaff(selectedTicket.id, e.target.value)} className="input" style={{ fontSize:"0.8rem", padding:"0.42rem 2rem 0.42rem 0.75rem", width:"100%", cursor:"pointer", appearance:"none", WebkitAppearance:"none" }} disabled={!activeGroup}>
                         <option value="">Assigned Staff…</option>
-                        {selectedTicket.assigned_group && (availableStaff[selectedTicket.assigned_group] || [])
-                          .filter(u => u.available || u.id === selectedTicket.assigned_staff_id)
-                          .map(u => (
+                        {activeGroup && (() => {
+                          const members = (availableStaff[activeGroup] || [])
+                            .filter(u => u.available || u.id === selectedTicket.assigned_staff_id);
+                          if (members.length === 0) {
+                            return <option disabled style={{ background:"#0c0f1d", color:"#666" }}>No staff in group</option>;
+                          }
+                          return members.map(u => (
                             <option key={u.id} value={u.id} style={{ background:"#0c0f1d" }}>{u.full_name}</option>
-                          ))
-                        }
+                          ));
+                        })()}
                       </select>
                       <ChevronDown size={12} style={{ position:"absolute", right:"0.5rem", top:"50%", transform:"translateY(-50%)", pointerEvents:"none", color:"var(--text-3)" }} />
                     </div>
                   </div>
-                  <div style={{ display:"flex", gap:"8px" }}>
-                    {/* Status */}
-                    <div style={{ position:"relative", flex:1 }}>
-                      <select value={selectedTicket.status} onChange={e => updateStatus(selectedTicket.id, e.target.value)} className="input" style={{ fontSize:"0.8rem", padding:"0.42rem 2rem 0.42rem 0.75rem", width:"100%", cursor:"pointer", appearance:"none", WebkitAppearance:"none" }}>
-                        {STATUSES.map(s => {
-                          const isSystem = s === "Open" || s === "Assigned";
-                          return (
-                            <option key={s} value={s} disabled={isSystem} style={{ background:"#0c0f1d", color: isSystem ? "#666" : "var(--text-1)" }}>
-                              {s} {isSystem ? "(System)" : ""}
-                            </option>
-                          );
-                        })}
-                      </select>
-                      <ChevronDown size={12} style={{ position:"absolute", right:"0.5rem", top:"50%", transform:"translateY(-50%)", pointerEvents:"none", color:"var(--text-3)" }} />
+                  <div style={{ display:"flex", gap:"8px", alignItems:"center" }}>
+                    {/* Status (Read-Only) */}
+                    <div style={{ flex:1 }}>
+                      <div style={{ 
+                        fontSize:"0.8rem", 
+                        padding:"0.42rem 0.85rem", 
+                        width:"100%", 
+                        background:"rgba(255,255,255,0.03)", 
+                        border:"1px solid rgba(255,255,255,0.06)", 
+                        borderRadius:"var(--r-sm)", 
+                        color:"var(--text-2)",
+                        fontWeight:600,
+                        display:"flex",
+                        alignItems:"center",
+                        gap:"8px",
+                        height:"35.2px"
+                      }}>
+                        <div style={{ width:"6px", height:"6px", borderRadius:"50%", background:statusColors[selectedTicket.status] || "#6b7280" }} />
+                        <span>Status: <strong style={{ color:statusColors[selectedTicket.status] }}>{selectedTicket.status}</strong></span>
+                      </div>
                     </div>
                     {/* Delete */}
                     <motion.button whileHover={{ scale:1.06 }} whileTap={{ scale:0.94 }} onClick={() => deleteTicket(selectedTicket.id)} className="btn-danger btn-sm" style={{ padding:"0.42rem 0.65rem", borderRadius:"var(--r-sm)" }}>

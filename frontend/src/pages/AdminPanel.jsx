@@ -66,34 +66,41 @@ export default function AdminPanel() {
   const onDragEnd = ({ destination, source, draggableId }) => {
     if (!destination) return;
     if (destination.droppableId === source.droppableId && destination.index === source.index) return;
+    
+    // System-managed statuses shouldn't be manually targeted by dragging
+    if (destination.droppableId === "Open" || destination.droppableId === "Assigned") {
+      alert("Statuses 'Open' and 'Assigned' are managed by the system. Use the actions panel to assign groups/staff.");
+      return;
+    }
+    
     updateStatus(parseInt(draggableId), destination.droppableId);
   };
 
   const assignGroup = async (ticketId, group) => {
     await axios.post(`${API_URL}/admin/assign-ticket`, { ticket_id: ticketId, assigned_group: group || null }, { headers:{ Authorization:`Bearer ${getToken()}` } });
-    load();
+    load(true);
   };
 
   const assignStaff = async (ticketId, staffId) => {
     await axios.post(`${API_URL}/admin/assign-ticket`, { ticket_id: ticketId, staff_id: staffId || null }, { headers:{ Authorization:`Bearer ${getToken()}` } });
-    load();
+    load(true);
   };
 
   const deleteTicket = async (id) => {
     if (!window.confirm("Delete this ticket?")) return;
     await axios.delete(`${API_URL}/tickets/${id}`, { headers:{ Authorization:`Bearer ${getToken()}` } });
     if (selectedId === id) setSelectedId(null);
-    load();
+    load(true);
   };
 
   const updateUserRole = async (userId, role) => {
     await axios.patch(`${API_URL}/admin/users/${userId}/role`, { role }, { headers:{ Authorization:`Bearer ${getToken()}` } });
-    load();
+    load(true);
   };
 
   const updateUserDept = async (userId, department) => {
     await axios.patch(`${API_URL}/admin/users/${userId}/department`, { department }, { headers:{ Authorization:`Bearer ${getToken()}` } });
-    load();
+    load(true);
   };
 
   const selectedTicket = tickets.find(t => t.id === selectedId);
@@ -342,7 +349,14 @@ export default function AdminPanel() {
                     {/* Status */}
                     <div style={{ position:"relative", flex:1 }}>
                       <select value={selectedTicket.status} onChange={e => updateStatus(selectedTicket.id, e.target.value)} className="input" style={{ fontSize:"0.8rem", padding:"0.42rem 2rem 0.42rem 0.75rem", width:"100%", cursor:"pointer", appearance:"none", WebkitAppearance:"none" }}>
-                        {STATUSES.map(s => <option key={s} style={{ background:"#0c0f1d" }}>{s}</option>)}
+                        {STATUSES.map(s => {
+                          const isSystem = s === "Open" || s === "Assigned";
+                          return (
+                            <option key={s} value={s} disabled={isSystem} style={{ background:"#0c0f1d", color: isSystem ? "#666" : "var(--text-1)" }}>
+                              {s} {isSystem ? "(System)" : ""}
+                            </option>
+                          );
+                        })}
                       </select>
                       <ChevronDown size={12} style={{ position:"absolute", right:"0.5rem", top:"50%", transform:"translateY(-50%)", pointerEvents:"none", color:"var(--text-3)" }} />
                     </div>

@@ -47,8 +47,37 @@ if (process.env.FRONTEND_URL) {
   allowedOrigins.push(cleanUrl + '/');
 }
 
+const isOriginAllowed = (origin) => {
+  if (!origin) return true;
+  const cleanOrigin = origin.trim().replace(/\/$/, '');
+  
+  if (allowedOrigins.includes(cleanOrigin) || allowedOrigins.includes(cleanOrigin + '/')) {
+    return true;
+  }
+  
+  // Robust check to automatically allow any remotedesk* Vercel subdomains.
+  // This automatically resolves spelling discrepancies (supprot vs support) and preview URLs.
+  if (cleanOrigin.startsWith('https://remotedesk') && cleanOrigin.endsWith('.vercel.app')) {
+    return true;
+  }
+  
+  if (process.env.FRONTEND_URL) {
+    const envUrl = process.env.FRONTEND_URL.trim().replace(/\/$/, '');
+    if (cleanOrigin === envUrl || cleanOrigin === envUrl + '/') {
+      return true;
+    }
+  }
+  return false;
+};
+
 app.use(cors({
-  origin: allowedOrigins,
+  origin: (origin, callback) => {
+    if (isOriginAllowed(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, false);
+    }
+  },
   credentials: true
 }));
 app.use(express.json());
@@ -62,13 +91,13 @@ const csrfGuard = (req, res, next) => {
   const origin = req.headers.origin;
   const referer = req.headers.referer;
   
-  if (origin && !allowedOrigins.includes(origin)) {
+  if (origin && !isOriginAllowed(origin)) {
     return res.status(403).json({ message: 'CSRF Blocked: Insecure request origin.' });
   }
   if (!origin && referer) {
     try {
       const refererOrigin = new URL(referer).origin;
-      if (!allowedOrigins.includes(refererOrigin) && !allowedOrigins.includes(refererOrigin + '/')) {
+      if (!isOriginAllowed(refererOrigin)) {
         return res.status(403).json({ message: 'CSRF Blocked: Insecure request referer.' });
       }
     } catch (e) {

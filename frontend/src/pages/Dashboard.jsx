@@ -7,7 +7,7 @@ import {
 } from 'recharts';
 import { Ticket, Clock, CheckCircle, Activity, Plus, TrendingUp, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import io from 'socket.io-client';
+import socket from '../services/socket';
 
 /* ── helpers ─────────────────────────────────── */
 const statusBadge = {
@@ -149,12 +149,10 @@ const Dashboard = () => {
 
   useEffect(() => {
     loadData();
-    const socketUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '') : 'http://localhost:5000';
-    const socket = io(socketUrl);
-    socket.on('tickets:update', () => {
-      loadData();
-    });
-    return () => socket.disconnect();
+    socket.on('tickets:update', loadData);
+    return () => {
+      socket.off('tickets:update', loadData);
+    };
   }, []);
 
   if (loading) return (

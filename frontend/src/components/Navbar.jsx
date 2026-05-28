@@ -8,7 +8,7 @@ import {
   PlusCircle, ShieldCheck, Menu, X, Zap, Bell, User as UserIcon, Moon, Sun
 } from 'lucide-react';
 import api from '../services/api';
-import io from 'socket.io-client';
+import socket from '../services/socket';
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
@@ -22,12 +22,15 @@ const Navbar = () => {
   React.useEffect(() => {
     if (user) {
       api.get('/notifications').then(res => setNotifications(res.data)).catch(() => {});
-      const socketUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '') : 'http://localhost:5000';
-      const socket = io(socketUrl);
-      socket.on(`notification:${user.id}`, (data) => {
+      
+      const handleNotification = (data) => {
         setNotifications(prev => [{ id: Date.now(), ...data, is_read: false }, ...prev]);
-      });
-      return () => socket.disconnect();
+      };
+
+      socket.on(`notification:${user.id}`, handleNotification);
+      return () => {
+        socket.off(`notification:${user.id}`, handleNotification);
+      };
     }
   }, [user]);
 

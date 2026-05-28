@@ -12,6 +12,7 @@ import Navbar from './components/Navbar';
 import Profile from './pages/Profile';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import Home from './pages/Home';
 import { Toaster } from 'react-hot-toast';
 
 const PrivateRoute = ({ children, adminOnly = false }) => {
@@ -56,7 +57,7 @@ function App() {
               paddingRight: '1.5rem',
             }}>
               <Routes>
-                <Route path="/"             element={<Navigate to="/dashboard" />} />
+                <Route path="/"             element={<Home />} />
                 <Route path="/login"        element={<Login />} />
                 <Route path="/register"     element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />

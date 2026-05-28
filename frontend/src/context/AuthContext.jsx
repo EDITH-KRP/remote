@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import api from '../services/api';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -11,36 +12,52 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const token = localStorage.getItem('access_token');
-      if (token) {
-        try {
-          const res = await axios.get(`${API_URL}/auth/profile`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          setUser(res.data);
-        } catch {
-          localStorage.removeItem('access_token');
+      try {
+        // Try credentials-based cookie authentication first
+        const res = await api.get('/auth/profile');
+        setUser(res.data);
+      } catch (err) {
+        // Fallback to localStorage bearer token if cookie check fails
+        const token = localStorage.getItem('access_token');
+        if (token) {
+          try {
+            const res = await axios.get(`${API_URL}/auth/profile`, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            setUser(res.data);
+          } catch {
+            localStorage.removeItem('access_token');
+          }
         }
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     fetchUser();
   }, []);
 
   const login = async (email, password) => {
-    const res = await axios.post(`${API_URL}/auth/login`, { email, password });
-    localStorage.setItem('access_token', res.data.access_token);
+    const res = await api.post('/auth/login', { email, password });
+    if (res.data.access_token) {
+      localStorage.setItem('access_token', res.data.access_token);
+    }
     setUser(res.data.user);
     return res.data.user;
   };
 
   const register = async (userData) => {
-    await axios.post(`${API_URL}/auth/register`, userData);
+    await api.post('/auth/register', userData);
   };
 
-  const logout = () => {
-    localStorage.removeItem('access_token');
-    setUser(null);
+  const logout = async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch (err) {
+      console.warn('Backend cookie clear failed:', err);
+    } finally {
+      localStorage.removeItem('access_token');
+      setUser(null);
+    }
   };
 
   return (

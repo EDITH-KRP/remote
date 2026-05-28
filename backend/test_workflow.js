@@ -14,11 +14,13 @@ async function testWorkflow() {
         full_name: 'Test Customer',
         email: TEST_EMAIL,
         password: 'password123',
-        role: 'user'
+        employee_id: 'EMP-999',
+        alternate_email: 'alt_test@example.com',
+        phone: '1234567890'
       });
       console.log('✅ User registered successfully!');
     } catch (e) {
-      if (e.response && e.response.status === 400) {
+      if (e.response && e.response.status === 400 && e.response.data?.message?.includes('already')) {
         console.log('⚠️ User already exists. Proceeding...');
       } else {
         throw e;

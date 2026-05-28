@@ -40,9 +40,37 @@ io.on('connection', (socket) => {
 
 // ── Middleware ───────────────────────────────────────────────────────────────
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:5000', process.env.FRONTEND_URL],
+  credentials: true
+}));
 app.use(express.json());
 app.use('/uploads', express.static(require('path').join(__dirname, '../uploads')));
+
+// Anti-CSRF Origin Guard
+const csrfGuard = (req, res, next) => {
+  if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
+    return next();
+  }
+  const origin = req.headers.origin;
+  const referer = req.headers.referer;
+  const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:5000', process.env.FRONTEND_URL];
+  if (origin && !allowedOrigins.includes(origin)) {
+    return res.status(403).json({ message: 'CSRF Blocked: Insecure request origin.' });
+  }
+  if (!origin && referer) {
+    try {
+      const refererOrigin = new URL(referer).origin;
+      if (!allowedOrigins.includes(refererOrigin)) {
+        return res.status(403).json({ message: 'CSRF Blocked: Insecure request referer.' });
+      }
+    } catch (e) {
+      return res.status(403).json({ message: 'CSRF Blocked: Invalid referer header.' });
+    }
+  }
+  next();
+};
+app.use('/api', csrfGuard);
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -51,6 +79,18 @@ const apiLimiter = rateLimit({
   legacyHeaders: false,
 });
 app.use('/api', apiLimiter);
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 15, // Limit each IP to 15 auth attempts per 15 minutes
+  message: { message: 'Too many authentication attempts. Please try again after 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
+app.use('/api/auth/forgot-password', authLimiter);
+app.use('/api/auth/reset-password', authLimiter);
 
 // ── Routes ───────────────────────────────────────────────────────────────────
 app.use('/api/auth',    authRoutes);

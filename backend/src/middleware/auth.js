@@ -1,7 +1,21 @@
 const jwt = require('jsonwebtoken');
 
+const parseCookies = (cookieHeader) => {
+  if (!cookieHeader) return {};
+  return cookieHeader.split(';').reduce((acc, cookie) => {
+    const [key, ...value] = cookie.split('=');
+    acc[key.trim()] = decodeURIComponent(value.join('=').trim());
+    return acc;
+  }, {});
+};
+
 const authMiddleware = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
+  let token = req.headers.authorization?.split(' ')[1];
+  
+  if (!token && req.headers.cookie) {
+    const cookies = parseCookies(req.headers.cookie);
+    token = cookies.token;
+  }
   
   if (!token) {
     return res.status(401).json({ message: 'Authentication required' });

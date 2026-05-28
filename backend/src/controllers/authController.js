@@ -15,10 +15,22 @@ const transporter = nodemailer.createTransport({
 
 exports.register = async (req, res) => {
   try {
-    const { full_name, email, password, role, employee_id, alternate_email, phone } = req.body;
+    const { full_name, email, password, employee_id, alternate_email, phone } = req.body;
     
     if (!employee_id || !alternate_email || !phone) {
       return res.status(400).json({ message: 'Employee ID, Alternate Email, and Phone are required' });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+      return res.status(400).json({ message: 'Invalid primary email format' });
+    }
+    if (alternate_email && !emailRegex.test(alternate_email)) {
+      return res.status(400).json({ message: 'Invalid alternate email format' });
+    }
+
+    if (!password || password.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters long' });
     }
 
     const existingUser = await User.findOne({ where: { email } });
@@ -29,11 +41,14 @@ exports.register = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const password_hash = await bcrypt.hash(password, salt);
 
+    // Hardcode public self-registration to 'user' role to prevent Privilege Escalation
+    const assignedRole = 'user';
+
     await User.create({
       full_name,
       email,
       password_hash,
-      role: role || 'user',
+      role: assignedRole,
       employee_id,
       alternate_email,
       phone
@@ -41,7 +56,7 @@ exports.register = async (req, res) => {
 
     res.status(201).json({ message: 'User created successfully' });
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -67,6 +82,13 @@ exports.login = async (req, res) => {
 
     const userObj = user.toJSON();
     delete userObj.password_hash;
+
+    res.cookie('token', access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000 // 1 day
+    });
 
     res.status(200).json({
       access_token,
@@ -156,6 +178,19 @@ exports.updateProfile = async (req, res) => {
     const userObj = user.toJSON();
     delete userObj.password_hash;
     res.status(200).json(userObj);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.logout = async (req, res) => {
+  try {
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax'
+    });
+    res.status(200).json({ message: 'Logged out successfully' });
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }

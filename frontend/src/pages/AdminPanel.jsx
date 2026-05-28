@@ -336,13 +336,14 @@ export default function AdminPanel() {
                       <select value={selectedTicket.assigned_staff_id || ""} onChange={e => assignStaff(selectedTicket.id, e.target.value)} className="input" style={{ fontSize:"0.8rem", padding:"0.42rem 2rem 0.42rem 0.75rem", width:"100%", cursor:"pointer", appearance:"none", WebkitAppearance:"none" }} disabled={!activeGroup}>
                         <option value="">Assigned Staff…</option>
                         {activeGroup && (() => {
-                          const members = (availableStaff[activeGroup] || [])
-                            .filter(u => u.available || u.id === selectedTicket.assigned_staff_id);
+                          const members = availableStaff[activeGroup] || [];
                           if (members.length === 0) {
                             return <option disabled style={{ background:"#0c0f1d", color:"#666" }}>No staff in group</option>;
                           }
                           return members.map(u => (
-                            <option key={u.id} value={u.id} style={{ background:"#0c0f1d" }}>{u.full_name}</option>
+                            <option key={u.id} value={u.id} style={{ background:"#0c0f1d" }}>
+                              {u.full_name} {u.available ? "🟢" : "🟡 (Busy)"}
+                            </option>
                           ));
                         })()}
                       </select>

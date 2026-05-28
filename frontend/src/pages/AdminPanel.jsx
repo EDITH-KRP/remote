@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import axios from "axios";
+import api from "../services/api";
 import { Ticket, Users, BarChart2, UserCheck, ShieldCheck, Trash2, ChevronDown, Download, X, MoreHorizontal } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import io from "socket.io-client";
@@ -37,12 +37,11 @@ export default function AdminPanel() {
   const load = async (silent = false) => {
     if (!silent) setLoading(true);
     try {
-      const h = { headers:{ Authorization:`Bearer ${getToken()}` } };
       const [tR,uR,rR,aR] = await Promise.all([
-        axios.get(`${API_URL}/tickets`, h),
-        axios.get(`${API_URL}/admin/users`, h),
-        axios.get(`${API_URL}/admin/reports`, h),
-        axios.get(`${API_URL}/admin/available-staff`, h),
+        api.get('/tickets'),
+        api.get('/admin/users'),
+        api.get('/admin/reports'),
+        api.get('/admin/available-staff'),
       ]);
       setTickets(tR.data); setUsers(uR.data); setReports(rR.data); setAvailableStaff(aR.data);
     } catch(e) { console.error(e); }
@@ -51,7 +50,7 @@ export default function AdminPanel() {
 
   useEffect(() => {
     load();
-    const base = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/,"") : "http://localhost:5000";
+    const base = import.meta.env.VITE_SOCKET_URL || (import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/,"") : "http://localhost:5000");
     const s = io(base);
     s.on("tickets:update", () => load(true));
     return () => s.disconnect();
@@ -59,7 +58,7 @@ export default function AdminPanel() {
 
   const updateStatus = async (id, status) => {
     setTickets(prev => prev.map(t => t.id===id ? {...t, status} : t));
-    await axios.put(`${API_URL}/tickets/${id}`, { status }, { headers:{ Authorization:`Bearer ${getToken()}` } });
+    await api.put(`/tickets/${id}`, { status });
     load(true);
   };
 
@@ -77,29 +76,29 @@ export default function AdminPanel() {
   };
 
   const assignGroup = async (ticketId, group) => {
-    await axios.post(`${API_URL}/admin/assign-ticket`, { ticket_id: ticketId, assigned_group: group || null }, { headers:{ Authorization:`Bearer ${getToken()}` } });
+    await api.post('/admin/assign-ticket', { ticket_id: ticketId, assigned_group: group || null });
     load(true);
   };
 
   const assignStaff = async (ticketId, staffId) => {
-    await axios.post(`${API_URL}/admin/assign-ticket`, { ticket_id: ticketId, staff_id: staffId || null }, { headers:{ Authorization:`Bearer ${getToken()}` } });
+    await api.post('/admin/assign-ticket', { ticket_id: ticketId, staff_id: staffId || null });
     load(true);
   };
 
   const deleteTicket = async (id) => {
     if (!window.confirm("Delete this ticket?")) return;
-    await axios.delete(`${API_URL}/tickets/${id}`, { headers:{ Authorization:`Bearer ${getToken()}` } });
+    await api.delete(`/tickets/${id}`);
     if (selectedId === id) setSelectedId(null);
     load(true);
   };
 
   const updateUserRole = async (userId, role) => {
-    await axios.patch(`${API_URL}/admin/users/${userId}/role`, { role }, { headers:{ Authorization:`Bearer ${getToken()}` } });
+    await api.patch(`/admin/users/${userId}/role`, { role });
     load(true);
   };
 
   const updateUserDept = async (userId, department) => {
-    await axios.patch(`${API_URL}/admin/users/${userId}/department`, { department }, { headers:{ Authorization:`Bearer ${getToken()}` } });
+    await api.patch(`/admin/users/${userId}/department`, { department });
     load(true);
   };
 

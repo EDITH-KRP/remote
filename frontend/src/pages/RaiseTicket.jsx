@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
+import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import { Send, Tag, AlertCircle, CheckCircle2, Flame, ChevronDown, FileText, AlignLeft, User, Briefcase, Mail, Clock } from 'lucide-react';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-const getToken = () => localStorage.getItem('access_token');
 
 const priorityMatrix = {
   'High-High': 'Critical', 'High-Medium': 'High', 'High-Low': 'Medium',
@@ -43,16 +40,16 @@ export default function RaiseTicket({ onSuccess }) {
   const [charCount, setCharCount] = useState(0);
 
   useEffect(() => {
-    axios.get(`${API_URL}/tickets/categories`, {
-      headers: { Authorization: `Bearer ${getToken()}` }
-    }).then(r => setCategories(r.data)).catch(() => {});
+    api.get('/tickets/categories')
+      .then(r => setCategories(r.data))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
     if (form.category_id) {
-      axios.get(`${API_URL}/tickets/sub-categories?category_id=${form.category_id}`, {
-        headers: { Authorization: `Bearer ${getToken()}` }
-      }).then(r => setSubCategories(r.data)).catch(() => {});
+      api.get(`/tickets/sub-categories?category_id=${form.category_id}`)
+        .then(r => setSubCategories(r.data))
+        .catch(() => {});
     } else {
       setSubCategories([]);
     }
@@ -75,9 +72,8 @@ export default function RaiseTicket({ onSuccess }) {
       if (form.sub_category_id) formData.append('sub_category_id', form.sub_category_id);
       if (attachment) formData.append('attachment', attachment);
 
-      const res = await axios.post(`${API_URL}/tickets/create`, formData, {
+      const res = await api.post('/tickets/create', formData, {
         headers: { 
-          Authorization: `Bearer ${getToken()}`,
           'Content-Type': 'multipart/form-data'
         }
       });

@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
+import api from '../services/api';
 import { X, Clock, MessageSquare, Star, ChevronRight, TicketIcon, Paperclip, Send, Search, Filter } from 'lucide-react';
 import io from 'socket.io-client';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-const getToken = () => localStorage.getItem('access_token');
 
 const statusBadge = {
   Open:          'badge badge-blue',
@@ -61,9 +58,7 @@ export default function MyTickets() {
   const loadTickets = async (silent = false) => {
     if (!silent) setLoading(true);
     try {
-      const r = await axios.get(`${API_URL}/tickets`, {
-        headers: { Authorization: `Bearer ${getToken()}` }
-      });
+      const r = await api.get('/tickets');
       setTickets(r.data);
     } catch (err) {}
     if (!silent) setLoading(false);
@@ -71,7 +66,7 @@ export default function MyTickets() {
 
   useEffect(() => {
     loadTickets();
-    const socketUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '') : 'http://localhost:5000';
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || (import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '') : 'http://localhost:5000');
     const socket = io(socketUrl);
     socket.on('tickets:update', () => {
       loadTickets(true);
@@ -82,8 +77,8 @@ export default function MyTickets() {
 
   const fetchDetail = async (id, silent = false) => {
     const [tRes, cRes] = await Promise.all([
-      axios.get(`${API_URL}/tickets/${id}`, { headers: { Authorization: `Bearer ${getToken()}` } }),
-      axios.get(`${API_URL}/tickets/${id}/comments`, { headers: { Authorization: `Bearer ${getToken()}` } })
+      api.get(`/tickets/${id}`),
+      api.get(`/tickets/${id}/comments`)
     ]);
     setSelected(tRes.data);
     setComments(cRes.data);
@@ -93,17 +88,13 @@ export default function MyTickets() {
   const handleAddComment = async (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
-    const res = await axios.post(`${API_URL}/tickets/${selected.id}/comments`, { body: newComment }, {
-      headers: { Authorization: `Bearer ${getToken()}` }
-    });
+    const res = await api.post(`/tickets/${selected.id}/comments`, { body: newComment });
     setComments([...comments, res.data]);
     setNewComment('');
   };
 
   const submitFeedback = async () => {
-    await axios.post(`${API_URL}/tickets/${selected.id}/feedback`, feedback, {
-      headers: { Authorization: `Bearer ${getToken()}` }
-    });
+    await api.post(`/tickets/${selected.id}/feedback`, feedback);
     setFeedbackSent(true);
   };
 

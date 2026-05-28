@@ -1,8 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
-import axios from 'axios';
 import api from '../services/api';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export const AuthContext = createContext();
 
@@ -13,22 +11,10 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        // Try credentials-based cookie authentication first
         const res = await api.get('/auth/profile');
         setUser(res.data);
       } catch (err) {
-        // Fallback to localStorage bearer token if cookie check fails
-        const token = localStorage.getItem('access_token');
-        if (token) {
-          try {
-            const res = await axios.get(`${API_URL}/auth/profile`, {
-              headers: { Authorization: `Bearer ${token}` }
-            });
-            setUser(res.data);
-          } catch {
-            localStorage.removeItem('access_token');
-          }
-        }
+        localStorage.removeItem('access_token');
       } finally {
         setLoading(false);
       }

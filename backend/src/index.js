@@ -40,8 +40,15 @@ io.on('connection', (socket) => {
 
 // ── Middleware ───────────────────────────────────────────────────────────────
 app.use(helmet());
+const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:5000'];
+if (process.env.FRONTEND_URL) {
+  const cleanUrl = process.env.FRONTEND_URL.trim().replace(/\/$/, '');
+  allowedOrigins.push(cleanUrl);
+  allowedOrigins.push(cleanUrl + '/');
+}
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:5000', process.env.FRONTEND_URL],
+  origin: allowedOrigins,
   credentials: true
 }));
 app.use(express.json());
@@ -54,14 +61,14 @@ const csrfGuard = (req, res, next) => {
   }
   const origin = req.headers.origin;
   const referer = req.headers.referer;
-  const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:5000', process.env.FRONTEND_URL];
+  
   if (origin && !allowedOrigins.includes(origin)) {
     return res.status(403).json({ message: 'CSRF Blocked: Insecure request origin.' });
   }
   if (!origin && referer) {
     try {
       const refererOrigin = new URL(referer).origin;
-      if (!allowedOrigins.includes(refererOrigin)) {
+      if (!allowedOrigins.includes(refererOrigin) && !allowedOrigins.includes(refererOrigin + '/')) {
         return res.status(403).json({ message: 'CSRF Blocked: Insecure request referer.' });
       }
     } catch (e) {

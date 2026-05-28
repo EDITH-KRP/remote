@@ -9,7 +9,7 @@ const fields = [
   { key: 'employee_id',     label: 'Employee ID',           type: 'text',     placeholder: 'EMP123',           Icon: Briefcase, required: true  },
   { key: 'email',           label: 'Email Address',         type: 'email',    placeholder: 'jane@company.com', Icon: Mail,      required: true  },
   { key: 'alternate_email', label: 'Alternate Email',       type: 'email',    placeholder: 'jane.alt@gmail.com', Icon: Mail,    required: true  },
-  { key: 'password',        label: 'Password',              type: 'password', placeholder: '••••••••',         Icon: Lock,      required: true  },
+  { key: 'password',        label: 'Password',              type: 'password', placeholder: '••••••••',         Icon: Lock,      required: true,  hint: 'Minimum 8 characters' },
   { key: 'phone',           label: 'Phone Number',          type: 'tel',      placeholder: '+91 98765 43210',  Icon: Phone,     required: true },
 ];
 
@@ -123,7 +123,7 @@ export default function Register() {
             )}
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.125rem' }}>
-              {fields.map(({ key, label, type, placeholder, Icon, required }, i) => (
+              {fields.map(({ key, label, type, placeholder, Icon, required, hint }, i) => (
                 <motion.div
                   key={key}
                   initial={{ opacity: 0, x: -14 }}
@@ -149,6 +149,11 @@ export default function Register() {
                       autoComplete={key === 'email' ? 'email' : key === 'password' ? 'new-password' : 'off'}
                     />
                   </div>
+                  {hint && (
+                    <p style={{ fontSize: '0.75rem', color: '#a78bfa', marginTop: '0.35rem', marginLeft: '0.25rem' }}>
+                      {hint}
+                    </p>
+                  )}
                 </motion.div>
               ))}
 

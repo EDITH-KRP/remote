@@ -6,12 +6,16 @@ services:
     buildCommand: npm install
     startCommand: npm start
     envVars:
+      - key: NODE_ENV
+        value: production
       - key: DATABASE_URL
         sync: false
       - key: JWT_SECRET_KEY
         generateValue: true
       - key: SECRET_KEY
         generateValue: true
+      - key: FRONTEND_URL
+        sync: false   # e.g. https://your-app.vercel.app
       - key: MAIL_SERVER
         value: smtp.gmail.com
       - key: MAIL_PORT

@@ -59,9 +59,9 @@ export default function Home() {
   const [incUrgency, setIncUrgency] = useState('High');
   const [incSubmitted, setIncSubmitted] = useState(false);
   const [simulatedIncidents, setSimulatedIncidents] = useState([
-    { id: 'INC-748', subject: 'Supabase DB Pooler connection timed out', category: 'Database', priority: 'Critical', sla: 84 },
-    { id: 'INC-732', subject: 'Windows AD authentication server latency spike', category: 'Networking', priority: 'High', sla: 60 },
-    { id: 'INC-711', subject: 'VPN access revoked for offsite developers', category: 'Access', priority: 'Medium', sla: 45 }
+    { id: 'inci748A', subject: 'Supabase DB Pooler connection timed out', category: 'Database', priority: 'Critical', sla: 84 },
+    { id: 'inci732B', subject: 'Windows AD authentication server latency spike', category: 'Networking', priority: 'High', sla: 60 },
+    { id: 'inci711C', subject: 'VPN access revoked for offsite developers', category: 'Access', priority: 'Medium', sla: 45 }
   ]);
 
   // Problem Management State
@@ -159,7 +159,7 @@ export default function Home() {
     e.preventDefault();
     const priority = getPriority(incImpact, incUrgency);
     const newInc = {
-      id: `INC-${Math.floor(Math.random() * 800) + 200}`,
+      id: `inci${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
       subject: `Simulated: Issue with ${incImpact} Impact & ${incUrgency} Urgency`,
       category: 'Simulated INC',
       priority,
@@ -191,7 +191,7 @@ export default function Home() {
   };
 
   const handleOrderCatalogItem = (title) => {
-    const orderId = `REQ-${Math.floor(Math.random() * 9000) + 1000}`;
+    const orderId = `REQ${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
     setCatalogOrders(prev => [{ id: orderId, item: title, date: new Date().toLocaleTimeString() }, ...prev]);
     setCheckoutItem(title);
     logWsEvent(`🛒 [WS Client] Dispatched Catalog Request order: ${orderId} (${title})`);
@@ -436,7 +436,7 @@ export default function Home() {
                       <h4 style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-1)' }}>Known Error Database (KEDB): Connection Pool Exhaustion</h4>
                     </div>
                     <p style={{ fontSize: '0.78rem', color: 'var(--text-2)', lineHeight: 1.5, marginBottom: '1.5rem' }}>
-                      ITIL Problem Management focuses on finding the permanent root cause of recurring incidents. In this simulation, **PRB-391** links three incidents caused by Supabase pooler latency. **Click on incidents to investigate root cause relationships:**
+                      ITIL Problem Management focuses on finding the permanent root cause of recurring incidents. In this simulation, **PRB-391** links three incidents (inci102A, inci105B, inci109C) caused by Supabase pooler latency. **Click on incidents to investigate root cause relationships:**
                     </p>
 
                     {/* ROOT CAUSE INCIDENT LINKER TREE */}
@@ -473,9 +473,9 @@ export default function Home() {
                       {/* Linked Incident Nodes */}
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', width: '100%', maxWidth: '420px' }}>
                         {[
-                          { id: 'INC-102', label: 'DB connection limit reached', details: 'Triggered when Supabase connection capacity reached 98% due to active pooling sync tests.' },
-                          { id: 'INC-105', label: 'Backend fails table sync', details: 'Express server failed to sync tables because the DB server refused database handshakes.' },
-                          { id: 'INC-109', label: 'Webapp loading 500 error', details: 'End users experienced HTTP 500 server errors because backend routes lost database connections.' }
+                          { id: 'inci102A', label: 'DB connection limit reached', details: 'Triggered when Supabase connection capacity reached 98% due to active pooling sync tests.' },
+                          { id: 'inci105B', label: 'Backend fails table sync', details: 'Express server failed to sync tables because the DB server refused database handshakes.' },
+                          { id: 'inci109C', label: 'Webapp loading 500 error', details: 'End users experienced HTTP 500 server errors because backend routes lost database connections.' }
                         ].map((node) => {
                           const active = selectedIncidentNode?.id === node.id;
                           return (

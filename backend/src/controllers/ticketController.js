@@ -44,8 +44,10 @@ exports.createTicket = async (req, res) => {
     };
     const priority = priorityMatrix[`${impact || 'Low'}-${urgency || 'Low'}`] || 'Low';
 
-    const prefix = ticket_type === 'Request' ? 'REQ' : 'INC';
-    const ticket_number = `${prefix}-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+    const isRequest = ticket_type === 'Request';
+    const prefix = isRequest ? 'REQ' : 'inci';
+    const randomLength = isRequest ? 8 : 4;
+    const ticket_number = `${prefix}${Math.random().toString(36).substring(2, 2 + randomLength).toUpperCase()}`;
 
     let attachment_url = null;
     if (req.file) {

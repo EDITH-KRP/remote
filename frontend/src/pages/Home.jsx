@@ -6,7 +6,8 @@ import {
   Zap, ShieldCheck, ArrowRight, LifeBuoy, Clock, Users,
   CheckCircle, AlertTriangle, Server, Database, Network,
   BookOpen, ShoppingBag, Calendar, Wifi, RefreshCw, Search,
-  FileText, ChevronRight, Play, Terminal, HelpCircle, HardDrive
+  FileText, ChevronRight, Play, Terminal, HelpCircle, HardDrive,
+  AlertCircle, Ticket as TicketIcon
 } from 'lucide-react';
 import socket from '../services/socket';
 

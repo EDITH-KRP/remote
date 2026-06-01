@@ -82,16 +82,18 @@ export default function ServiceNowLayout({ children }) {
 
   // ServiceNow Sidebar Navigator items
   const menuSections = [
-    {
-      title: "Self-Service",
-      items: [
-        { to: "/", label: "Service Portal Home", icon: <FolderOpen size={13} /> },
-        { to: "/dashboard", label: "Overview Dashboard", icon: <LayoutDashboard size={13} /> },
-        { to: "/raise-ticket", label: "Create New Request", icon: <PlusCircle size={13} /> },
-        { to: "/my-tickets", label: "My Incidents Feed", icon: <TicketIcon size={13} /> },
-        { to: "/profile", label: "My Employee Profile", icon: <UserIcon size={13} /> },
-      ]
-    },
+    ...(location.pathname === "/admin" ? [] : [
+      {
+        title: "Self-Service",
+        items: [
+          { to: "/", label: "Service Portal Home", icon: <FolderOpen size={13} /> },
+          { to: "/dashboard", label: "Overview Dashboard", icon: <LayoutDashboard size={13} /> },
+          { to: "/raise-ticket", label: "Create New Request", icon: <PlusCircle size={13} /> },
+          { to: "/my-tickets", label: "My Incidents Feed", icon: <TicketIcon size={13} /> },
+          { to: "/profile", label: "My Employee Profile", icon: <UserIcon size={13} /> },
+        ]
+      }
+    ]),
     ...(user?.role === "admin" ? [
       {
         title: "ITIL Service Desk",

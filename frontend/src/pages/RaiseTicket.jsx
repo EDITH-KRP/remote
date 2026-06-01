@@ -181,7 +181,7 @@ export default function RaiseTicket({ onSuccess }) {
                 Caller Identification & Information
               </p>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
                 {/* Left Column: Caller, Email, Employee ID, Alternate Contact */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   <div>
@@ -281,12 +281,11 @@ export default function RaiseTicket({ onSuccess }) {
               </div>
             </motion.div>
 
-            {/* ── ITIL Detail Information (Two Columns Grid) ── */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15, duration: 0.3 }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4"
+              style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', marginBottom: '1rem' }}
             >
               {/* Left Column: Categories and Sub Categories */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>

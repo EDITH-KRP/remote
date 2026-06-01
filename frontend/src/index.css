@@ -769,3 +769,31 @@ html:not(.dark) {
   --glow-md:  0 0 40px rgba(3,105,161,0.2);
   --grad-card: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(248,250,252,0.85));
 }
+
+/* ── ServiceNow ITIL UI Utilities ── */
+.sn-table-list {
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--bg-2);
+  overflow: hidden;
+}
+.sn-list-header {
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.sn-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+@media (max-width: 767px) {
+  .sn-form-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+

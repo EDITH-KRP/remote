@@ -207,66 +207,148 @@ export default function Home() {
   return (
     <div style={{ position: 'relative', overflow: 'hidden' }}>
       
-      {/* Background glow effects */}
-      <div style={{
-        position: 'absolute', width: '800px', height: '800px', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(2, 132, 199, 0.07) 0%, transparent 70%)',
-        top: '-15%', left: '50%', transform: 'translate(-50%,-50%)', pointerEvents: 'none', zIndex: 0
-      }} />
+      {/* ServiceNow Service Portal Banner for logged-in users */}
+      {user ? (
+        <div style={{ 
+          background: "linear-gradient(135deg, rgba(15,23,42,0.95), rgba(30,41,59,0.85))", 
+          border: "1px solid var(--border)", 
+          borderRadius: "var(--r-lg)", 
+          padding: "2.5rem 2rem", 
+          textAlign: "center", 
+          marginBottom: "1.75rem", 
+          position: "relative", 
+          overflow: "hidden", 
+          boxShadow: "var(--shadow-md)",
+          backdropFilter: "blur(20px)"
+        }}>
+          <div style={{ position: "absolute", top: 0, right: 0, width: "150px", height: "150px", background: "radial-gradient(circle, rgba(3,105,161,0.15) 0%, transparent 70%)", borderRadius: "50%", transform: "translate(30%, -30%)" }} />
+          <h2 style={{ fontSize: "2rem", fontWeight: 900, letterSpacing: "-0.04em", color: "#fff", marginBottom: "0.5rem" }}>Service Portal</h2>
+          <p style={{ fontSize: "0.9rem", color: "var(--text-2)", marginBottom: "1.5rem" }}>Search the knowledge base, submit incident tickets, or request standard IT catalog services.</p>
+          
+          {/* Central Search Bar */}
+          <div style={{ maxWidth: "580px", margin: "0 auto", position: "relative" }}>
+            <input
+              type="text"
+              className="input"
+              placeholder="How can we help you today? Search KB, incidents, catalog..."
+              value={kbQuery}
+              onChange={e => { setKbQuery(e.target.value); setActiveTab('kb'); }}
+              style={{ padding: "0.75rem 1.25rem 0.75rem 2.5rem", fontSize: "0.9rem", background: "rgba(0,0,0,0.25)", border: "1px solid rgba(99,102,241,0.2)" }}
+            />
+            <Search size={16} style={{ position: "absolute", left: "0.85rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-3)" }} />
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Background glow effects */}
+          <div style={{
+            position: 'absolute', width: '800px', height: '800px', borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(2, 132, 199, 0.07) 0%, transparent 70%)',
+            top: '-15%', left: '50%', transform: 'translate(-50%,-50%)', pointerEvents: 'none', zIndex: 0
+          }} />
 
-      {/* Hero Header Section */}
-      <div style={{ textAlign: 'center', position: 'relative', zIndex: 1, padding: '3.5rem 1rem 2.5rem' }}>
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 14px', background: 'rgba(2, 132, 199, 0.08)', border: '1px solid rgba(2, 132, 199, 0.25)', borderRadius: '99px', marginBottom: '1.5rem', cursor: 'default' }}
-        >
-          <span style={{ display: 'inline-block', width: '8px', height: '8px', background: '#38bdf8', borderRadius: '50%', animation: 'pulse-glow 2s infinite' }} />
-          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#38bdf8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>ITIL v4 Service Portal & Command Center</span>
-        </motion.div>
+          {/* Hero Header Section */}
+          <div style={{ textAlign: 'center', position: 'relative', zIndex: 1, padding: '3.5rem 1rem 2.5rem' }}>
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 14px', background: 'rgba(2, 132, 199, 0.08)', border: '1px solid rgba(2, 132, 199, 0.25)', borderRadius: '99px', marginBottom: '1.5rem', cursor: 'default' }}
+            >
+              <span style={{ display: 'inline-block', width: '8px', height: '8px', background: '#38bdf8', borderRadius: '50%', animation: 'pulse-glow 2s infinite' }} />
+              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#38bdf8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>ITIL v4 Service Portal & Command Center</span>
+            </motion.div>
 
-        <motion.h1
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          style={{ fontSize: '3rem', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, color: 'var(--text-1)', marginBottom: '1rem' }}
-        >
-          Enterprise Support & <br/>
-          <span className="gradient-text-cyan">Service Desk Operations</span>
-        </motion.h1>
+            <motion.h1
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              style={{ fontSize: '3rem', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, color: 'var(--text-1)', marginBottom: '1rem' }}
+            >
+              Enterprise Support & <br/>
+              <span className="gradient-text-cyan">Service Desk Operations</span>
+            </motion.h1>
 
-        <motion.p
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          style={{ fontSize: '1.05rem', color: 'var(--text-2)', maxWidth: '650px', margin: '0 auto 2.5rem', lineHeight: 1.6 }}
-        >
-          An integrated ITSM system delivering modern, role-based workflows for Incident resolution, Configuration items, Service Catalog, and automated CAB controls.
-        </motion.p>
+            <motion.p
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              style={{ fontSize: '1.05rem', color: 'var(--text-2)', maxWidth: '650px', margin: '0 auto 2.5rem', lineHeight: 1.6 }}
+            >
+              An integrated ITSM system delivering modern, role-based workflows for Incident resolution, Configuration items, Service Catalog, and automated CAB controls.
+            </motion.p>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}
-        >
-          {user ? (
-            <Link to="/dashboard" className="btn btn-primary btn-lg" style={{ boxShadow: '0 4px 20px rgba(3,105,161,0.5)' }}>
-              Go to Workspace <ArrowRight size={16} />
-            </Link>
-          ) : (
-            <>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}
+            >
               <Link to="/login" className="btn btn-primary btn-lg" style={{ padding: '0.75rem 2.25rem' }}>
                 Sign In
               </Link>
               <Link to="/register" className="btn btn-secondary btn-lg" style={{ padding: '0.75rem 2.25rem' }}>
                 Register Account
               </Link>
-            </>
-          )}
-        </motion.div>
-      </div>
+            </motion.div>
+          </div>
+        </>
+      )}
+
+      {/* ServiceNow 4 Quick Link Cards for authenticated service desk portal */}
+      {user && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1rem", marginBottom: "1.75rem", position: "relative", zIndex: 1 }}>
+          
+          <Link to="/raise-ticket" style={{ textDecoration: "none" }}>
+            <motion.div whileHover={{ y: -4 }} style={{ background: "rgba(10,12,22,0.82)", border: "1px solid rgba(99,102,241,0.12)", borderRadius: "var(--r-lg)", padding: "1.25rem 1.5rem", display: "flex", alignItems: "center", gap: "1rem", cursor: "pointer", backdropFilter: "blur(20px)" }}>
+              <div style={{ width: "42px", height: "42px", borderRadius: "var(--r-md)", background: "linear-gradient(135deg,#f59e0b,#d97706)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", flexShrink: 0 }}>
+                <AlertCircle size={18} />
+              </div>
+              <div>
+                <p style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--text-1)", margin: 0 }}>Report an Issue</p>
+                <p style={{ fontSize: "0.72rem", color: "var(--text-3)", margin: "2px 0 0" }}>Submit an Incident ticket</p>
+              </div>
+            </motion.div>
+          </Link>
+
+          <div onClick={() => setActiveTab('catalog')} style={{ cursor: "pointer" }}>
+            <motion.div whileHover={{ y: -4 }} style={{ background: "rgba(10,12,22,0.82)", border: "1px solid rgba(99,102,241,0.12)", borderRadius: "var(--r-lg)", padding: "1.25rem 1.5rem", display: "flex", alignItems: "center", gap: "1rem", backdropFilter: "blur(20px)" }}>
+              <div style={{ width: "42px", height: "42px", borderRadius: "var(--r-md)", background: "linear-gradient(135deg,#8b5cf6,#7c3aed)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", flexShrink: 0 }}>
+                <ShoppingBag size={18} />
+              </div>
+              <div>
+                <p style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--text-1)", margin: 0 }}>Request Service</p>
+                <p style={{ fontSize: "0.72rem", color: "var(--text-3)", margin: "2px 0 0" }}>Order standard IT catalog</p>
+              </div>
+            </motion.div>
+          </div>
+
+          <div onClick={() => setActiveTab('kb')} style={{ cursor: "pointer" }}>
+            <motion.div whileHover={{ y: -4 }} style={{ background: "rgba(10,12,22,0.82)", border: "1px solid rgba(99,102,241,0.12)", borderRadius: "var(--r-lg)", padding: "1.25rem 1.5rem", display: "flex", alignItems: "center", gap: "1rem", backdropFilter: "blur(20px)" }}>
+              <div style={{ width: "42px", height: "42px", borderRadius: "var(--r-md)", background: "linear-gradient(135deg,#10b981,#059669)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", flexShrink: 0 }}>
+                <BookOpen size={18} />
+              </div>
+              <div>
+                <p style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--text-1)", margin: 0 }}>Knowledge Base</p>
+                <p style={{ fontSize: "0.72rem", color: "var(--text-3)", margin: "2px 0 0" }}>Browse self-help articles</p>
+              </div>
+            </motion.div>
+          </div>
+
+          <Link to="/my-tickets" style={{ textDecoration: "none" }}>
+            <motion.div whileHover={{ y: -4 }} style={{ background: "rgba(10,12,22,0.82)", border: "1px solid rgba(99,102,241,0.12)", borderRadius: "var(--r-lg)", padding: "1.25rem 1.5rem", display: "flex", alignItems: "center", gap: "1rem", cursor: "pointer", backdropFilter: "blur(20px)" }}>
+              <div style={{ width: "42px", height: "42px", borderRadius: "var(--r-md)", background: "linear-gradient(135deg,#6366f1,#4f46e5)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", flexShrink: 0 }}>
+                <TicketIcon size={18} />
+              </div>
+              <div>
+                <p style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--text-1)", margin: 0 }}>My Ticket Status</p>
+                <p style={{ fontSize: "0.72rem", color: "var(--text-3)", margin: "2px 0 0" }}>Check ticket activity</p>
+              </div>
+            </motion.div>
+          </Link>
+
+        </div>
+      )}
 
       {/* Grid Layout: WebSocket Console + Command Modules */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem', marginTop: '1.5rem', position: 'relative', zIndex: 1 }} className="lg:grid-cols-dash">

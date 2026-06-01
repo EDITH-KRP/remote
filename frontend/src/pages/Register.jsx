@@ -43,11 +43,11 @@ export default function Register() {
       padding: '2rem 1rem',
       position: 'relative',
     }}>
-      {/* Ambient glow */}
+      {/* Subtle background canvas glow */}
       <div aria-hidden="true" style={{
         position: 'absolute',
         width: '560px', height: '560px', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(139,92,246,0.09) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(53,122,112,0.03) 0%, transparent 70%)',
         top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
         pointerEvents: 'none', zIndex: 0,
       }} />
@@ -61,17 +61,16 @@ export default function Register() {
         {/* ── Brand ──────────────────────────── */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <motion.div
-            initial={{ scale: 0, rotate: -20 }}
-            animate={{ scale: 1, rotate: 0 }}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
             transition={{ type: 'spring', stiffness: 220, damping: 16, delay: 0.1 }}
             style={{
               width: '58px', height: '58px',
-              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-              borderRadius: '18px',
+              background: 'linear-gradient(135deg, #357a70, #81b3b8)',
+              borderRadius: '12px',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               margin: '0 auto 1.25rem',
-              boxShadow: '0 12px 36px rgba(99,102,241,0.45)',
-              animation: 'float 4.5s ease-in-out infinite',
+              boxShadow: '0 4px 12px rgba(53,122,112,0.3)',
             }}
           >
             <Zap size={26} color="#fff" fill="#fff" />
@@ -79,8 +78,7 @@ export default function Register() {
 
           <h1 style={{
             fontSize: '1.875rem', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.2,
-            background: 'linear-gradient(135deg, #eef0fb 30%, #a78bfa)',
-            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+            color: 'var(--text-1)',
             marginBottom: '0.375rem',
           }}>
             Create account
@@ -92,23 +90,15 @@ export default function Register() {
 
         {/* ── Card ────────────────────────────── */}
         <div style={{ position: 'relative' }}>
-          {/* Gradient border */}
-          <div aria-hidden="true" style={{
-            position: 'absolute', inset: '-1px',
-            borderRadius: 'calc(var(--r-xl) + 1px)',
-            background: 'linear-gradient(135deg, rgba(99,102,241,0.4), rgba(139,92,246,0.28), rgba(6,182,212,0.18))',
-            zIndex: 0,
-          }} />
-
           <div style={{
             position: 'relative', zIndex: 1,
-            background: 'rgba(9, 11, 22, 0.92)',
-            border: '1px solid rgba(99,102,241,0.18)',
-            borderRadius: 'var(--r-xl)',
+            background: 'var(--bg-2)',
+            border: '1px solid rgba(53,122,112,0.25)',
+            borderRadius: 'var(--r-md)',
             padding: '2rem 2.25rem 2.25rem',
             backdropFilter: 'blur(32px)',
             WebkitBackdropFilter: 'blur(32px)',
-            boxShadow: '0 24px 64px rgba(0,0,0,0.7)',
+            boxShadow: 'var(--shadow-lg)',
           }}>
 
             {error && (
@@ -150,7 +140,7 @@ export default function Register() {
                     />
                   </div>
                   {hint && (
-                    <p style={{ fontSize: '0.75rem', color: '#a78bfa', marginTop: '0.35rem', marginLeft: '0.25rem' }}>
+                    <p style={{ fontSize: '0.75rem', color: '#81b3b8', marginTop: '0.35rem', marginLeft: '0.25rem' }}>
                       {hint}
                     </p>
                   )}
@@ -164,7 +154,7 @@ export default function Register() {
                 type="submit"
                 disabled={loading}
                 className="btn btn-primary btn-lg"
-                style={{ width: '100%', marginTop: '0.5rem' }}
+                style={{ width: '100%', marginTop: '0.5rem', background: '#357a70', border: '1px solid rgba(129,179,184,0.2)', boxShadow: '0 4px 12px rgba(53,122,112,0.3)' }}
               >
                 {loading
                   ? <><div className="spinner" style={{ width: '17px', height: '17px' }} /> Creating account…</>
@@ -183,9 +173,8 @@ export default function Register() {
           Already have an account?{' '}
           <Link to="/login" style={{
             fontWeight: 700,
-            background: 'linear-gradient(135deg, #818cf8, #a78bfa)',
-            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-            textDecoration: 'none',
+            color: '#81b3b8',
+            textDecoration: 'underline',
           }}>
             Sign in →
           </Link>

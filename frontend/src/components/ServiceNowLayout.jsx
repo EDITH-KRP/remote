@@ -5,7 +5,7 @@ import { ThemeContext } from "../context/ThemeContext";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, PlusCircle, TicketIcon, User as UserIcon, ShieldCheck,
-  Menu, X, Bell, Moon, Sun, LogOut, Search, ChevronRight, Zap, FolderOpen,
+  Menu, X, Bell, Moon, Sun, LogOut, Search, ChevronRight, ChevronDown, Zap, FolderOpen,
   Filter, HelpCircle, HardDrive, List
 } from "lucide-react";
 import api from "../services/api";
@@ -21,7 +21,19 @@ export default function ServiceNowLayout({ children }) {
   const [menuFilter, setMenuFilter] = useState("");
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  
+  // Collapsible Application Navigator Section States
+  const [expandedSections, setExpandedSections] = useState({
+    "Self-Service": true,
+    "ITIL Service Desk": true
+  });
+
+  const toggleSection = (title) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [title]: !prev[title]
+    }));
+  };
 
   // Sync notifications with backend and socket events
   useEffect(() => {
@@ -53,7 +65,7 @@ export default function ServiceNowLayout({ children }) {
     navigate("/login");
   };
 
-  // ServiceNow dynamic breadcrumbs mapper
+  // ServiceNow breadcrumbs mapper
   const getBreadcrumbs = () => {
     const paths = {
       "/": ["Service Portal", "Home"],
@@ -105,14 +117,14 @@ export default function ServiceNowLayout({ children }) {
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg)", color: "var(--text-1)", transition: "background 0.3s ease" }}>
       
-      {/* ── ServiceNow Collapsible Left Sidebar Navigator ── */}
+      {/* ── ServiceNow Collapsible Left Sidebar Navigator (Charcoal: #1c282c) ── */}
       <motion.aside
         animate={{ width: sidebarCollapsed ? 64 : 240 }}
         transition={{ duration: 0.25, ease: "easeInOut" }}
         style={{
           width: 240,
-          background: "var(--bg-2)",
-          borderRight: "1px solid var(--border)",
+          background: "#1c282c",
+          borderRight: "1px solid rgba(255,255,255,0.06)",
           display: "flex",
           flexDirection: "column",
           position: "fixed",
@@ -125,13 +137,13 @@ export default function ServiceNowLayout({ children }) {
         className="hidden md:flex"
       >
         {/* Left top branding */}
-        <div style={{ height: "62px", padding: "0 1.25rem", display: "flex", alignItems: "center", gap: "10px", borderBottom: "1px solid var(--border)", flexShrink: 0 }}>
-          <div style={{ width: "28px", height: "28px", borderRadius: "6px", background: "var(--grad-main)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ height: "62px", padding: "0 1.25rem", display: "flex", alignItems: "center", gap: "10px", borderBottom: "1px solid rgba(255,255,255,0.05)", flexShrink: 0 }}>
+          <div style={{ width: "28px", height: "28px", borderRadius: "6px", background: "linear-gradient(135deg, #81b3b8, #357a70)", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Zap size={14} color="#fff" fill="#fff" />
           </div>
           {!sidebarCollapsed && (
-            <span style={{ fontWeight: 800, fontSize: "0.95rem", letterSpacing: "-0.02em", color: "var(--text-1)" }}>
-              ServiceNow <span style={{ color: "var(--p3)" }}>ITSM</span>
+            <span style={{ fontWeight: 800, fontSize: "0.95rem", letterSpacing: "-0.02em", color: "#ffffff" }}>
+              ServiceNow <span style={{ color: "#81b3b8" }}>ITSM</span>
             </span>
           )}
         </div>
@@ -146,7 +158,7 @@ export default function ServiceNowLayout({ children }) {
                 placeholder="Filter navigator..."
                 value={menuFilter}
                 onChange={e => setMenuFilter(e.target.value)}
-                style={{ fontSize: "0.75rem", padding: "0.35rem 0.5rem 0.35rem 1.75rem", background: "rgba(0,0,0,0.15)", borderRadius: "4px" }}
+                style={{ fontSize: "0.75rem", padding: "0.35rem 0.5rem 0.35rem 1.75rem", background: "rgba(0,0,0,0.25)", border: "1px solid rgba(255,255,255,0.06)", color: "#ffffff", borderRadius: "4px" }}
               />
               <Filter size={11} style={{ position: "absolute", left: "0.55rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-3)" }} />
             </div>
@@ -159,70 +171,92 @@ export default function ServiceNowLayout({ children }) {
 
         {/* Navigation list */}
         <div style={{ flex: 1, overflowY: "auto", padding: "0.75rem 0" }}>
-          {filteredSections.map((sec, sidx) => (
-            <div key={sidx} style={{ marginBottom: "1.25rem" }}>
-              {/* Section title */}
-              {!sidebarCollapsed ? (
-                <p style={{ fontSize: "0.68rem", fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.08em", padding: "0 1.25rem 0.35rem" }}>
-                  {sec.title}
-                </p>
-              ) : (
-                <div style={{ borderBottom: "1px solid rgba(255,255,255,0.03)", margin: "0.25rem 0.75rem" }} />
-              )}
+          {filteredSections.map((sec, sidx) => {
+            const isExpanded = expandedSections[sec.title] !== false;
+            return (
+              <div key={sidx} style={{ marginBottom: "1.25rem" }}>
+                {/* Collapsible Section title */}
+                {!sidebarCollapsed ? (
+                  <button 
+                    onClick={() => toggleSection(sec.title)}
+                    style={{ 
+                      display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%",
+                      fontSize: "0.68rem", fontWeight: 700, color: "#8b9ea2", textTransform: "uppercase", 
+                      letterSpacing: "0.08em", padding: "0 1.25rem 0.35rem", background: "none", border: "none",
+                      cursor: "pointer", fontFamily: "inherit"
+                    }}
+                  >
+                    <span>{sec.title}</span>
+                    {isExpanded ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
+                  </button>
+                ) : (
+                  <div style={{ borderBottom: "1px solid rgba(255,255,255,0.03)", margin: "0.25rem 0.75rem" }} />
+                )}
 
-              {/* Section items */}
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                {sec.items.map(item => {
-                  const active = location.pathname === item.to;
-                  return (
-                    <Link
-                      key={item.to}
-                      to={item.to}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: sidebarCollapsed ? "0" : "10px",
-                        justifyContent: sidebarCollapsed ? "center" : "flex-start",
-                        padding: "0.5rem 1.25rem",
-                        color: active ? "var(--p3)" : "var(--text-2)",
-                        textDecoration: "none",
-                        fontSize: "0.8rem",
-                        fontWeight: 600,
-                        borderLeft: `2.5px solid ${active ? "var(--p3)" : "transparent"}`,
-                        background: active ? "rgba(3,105,161,0.06)" : "transparent",
-                        transition: "all 0.18s"
-                      }}
-                      onMouseEnter={e => {
-                        if (!active) {
-                          e.currentTarget.style.color = "var(--text-1)";
-                          e.currentTarget.style.background = "rgba(255,255,255,0.02)";
-                        }
-                      }}
-                      onMouseLeave={e => {
-                        if (!active) {
-                          e.currentTarget.style.color = "var(--text-2)";
-                          e.currentTarget.style.background = "transparent";
-                        }
-                      }}
+                {/* Section items */}
+                <AnimatePresence>
+                  {(isExpanded || sidebarCollapsed) && (
+                    <motion.div 
+                      initial={sidebarCollapsed ? false : { height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}
                     >
-                      {item.icon}
-                      {!sidebarCollapsed && <span>{item.label}</span>}
-                    </Link>
-                  );
-                })}
+                      {sec.items.map(item => {
+                        const active = location.pathname === item.to;
+                        return (
+                          <Link
+                            key={item.to}
+                            to={item.to}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: sidebarCollapsed ? "0" : "10px",
+                              justifyContent: sidebarCollapsed ? "center" : "flex-start",
+                              padding: "0.5rem 1.25rem",
+                              color: active ? "#81b3b8" : "#b3c1c5",
+                              textDecoration: "none",
+                              fontSize: "0.8rem",
+                              fontWeight: 600,
+                              borderLeft: `2.5px solid ${active ? "#81b3b8" : "transparent"}`,
+                              background: active ? "rgba(129,179,184,0.08)" : "transparent",
+                              transition: "all 0.18s"
+                            }}
+                            onMouseEnter={e => {
+                              if (!active) {
+                                e.currentTarget.style.color = "#ffffff";
+                                e.currentTarget.style.background = "rgba(255,255,255,0.03)";
+                              }
+                            }}
+                            onMouseLeave={e => {
+                              if (!active) {
+                                e.currentTarget.style.color = "#b3c1c5";
+                                e.currentTarget.style.background = "transparent";
+                              }
+                            }}
+                          >
+                            <span style={{ color: active ? "#81b3b8" : "#8b9ea2" }}>{item.icon}</span>
+                            {!sidebarCollapsed && <span>{item.label}</span>}
+                          </Link>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-            </div>
-          ))}
+            );
+          })}
           {filteredSections.length === 0 && (
             <p style={{ fontSize: "0.75rem", color: "var(--text-3)", padding: "0 1.25rem", fontStyle: "italic" }}>No modules match</p>
           )}
         </div>
       </motion.aside>
 
-      {/* ── Main Canvas Area (Top Banner Frame + Viewport) ── */}
+      {/* ── Main Canvas Area ── */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", marginLeft: sidebarCollapsed ? 64 : 240, transition: "margin-left 0.25s ease" }} className="md:ml-sn">
         
-        {/* Top Header Banner Frame */}
+        {/* Top Header Banner Frame (Slate Green: #293e40) */}
         <header
           style={{
             height: "62px",
@@ -231,10 +265,8 @@ export default function ServiceNowLayout({ children }) {
             right: 0,
             left: sidebarCollapsed ? 64 : 240,
             zIndex: 80,
-            background: "rgba(6, 8, 15, 0.75)",
-            borderBottom: "1px solid var(--border)",
-            backdropFilter: "blur(24px)",
-            WebkitBackdropFilter: "blur(24px)",
+            background: "#293e40",
+            borderBottom: "1px solid rgba(255,255,255,0.08)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -243,23 +275,22 @@ export default function ServiceNowLayout({ children }) {
           }}
           className="sn-header"
         >
-          {/* Left: Collapse Toggle + Breadcrumbs */}
+          {/* Left Toggle & Breadcrumbs */}
           <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-            {/* Collapse toggle */}
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              style={{ background: "none", border: "none", color: "var(--text-2)", cursor: "pointer", display: "flex", alignItems: "center" }}
+              style={{ background: "none", border: "none", color: "#ffffff", opacity: 0.85, cursor: "pointer", display: "flex", alignItems: "center" }}
               title={sidebarCollapsed ? "Expand Navigator" : "Collapse Navigator"}
             >
               <Menu size={18} />
             </button>
 
-            {/* ServiceNow Breadcrumbs frame */}
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "0.78rem", fontWeight: 700, color: "var(--text-2)" }} className="hidden sm:flex">
+            {/* ServiceNow Breadcrumbs */}
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "0.78rem", fontWeight: 700, color: "#cbd5e1" }} className="hidden sm:flex">
               {breadcrumbs.map((crumb, idx) => (
                 <React.Fragment key={idx}>
-                  {idx > 0 && <ChevronRight size={12} style={{ color: "var(--text-3)" }} />}
-                  <span style={{ color: idx === breadcrumbs.length - 1 ? "var(--text-1)" : "var(--text-3)" }}>
+                  {idx > 0 && <ChevronRight size={12} style={{ color: "#94a3b8" }} />}
+                  <span style={{ color: idx === breadcrumbs.length - 1 ? "#ffffff" : "#cbd5e1" }}>
                     {crumb}
                   </span>
                 </React.Fragment>
@@ -270,28 +301,28 @@ export default function ServiceNowLayout({ children }) {
           {/* Right Controls */}
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             
-            {/* Global Search Box (ServiceNow layout) */}
+            {/* Global Search Box */}
             <div style={{ position: "relative" }} className="hidden lg:block">
               <input
                 type="text"
                 placeholder="Global search..."
                 className="input"
-                style={{ fontSize: "0.75rem", padding: "0.35rem 0.5rem 0.35rem 1.75rem", width: "160px", background: "rgba(255,255,255,0.03)", borderRadius: "4px" }}
+                style={{ fontSize: "0.75rem", padding: "0.35rem 0.5rem 0.35rem 1.75rem", width: "160px", background: "rgba(0,0,0,0.15)", border: "1px solid rgba(255,255,255,0.08)", color: "#ffffff", borderRadius: "4px" }}
               />
-              <Search size={11} style={{ position: "absolute", left: "0.55rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-3)" }} />
+              <Search size={11} style={{ position: "absolute", left: "0.55rem", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
             </div>
 
-            {/* Theme selector */}
-            <button onClick={toggleTheme} className="btn-icon" style={{ color: "var(--text-2)" }}>
+            {/* Theme switcher */}
+            <button onClick={toggleTheme} className="btn-icon" style={{ color: "#ffffff", opacity: 0.85 }}>
               {isDarkMode ? <Sun size={17} /> : <Moon size={17} />}
             </button>
 
             {/* Notification Bell */}
             <div style={{ position: "relative" }}>
-              <button onClick={() => setShowNotifications(!showNotifications)} className="btn-icon" style={{ color: "var(--text-2)", position: "relative" }}>
+              <button onClick={() => setShowNotifications(!showNotifications)} className="btn-icon" style={{ color: "#ffffff", opacity: 0.85, position: "relative" }}>
                 <Bell size={17} />
                 {unreadCount > 0 && (
-                  <span style={{ position: "absolute", top: 3, right: 3, width: 8, height: 8, background: "#f87171", borderRadius: "50%", border: "2px solid var(--bg)" }} />
+                  <span style={{ position: "absolute", top: 3, right: 3, width: 8, height: 8, background: "#f97316", borderRadius: "50%", border: "2px solid #293e40" }} />
                 )}
               </button>
               
@@ -331,26 +362,26 @@ export default function ServiceNowLayout({ children }) {
             </div>
 
             {/* Profile Avatar Badge */}
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", paddingLeft: "10px", borderLeft: "1px solid rgba(255,255,255,0.08)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", paddingLeft: "10px", borderLeft: "1px solid rgba(255,255,255,0.15)" }}>
               <div
                 style={{
                   width: "28px", height: "28px", borderRadius: "50%",
-                  background: "var(--grad-main)", display: "flex", alignItems: "center", justifyContent: "center",
+                  background: "linear-gradient(135deg, #81b3b8, #357a70)", display: "flex", alignItems: "center", justifyContent: "center",
                   color: "#fff", fontSize: "0.7rem", fontWeight: 800,
-                  boxShadow: "0 2px 10px rgba(3,105,161,0.4)"
+                  boxShadow: "0 2px 10px rgba(0,0,0,0.25)"
                 }}
               >
                 {initials}
               </div>
-              <span className="hidden lg:block" style={{ fontSize: "0.825rem", fontWeight: 600, color: "var(--text-2)" }}>
+              <span className="hidden lg:block" style={{ fontSize: "0.825rem", fontWeight: 600, color: "#ffffff" }}>
                 {user?.full_name?.split(" ")[0]}
               </span>
             </div>
 
             {/* Log out */}
-            <button onClick={handleLogout} className="btn-icon" title="Logout" style={{ color: "var(--text-2)" }}
+            <button onClick={handleLogout} className="btn-icon" title="Logout" style={{ color: "#ffffff", opacity: 0.85 }}
               onMouseEnter={e => { e.currentTarget.style.color = "#f87171"; e.currentTarget.style.background = "rgba(248,113,113,0.1)"; }}
-              onMouseLeave={e => { e.currentTarget.style.color = "var(--text-2)"; e.currentTarget.style.background = "transparent"; }}
+              onMouseLeave={e => { e.currentTarget.style.color = "#ffffff"; e.currentTarget.style.background = "transparent"; }}
             >
               <LogOut size={15} />
             </button>
@@ -364,7 +395,6 @@ export default function ServiceNowLayout({ children }) {
         </main>
       </div>
 
-      {/* CSS adjustments block helper */}
       <style>{`
         @media (max-width: 767px) {
           .md\\:ml-sn { margin-left: 0 !important; }

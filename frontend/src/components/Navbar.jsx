@@ -66,8 +66,8 @@ const Navbar = () => {
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         style={{
           position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-          background: 'rgba(6, 8, 15, 0.75)',
-          borderBottom: '1px solid rgba(99,102,241,0.15)',
+          background: '#293e40',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
           backdropFilter: 'blur(24px)',
           WebkitBackdropFilter: 'blur(24px)',
         }}
@@ -75,7 +75,7 @@ const Navbar = () => {
         {/* Subtle top accent line */}
         <div style={{
           position: 'absolute', top: 0, left: 0, right: 0, height: '2px',
-          background: 'linear-gradient(90deg, transparent, rgba(99,102,241,0.6), rgba(139,92,246,0.6), transparent)',
+          background: 'linear-gradient(90deg, transparent, rgba(129,179,184,0.6), rgba(53,122,112,0.6), transparent)',
         }} />
 
         <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1.5rem' }}>
@@ -84,22 +84,20 @@ const Navbar = () => {
             {/* Logo */}
             <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
               <motion.div
-                whileHover={{ scale: 1.08, rotate: 5 }}
+                whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 style={{
-                  width: '34px', height: '34px', borderRadius: '10px', flexShrink: 0,
-                  background: 'linear-gradient(135deg, #6366f1, #8b5cf6, #a78bfa)',
+                  width: '34px', height: '34px', borderRadius: '6px', flexShrink: 0,
+                  background: 'linear-gradient(135deg, #357a70, #81b3b8)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 4px 20px rgba(99,102,241,0.5)',
-                  animation: 'pulse-glow 3s ease-in-out infinite',
+                  boxShadow: '0 4px 12px rgba(53,122,112,0.3)',
                 }}
               >
                 <Zap size={17} color="#fff" fill="#fff" />
               </motion.div>
               <span style={{
                 fontWeight: 800, fontSize: '1.0625rem',
-                background: 'linear-gradient(135deg, #eef0fb, #a78bfa)',
-                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                color: '#ffffff',
                 letterSpacing: '-0.03em',
               }}>
                 SupportDesk
@@ -204,12 +202,12 @@ const Navbar = () => {
                       whileHover={{ scale: 1.1 }}
                       style={{
                         width: '34px', height: '34px', borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                        background: 'linear-gradient(135deg, #357a70, #81b3b8)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         color: '#fff', fontSize: '0.75rem', fontWeight: 800,
-                        boxShadow: '0 4px 16px rgba(99,102,241,0.4)',
+                        boxShadow: '0 4px 16px rgba(53,122,112,0.3)',
                         cursor: 'default',
-                        border: '2px solid rgba(99,102,241,0.3)',
+                        border: '2px solid rgba(129,179,184,0.3)',
                       }}
                     >
                       {initials}
@@ -233,14 +231,14 @@ const Navbar = () => {
                   </motion.button>
                 </>
               ) : (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: '12px', borderLeft: '1px solid rgba(99,102,241,0.15)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: '12px', borderLeft: '1px solid rgba(255,255,255,0.15)' }}>
                   <Link to="/login" style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-2)', textDecoration: 'none' }}
                     onMouseEnter={e => e.currentTarget.style.color = 'var(--text-1)'}
                     onMouseLeave={e => e.currentTarget.style.color = 'var(--text-2)'}
                   >
                     Sign in
                   </Link>
-                  <Link to="/register" className="btn btn-primary btn-sm">
+                  <Link to="/register" className="btn btn-primary btn-sm" style={{ background: '#357a70', border: '1px solid rgba(129,179,184,0.3)', boxShadow: '0 4px 12px rgba(53,122,112,0.3)' }}>
                     Get Started
                   </Link>
                 </div>

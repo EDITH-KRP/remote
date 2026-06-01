@@ -13,7 +13,7 @@ import socket from '../services/socket';
 const statusBadge = {
   Open:           'badge badge-blue',
   Assigned:       'badge badge-yellow',
-  'In Progress':  'badge badge-purple',
+  'In Progress':  'badge badge-blue',
   Resolved:       'badge badge-green',
   Closed:         'badge badge-gray',
 };
@@ -29,8 +29,8 @@ const ChartTip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
     <div style={{
-      background: 'rgba(9,11,22,0.97)',
-      border: '1px solid rgba(99,102,241,0.25)',
+      background: 'rgba(22,31,34,0.97)',
+      border: '1px solid rgba(129,179,184,0.25)',
       borderRadius: '12px',
       padding: '10px 14px',
       backdropFilter: 'blur(16px)',
@@ -39,7 +39,7 @@ const ChartTip = ({ active, payload, label }) => {
     }}>
       <p style={{ fontWeight: 700, color: 'var(--text-1)', fontSize: '0.8rem', marginBottom: '6px' }}>{label}</p>
       {payload.map(p => (
-        <p key={p.dataKey} style={{ fontSize: '0.78rem', color: p.dataKey === 'created' ? '#818cf8' : '#34d399', marginBottom: '2px' }}>
+        <p key={p.dataKey} style={{ fontSize: '0.78rem', color: p.dataKey === 'created' ? '#81b3b8' : '#34d399', marginBottom: '2px' }}>
           <span style={{ opacity: 0.7 }}>{p.dataKey === 'created' ? 'Created' : 'Resolved'}:</span> {p.value}
         </p>
       ))}
@@ -51,26 +51,26 @@ const ChartTip = ({ active, payload, label }) => {
 const makeStats = (tickets) => [
   {
     label: 'Total', value: tickets.length, icon: Ticket,
-    gradient: 'linear-gradient(135deg,#6366f1,#4f46e5)',
-    glow: '0 6px 24px rgba(99,102,241,0.45)', glowBg: 'rgba(99,102,241,0.1)',
-    accent: 'rgba(99,102,241,0.3)',
+    gradient: 'linear-gradient(135deg,#293e40,#357a70)',
+    glow: '0 4px 12px rgba(41,62,64,0.3)', glowBg: 'rgba(41,62,64,0.1)',
+    accent: 'rgba(41,62,64,0.25)',
   },
   {
     label: 'Open', value: tickets.filter(t => t.status === 'Open').length, icon: Clock,
     gradient: 'linear-gradient(135deg,#f59e0b,#d97706)',
-    glow: '0 6px 24px rgba(245,158,11,0.4)',  glowBg: 'rgba(245,158,11,0.08)',
+    glow: '0 4px 12px rgba(245,158,11,0.3)',  glowBg: 'rgba(245,158,11,0.08)',
     accent: 'rgba(245,158,11,0.25)',
   },
   {
     label: 'In Progress', value: tickets.filter(t => t.status === 'In Progress').length, icon: Activity,
-    gradient: 'linear-gradient(135deg,#8b5cf6,#7c3aed)',
-    glow: '0 6px 24px rgba(139,92,246,0.4)',  glowBg: 'rgba(139,92,246,0.08)',
-    accent: 'rgba(139,92,246,0.25)',
+    gradient: 'linear-gradient(135deg,#2563EB,#1d4ed8)',
+    glow: '0 4px 12px rgba(37,99,235,0.3)',  glowBg: 'rgba(37,99,235,0.08)',
+    accent: 'rgba(37,99,235,0.2)',
   },
   {
     label: 'Resolved', value: tickets.filter(t => ['Resolved','Closed'].includes(t.status)).length, icon: CheckCircle,
     gradient: 'linear-gradient(135deg,#10b981,#059669)',
-    glow: '0 6px 24px rgba(16,185,129,0.4)',  glowBg: 'rgba(16,185,129,0.08)',
+    glow: '0 4px 12px rgba(16,185,129,0.3)',  glowBg: 'rgba(16,185,129,0.08)',
     accent: 'rgba(16,185,129,0.25)',
   },
 ];
@@ -82,8 +82,8 @@ const StatCard = ({ s }) => {
     <motion.div
       whileHover={{ y: -4, boxShadow: `0 20px 40px rgba(0,0,0,0.5),${s.glow}`, borderColor: s.accent }}
       style={{
-        background: 'rgba(10,12,22,0.82)',
-        border: '1px solid rgba(99,102,241,0.12)',
+        background: 'rgba(22,31,34,0.82)',
+        border: '1px solid var(--border)',
         borderRadius: 'var(--r-lg)',
         padding: '1.25rem 1.5rem',
         display: 'flex', alignItems: 'center', gap: '1rem',
@@ -192,7 +192,7 @@ const Dashboard = () => {
           </h1>
           <p style={{ fontSize:'0.875rem', color:'var(--text-2)' }}>
             Welcome back,{' '}
-            <span style={{ fontWeight:700, background:'linear-gradient(135deg,#a78bfa,#6366f1)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>
+            <span style={{ fontWeight:700, color: 'var(--p3)' }}>
               {user?.full_name?.split(' ')[0]}
             </span>
           </p>
@@ -233,8 +233,8 @@ const Dashboard = () => {
           animate={{ opacity:1, y:0 }}
           transition={{ delay:0.3, duration:0.35 }}
           style={{
-            background:'rgba(10,12,22,0.82)',
-            border:'1px solid rgba(99,102,241,0.12)',
+            background:'rgba(22,31,34,0.82)',
+            border:'1px solid var(--border)',
             borderRadius:'var(--r-lg)',
             backdropFilter:'blur(20px)',
             overflow:'hidden',
@@ -245,11 +245,11 @@ const Dashboard = () => {
           <div style={{
             display:'flex', justifyContent:'space-between', alignItems:'center',
             padding:'1.1rem 1.5rem',
-            borderBottom:'1px solid rgba(99,102,241,0.09)',
-            background:'rgba(99,102,241,0.03)',
+            borderBottom:'1px solid rgba(129,179,184,0.15)',
+            background:'rgba(53,122,112,0.03)',
           }}>
             <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
-              <div style={{ width:'7px', height:'7px', borderRadius:'50%', background:'linear-gradient(135deg,#6366f1,#a78bfa)', boxShadow:'0 0 8px rgba(99,102,241,0.8)' }} />
+              <div style={{ width:'7px', height:'7px', borderRadius:'50%', background:'#357a70' }} />
               <span style={{ fontSize:'0.9rem', fontWeight:700, color:'var(--text-1)', letterSpacing:'-0.01em' }}>
                 Recent Tickets
               </span>
@@ -310,8 +310,8 @@ const Dashboard = () => {
           animate={{ opacity:1, y:0 }}
           transition={{ delay:0.38, duration:0.35 }}
           style={{
-            background:'rgba(10,12,22,0.82)',
-            border:'1px solid rgba(99,102,241,0.12)',
+            background:'rgba(22,31,34,0.82)',
+            border:'1px solid var(--border)',
             borderRadius:'var(--r-lg)',
             backdropFilter:'blur(20px)',
             padding:'1.25rem 1.5rem 1rem',
@@ -329,26 +329,26 @@ const Dashboard = () => {
             <AreaChart data={activityData} margin={{ top:4, right:4, left:-20, bottom:0 }}>
               <defs>
                 <linearGradient id="gCreated"  x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor="#6366f1" stopOpacity={0.35} />
-                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                  <stop offset="5%"  stopColor="#357a70" stopOpacity={0.35} />
+                  <stop offset="95%" stopColor="#357a70" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="gResolved" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%"  stopColor="#10b981" stopOpacity={0.35} />
                   <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(99,102,241,0.07)" />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(129,179,184,0.07)" />
               <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill:'var(--text-3)', fontSize:11 }} dy={4} />
               <YAxis axisLine={false} tickLine={false} tick={{ fill:'var(--text-3)', fontSize:11 }} />
               <Tooltip content={<ChartTip />} />
-              <Area type="monotone" dataKey="created"  stroke="#6366f1" strokeWidth={2} fill="url(#gCreated)"  dot={{ fill:'#6366f1', r:3, strokeWidth:0 }} activeDot={{ r:5 }} />
+              <Area type="monotone" dataKey="created"  stroke="#357a70" strokeWidth={2} fill="url(#gCreated)"  dot={{ fill:'#357a70', r:3, strokeWidth:0 }} activeDot={{ r:5 }} />
               <Area type="monotone" dataKey="resolved" stroke="#10b981" strokeWidth={2} fill="url(#gResolved)" dot={{ fill:'#10b981', r:3, strokeWidth:0 }} activeDot={{ r:5 }} />
             </AreaChart>
           </ResponsiveContainer>
 
           {/* Legend */}
           <div style={{ display:'flex', gap:'1.25rem', justifyContent:'center', marginTop:'8px' }}>
-            {[{ c:'#6366f1', l:'Created' }, { c:'#10b981', l:'Resolved' }].map(({ c, l }) => (
+            {[{ c:'#357a70', l:'Created' }, { c:'#10b981', l:'Resolved' }].map(({ c, l }) => (
               <div key={l} style={{ display:'flex', alignItems:'center', gap:'6px', fontSize:'0.75rem', color:'var(--text-2)' }}>
                 <div style={{ width:'10px', height:'3px', borderRadius:'99px', background:c }} />
                 {l}

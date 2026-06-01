@@ -35,7 +35,13 @@ export default function ResetPassword() {
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <h1 className="page-title">New Password</h1>
         </div>
-        <div className="glass" style={{ padding: '2rem' }}>
+        <div style={{
+          background: 'var(--bg-2)',
+          border: '1px solid rgba(53,122,112,0.25)',
+          borderRadius: 'var(--r-md)',
+          padding: '2rem',
+          boxShadow: 'var(--shadow-lg)',
+        }}>
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
               <label className="input-label">New Password</label>
@@ -44,7 +50,7 @@ export default function ResetPassword() {
                 <input type="password" required className="input" style={{ paddingLeft: '2.5rem' }} value={password} onChange={e => setPassword(e.target.value)} />
               </div>
             </div>
-            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" className="btn btn-primary" disabled={loading}>
+            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" className="btn btn-primary" style={{ background: '#357a70', border: '1px solid rgba(129,179,184,0.2)', boxShadow: '0 4px 12px rgba(53,122,112,0.3)' }} disabled={loading}>
               {loading ? 'Saving...' : <><Save size={15} /> Save Password</>}
             </motion.button>
           </form>

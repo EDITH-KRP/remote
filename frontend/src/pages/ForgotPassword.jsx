@@ -28,7 +28,13 @@ export default function ForgotPassword() {
           <h1 className="page-title">Reset Password</h1>
           <p className="page-sub">Enter your email to receive a reset link</p>
         </div>
-        <div className="glass" style={{ padding: '2rem' }}>
+        <div style={{
+          background: 'var(--bg-2)',
+          border: '1px solid rgba(53,122,112,0.25)',
+          borderRadius: 'var(--r-md)',
+          padding: '2rem',
+          boxShadow: 'var(--shadow-lg)',
+        }}>
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
               <label className="input-label">Email</label>
@@ -37,13 +43,13 @@ export default function ForgotPassword() {
                 <input type="email" required className="input" style={{ paddingLeft: '2.5rem' }} value={email} onChange={e => setEmail(e.target.value)} />
               </div>
             </div>
-            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" className="btn btn-primary" disabled={loading}>
+            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" className="btn btn-primary" style={{ background: '#357a70', border: '1px solid rgba(129,179,184,0.2)', boxShadow: '0 4px 12px rgba(53,122,112,0.3)' }} disabled={loading}>
               {loading ? 'Sending...' : <><ArrowRight size={15} /> Send Link</>}
             </motion.button>
           </form>
         </div>
         <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.875rem' }}>
-          <Link to="/login" style={{ color: 'var(--p3)', textDecoration: 'none', fontWeight: 600 }}>← Back to Login</Link>
+          <Link to="/login" style={{ color: '#81b3b8', textDecoration: 'underline', fontWeight: 600 }}>← Back to Login</Link>
         </p>
       </motion.div>
     </div>

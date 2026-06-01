@@ -9,32 +9,32 @@
 â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 @layer base {
   :root {
-    --bg:            #020617;
-    --bg-2:          #0F172A;
-    --bg-3:          #1E293B;
-    --bg-4:          #334155;
-    --surface:       rgba(15, 23, 42, 0.75);
-    --surface-2:     rgba(30, 41, 59, 0.88);
+    --bg:            #0d1416;
+    --bg-2:          #161f22;
+    --bg-3:          #1c282c;
+    --bg-4:          #2b3e45;
+    --surface:       rgba(22, 31, 34, 0.75);
+    --surface-2:     rgba(28, 40, 44, 0.88);
 
     --text-1: #F8FAFC;
-    --text-2: #94A3B8;
-    --text-3: #64748B;
+    --text-2: #b3c1c5;
+    --text-3: #6b8489;
 
-    --border:   rgba(3, 105, 161, 0.15);
-    --border-2: rgba(2, 132, 199, 0.2);
-    --border-hover: rgba(2, 132, 199, 0.4);
+    --border:   rgba(53, 122, 112, 0.18);
+    --border-2: rgba(129, 179, 184, 0.22);
+    --border-hover: rgba(129, 179, 184, 0.45);
 
-    /* Brand gradient */
-    --p1: #0369A1;
-    --p2: #0284C7;
-    --p3: #38BDF8;
-    --cyan: #06b6d4;
-    --pink: #ec4899;
+    /* ServiceNow Brand Colors */
+    --p1: #293e40;
+    --p2: #357a70;
+    --p3: #81b3b8;
+    --cyan: #81b3b8;
+    --pink: #EA580C;
 
-    --grad-main:    linear-gradient(135deg, #0369A1, #0284C7, #38BDF8);
-    --grad-glow:    linear-gradient(135deg, rgba(3,105,161,0.6), rgba(2,132,199,0.6));
-    --grad-card:    linear-gradient(145deg, rgba(16,21,40,0.9), rgba(22,28,52,0.8));
-    --grad-subtle:  linear-gradient(135deg, rgba(3,105,161,0.08), rgba(2,132,199,0.04));
+    --grad-main:    linear-gradient(135deg, #293e40, #357a70, #81b3b8);
+    --grad-glow:    linear-gradient(135deg, rgba(41,62,64,0.6), rgba(53,122,112,0.6));
+    --grad-card:    linear-gradient(145deg, rgba(22,31,34,0.95), rgba(28,40,44,0.85));
+    --grad-subtle:  linear-gradient(135deg, rgba(41,62,64,0.08), rgba(53,122,112,0.04));
 
     --glow-sm:  0 0 20px rgba(3,105,161,0.25);
     --glow-md:  0 0 40px rgba(3,105,161,0.3);
@@ -753,20 +753,20 @@ select option {
 
 
 html:not(.dark) {
-  --bg: #F8FAFC;
+  --bg: #f3f4f5;
   --bg-2: #FFFFFF;
-  --bg-3: #F1F5F9;
-  --bg-4: #E2E8F0;
+  --bg-3: #e6e8ea;
+  --bg-4: #cbd2d6;
   --surface: rgba(255, 255, 255, 0.8);
   --surface-2: rgba(255, 255, 255, 0.95);
-  --text-1: #020617;
-  --text-2: #334155;
-  --text-3: #64748B;
-  --border:        rgba(3, 105, 161, 0.18);
-  --border-2:      rgba(2, 132, 199, 0.22);
-  --border-hover:  rgba(3, 105, 161, 0.45);
-  --glow-sm:  0 0 20px rgba(3,105,161,0.15);
-  --glow-md:  0 0 40px rgba(3,105,161,0.2);
+  --text-1: #161b1c;
+  --text-2: #3e4f52;
+  --text-3: #758689;
+  --border:        rgba(41, 62, 64, 0.18);
+  --border-2:      rgba(53, 122, 112, 0.22);
+  --border-hover:  rgba(53, 122, 112, 0.45);
+  --glow-sm:  0 0 20px rgba(41,62,64,0.15);
+  --glow-md:  0 0 40px rgba(41,62,64,0.2);
   --grad-card: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(248,250,252,0.85));
 }
 

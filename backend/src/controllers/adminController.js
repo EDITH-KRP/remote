@@ -141,9 +141,10 @@ exports.getReports = async (req, res) => {
   try {
     const total_tickets = await Ticket.count();
     const open_tickets = await Ticket.count({ where: { status: 'Open' } });
+    const inprogress_tickets = await Ticket.count({ where: { status: 'In Progress' } });
     const resolved_tickets = await Ticket.count({ where: { status: 'Resolved' } });
     
-    res.status(200).json({ total_tickets, open_tickets, resolved_tickets });
+    res.status(200).json({ total_tickets, open_tickets, inprogress_tickets, resolved_tickets });
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }

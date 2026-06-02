@@ -20,6 +20,18 @@ export default function Profile() {
   const location = useLocation();
 
   useEffect(() => {
+    if (user) {
+      setForm(prev => ({
+        ...prev,
+        full_name: user.full_name || "",
+        employee_id: user.employee_id || "",
+        alternate_email: user.alternate_email || "",
+        phone: user.phone || ""
+      }));
+    }
+  }, [user]);
+
+  useEffect(() => {
     if (location.state?.message) {
       toast.error(location.state.message, { id: "profile-redirect" });
     }
@@ -62,42 +74,7 @@ export default function Profile() {
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "1.5rem" }} className="lg:grid-cols-dash">
         
-        {/* Left Side: ServiceNow User Badge & Info Card */}
-        <div style={{ background: "rgba(10,12,22,0.82)", border: "1px solid rgba(99,102,241,0.12)", borderRadius: "var(--r-lg)", padding: "2rem 1.5rem", textAlign: "center", backdropFilter: "blur(20px)", height: "fit-content" }}>
-          
-          <div style={{
-            width: "74px", height: "74px", borderRadius: "50%",
-            background: "var(--grad-main)", display: "flex", alignItems: "center", justifyContent: "center",
-            color: "#fff", fontSize: "1.5rem", fontWeight: 800,
-            boxShadow: "0 4px 20px rgba(3,105,161,0.5)",
-            margin: "0 auto 1rem",
-            border: "3px solid rgba(3,105,161,0.3)"
-          }}>
-            {initials}
-          </div>
-
-          <h3 style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--text-1)", margin: "0 0 4px" }}>{user?.full_name}</h3>
-          <span style={{ fontSize: "0.72rem", color: "var(--p3)", fontWeight: 700, textTransform: "uppercase", background: "rgba(3,105,161,0.12)", border: "1px solid var(--border-2)", borderRadius: "99px", padding: "2px 10px" }}>
-            {user?.role} Account
-          </span>
-
-          <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)", marginTop: "1.5rem", paddingTop: "1rem", display: "flex", flexDirection: "column", gap: "10px", textAlign: "left" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.8rem", color: "var(--text-2)" }}>
-              <Shield size={12} style={{ color: "var(--text-3)" }} />
-              <span>Role: <strong style={{ color: "var(--text-1)" }}>{user?.role}</strong></span>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.8rem", color: "var(--text-2)" }}>
-              <Bookmark size={12} style={{ color: "var(--text-3)" }} />
-              <span>Department: <strong style={{ color: "var(--text-1)" }}>{user?.department || "Others"}</strong></span>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.8rem", color: "var(--text-2)" }}>
-              <Mail size={12} style={{ color: "var(--text-3)" }} />
-              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Email: <strong style={{ color: "var(--text-1)" }}>{user?.email}</strong></span>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Side: ServiceNow Editable Profile Form */}
+        {/* Left Side: ServiceNow Editable Profile Form (gets 2fr column) */}
         <div style={{ background: "rgba(10,12,22,0.82)", border: "1px solid rgba(99,102,241,0.12)", borderRadius: "var(--r-lg)", padding: "2rem", backdropFilter: "blur(20px)" }}>
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
             
@@ -195,6 +172,41 @@ export default function Profile() {
               {loading ? "Saving Changes..." : <><Save size={15} /> Save Record</>}
             </motion.button>
           </form>
+        </div>
+
+        {/* Right Side: ServiceNow User Badge & Info Card (gets 1fr column) */}
+        <div style={{ background: "rgba(10,12,22,0.82)", border: "1px solid rgba(99,102,241,0.12)", borderRadius: "var(--r-lg)", padding: "2rem 1.5rem", textAlign: "center", backdropFilter: "blur(20px)", height: "fit-content" }}>
+          
+          <div style={{
+            width: "74px", height: "74px", borderRadius: "50%",
+            background: "var(--grad-main)", display: "flex", alignItems: "center", justifyContent: "center",
+            color: "#fff", fontSize: "1.5rem", fontWeight: 800,
+            boxShadow: "0 4px 20px rgba(3,105,161,0.5)",
+            margin: "0 auto 1rem",
+            border: "3px solid rgba(3,105,161,0.3)"
+          }}>
+            {initials}
+          </div>
+
+          <h3 style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--text-1)", margin: "0 0 4px" }}>{user?.full_name}</h3>
+          <span style={{ fontSize: "0.72rem", color: "var(--p3)", fontWeight: 700, textTransform: "uppercase", background: "rgba(3,105,161,0.12)", border: "1px solid var(--border-2)", borderRadius: "99px", padding: "2px 10px" }}>
+            {user?.role} Account
+          </span>
+
+          <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)", marginTop: "1.5rem", paddingTop: "1rem", display: "flex", flexDirection: "column", gap: "10px", textAlign: "left" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.8rem", color: "var(--text-2)" }}>
+              <Shield size={12} style={{ color: "var(--text-3)" }} />
+              <span>Role: <strong style={{ color: "var(--text-1)" }}>{user?.role}</strong></span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.8rem", color: "var(--text-2)" }}>
+              <Bookmark size={12} style={{ color: "var(--text-3)" }} />
+              <span>Department: <strong style={{ color: "var(--text-1)" }}>{user?.department || "Others"}</strong></span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.8rem", color: "var(--text-2)" }}>
+              <Mail size={12} style={{ color: "var(--text-3)" }} />
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Email: <strong style={{ color: "var(--text-1)" }}>{user?.email}</strong></span>
+            </div>
+          </div>
         </div>
 
       </div>

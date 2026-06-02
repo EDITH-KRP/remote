@@ -65,24 +65,28 @@ export default function ServiceNowLayout({ children }) {
     navigate("/login");
   };
 
+  const currentPath = location.pathname.toLowerCase().replace(/\/$/, "") || "/";
+
   // ServiceNow breadcrumbs mapper
   const getBreadcrumbs = () => {
+    if (currentPath.startsWith("/admin")) {
+      return ["Service Desk", "Control Center"];
+    }
     const paths = {
       "/": ["Service Portal", "Home"],
       "/dashboard": ["Self-Service", "Dashboard"],
       "/raise-ticket": ["Self-Service", "Raise a Ticket"],
       "/my-tickets": ["Self-Service", "My Requests"],
       "/profile": ["Self-Service", "My Profile"],
-      "/admin": ["Service Desk", "Control Center"],
     };
-    return paths[location.pathname] || ["Self-Service", "Incident Desk"];
+    return paths[currentPath] || ["Self-Service", "Incident Desk"];
   };
 
   const breadcrumbs = getBreadcrumbs();
 
   // ServiceNow Sidebar Navigator items
   const menuSections = [
-    ...(location.pathname === "/admin" ? [] : [
+    ...(currentPath.startsWith("/admin") ? [] : [
       {
         title: "Self-Service",
         items: [
@@ -206,7 +210,7 @@ export default function ServiceNowLayout({ children }) {
                       style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}
                     >
                       {sec.items.map(item => {
-                        const active = location.pathname === item.to;
+                        const active = currentPath === (item.to.toLowerCase().replace(/\/$/, "") || "/");
                         return (
                           <Link
                             key={item.to}

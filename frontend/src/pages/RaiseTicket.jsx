@@ -169,126 +169,92 @@ export default function RaiseTicket({ onSuccess }) {
           boxShadow: '0 20px 60px rgba(0,0,0,0.65)',
         }}>
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {/* ── Corporate User Info Box (Two Columns) ── */}
+            {/* ── ServiceNow 2-Column Form Fields Grid ── */}
             <div style={{
-              background: 'rgba(255,255,255,0.015)',
-              border: '1px solid rgba(53,122,112,0.18)',
-              borderRadius: 'var(--r-sm)',
-              padding: '1.25rem',
-              marginBottom: '0.5rem',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
+              gap: '1.25rem 2rem',
+              background: 'rgba(255,255,255,0.01)',
+              border: '1px solid rgba(99,102,241,0.1)',
+              borderRadius: 'var(--r-md)',
+              padding: '1.5rem',
+              marginBottom: '0.5rem'
             }}>
-              <p style={{ fontSize: '0.68rem', fontWeight: 700, color: '#fb923c', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>
-                Caller Identification & Information
-              </p>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
-                {/* Left Column: Caller, Email, Employee ID, Alternate Contact */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  <div>
-                    <label className="input-label" htmlFor="t-caller">Caller (Name)</label>
-                    <div style={{ position: 'relative' }}>
-                      <input
-                        id="t-caller"
-                        type="text"
-                        readOnly
-                        className="input"
-                        value={user?.full_name || ''}
-                        style={{ background: 'rgba(255,255,255,0.02)', color: 'var(--text-2)', cursor: 'not-allowed', fontSize: '0.8rem', padding: '0.45rem 0.75rem' }}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="input-label" htmlFor="t-email">Email ID</label>
-                    <div style={{ position: 'relative' }}>
-                      <input
-                        id="t-email"
-                        type="text"
-                        readOnly
-                        className="input"
-                        value={user?.email || ''}
-                        style={{ background: 'rgba(255,255,255,0.02)', color: 'var(--text-2)', cursor: 'not-allowed', fontSize: '0.8rem', padding: '0.45rem 0.75rem' }}
-                      />
-                    </div>
-                  </div>
+              {/* Left Column */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+                <p style={{ fontSize: '0.72rem', fontWeight: 700, color: '#fb923c', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 4px 0' }}>
+                  Requester Details
+                </p>
+                <div>
+                  <label className="input-label" htmlFor="t-caller">Caller (Name)</label>
+                  <input
+                    id="t-caller"
+                    type="text"
+                    readOnly
+                    className="input"
+                    value={user?.full_name || ''}
+                    style={{ background: 'rgba(255,255,255,0.02)', color: 'var(--text-2)', cursor: 'not-allowed', fontSize: '0.8rem', padding: '0.45rem 0.75rem' }}
+                  />
+                </div>
+                <div>
+                  <label className="input-label" htmlFor="t-email">Email ID</label>
+                  <input
+                    id="t-email"
+                    type="text"
+                    readOnly
+                    className="input"
+                    value={user?.email || ''}
+                    style={{ background: 'rgba(255,255,255,0.02)', color: 'var(--text-2)', cursor: 'not-allowed', fontSize: '0.8rem', padding: '0.45rem 0.75rem' }}
+                  />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <div>
                     <label className="input-label" htmlFor="t-empid">Employee ID</label>
-                    <div style={{ position: 'relative' }}>
-                      <input
-                        id="t-empid"
-                        type="text"
-                        readOnly
-                        className="input"
-                        value={user?.employee_id || '—'}
-                        style={{ background: 'rgba(255,255,255,0.02)', color: 'var(--text-2)', cursor: 'not-allowed', fontSize: '0.8rem', padding: '0.45rem 0.75rem' }}
-                      />
-                    </div>
+                    <input
+                      id="t-empid"
+                      type="text"
+                      readOnly
+                      className="input"
+                      value={user?.employee_id || '—'}
+                      style={{ background: 'rgba(255,255,255,0.02)', color: 'var(--text-2)', cursor: 'not-allowed', fontSize: '0.8rem', padding: '0.45rem 0.75rem' }}
+                    />
                   </div>
                   <div>
-                    <label className="input-label" htmlFor="t-altcontact">Alternate Contact Number</label>
-                    <div style={{ position: 'relative' }}>
-                      <input
-                        id="t-altcontact"
-                        type="text"
-                        readOnly
-                        className="input"
-                        value={user?.phone || '—'}
-                        style={{ background: 'rgba(255,255,255,0.02)', color: 'var(--text-2)', cursor: 'not-allowed', fontSize: '0.8rem', padding: '0.45rem 0.75rem' }}
-                      />
-                    </div>
+                    <label className="input-label" htmlFor="t-altcontact">Alternate Contact</label>
+                    <input
+                      id="t-altcontact"
+                      type="text"
+                      readOnly
+                      className="input"
+                      value={user?.phone || '—'}
+                      style={{ background: 'rgba(255,255,255,0.02)', color: 'var(--text-2)', cursor: 'not-allowed', fontSize: '0.8rem', padding: '0.45rem 0.75rem' }}
+                    />
                   </div>
                 </div>
 
-                {/* Right Column: Date */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  <div>
-                    <label className="input-label" htmlFor="t-opened">Opened Date</label>
-                    <div style={{ position: 'relative' }}>
-                      <input
-                        id="t-opened"
-                        type="text"
-                        readOnly
-                        className="input"
-                        value={new Date().toLocaleString()}
-                        style={{ background: 'rgba(255,255,255,0.02)', color: 'var(--text-2)', cursor: 'not-allowed', fontSize: '0.8rem', padding: '0.45rem 0.75rem' }}
-                      />
-                    </div>
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', margin: '0.5rem 0' }} />
+
+                <p style={{ fontSize: '0.72rem', fontWeight: 700, color: '#fb923c', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 4px 0' }}>
+                  Ticket Classification
+                </p>
+
+                <div>
+                  <label className="input-label" htmlFor="t-type">Ticket Type</label>
+                  <div style={{ position: 'relative' }}>
+                    <select
+                      id="t-type"
+                      value={form.ticket_type}
+                      onChange={e => setForm({ ...form, ticket_type: e.target.value })}
+                      className="input"
+                      style={{ paddingRight: '2rem', cursor: 'pointer', fontSize: '0.825rem', padding: '0.5rem 0.85rem' }}
+                    >
+                      <option value="Incident" style={{ background: '#0c0f1d' }}>Incident</option>
+                      <option value="Request" style={{ background: '#0c0f1d' }}>Request</option>
+                    </select>
+                    <ChevronDown size={13} style={{ position: 'absolute', right: '0.7rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-3)' }} />
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* ── State Selector (Above Grids) ── */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1, duration: 0.3 }}
-            >
-              <label className="input-label" htmlFor="t-state">Incident State</label>
-              <div style={{ position: 'relative' }}>
-                <select
-                  id="t-state"
-                  value={form.state}
-                  onChange={e => setForm({ ...form, state: e.target.value })}
-                  className="input"
-                  style={{ paddingRight: '2rem', cursor: 'pointer', fontSize: '0.825rem', padding: '0.5rem 0.85rem' }}
-                >
-                  <option value="New" style={{ background: '#0c0f1d' }}>New</option>
-                  <option value="In Progress" style={{ background: '#0c0f1d' }}>In Progress</option>
-                  <option value="On Hold" style={{ background: '#0c0f1d' }}>On Hold</option>
-                  <option value="Resolved" style={{ background: '#0c0f1d' }}>Resolved</option>
-                </select>
-                <ChevronDown size={13} style={{ position: 'absolute', right: '0.7rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-3)' }} />
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15, duration: 0.3 }}
-              style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', marginBottom: '1rem' }}
-            >
-              {/* Left Column: Categories and Sub Categories */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                 <div>
                   <label className="input-label" htmlFor="t-category">Category</label>
                   <div style={{ position: 'relative' }}>
@@ -307,6 +273,7 @@ export default function RaiseTicket({ onSuccess }) {
                     <ChevronDown size={13} style={{ position: 'absolute', right: '0.7rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-3)' }} />
                   </div>
                 </div>
+
                 <div>
                   <label className="input-label" htmlFor="t-sub-category">Sub Category</label>
                   <div style={{ position: 'relative' }}>
@@ -326,48 +293,71 @@ export default function RaiseTicket({ onSuccess }) {
                     <ChevronDown size={13} style={{ position: 'absolute', right: '0.7rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-3)' }} />
                   </div>
                 </div>
+
+                <div>
+                  <label className="input-label" htmlFor="t-subject">Subject <span style={{ color: '#f87171' }}>*</span></label>
+                  <input
+                    id="t-subject"
+                    type="text"
+                    required
+                    placeholder="Brief summary"
+                    value={form.subject}
+                    onChange={e => setForm({ ...form, subject: e.target.value })}
+                    className="input"
+                    style={{ fontSize: '0.825rem', padding: '0.5rem 0.85rem' }}
+                  />
+                </div>
+
+                <div>
+                  <label className="input-label" htmlFor="t-sdesc">Short Description</label>
+                  <input
+                    id="t-sdesc"
+                    type="text"
+                    placeholder="One sentence summary"
+                    value={form.short_description}
+                    onChange={e => setForm({ ...form, short_description: e.target.value })}
+                    className="input"
+                    style={{ fontSize: '0.825rem', padding: '0.5rem 0.85rem' }}
+                  />
+                </div>
               </div>
 
-              {/* Right Column: Priority, Impact, Urgency */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              {/* Right Column */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+                <p style={{ fontSize: '0.72rem', fontWeight: 700, color: '#fb923c', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 4px 0' }}>
+                  Incident Settings
+                </p>
                 <div>
-                  <label className="input-label">Calculated Priority</label>
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={curPriorityValue}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.18 }}
-                      className="input"
-                      style={{
-                        background: 'rgba(255,255,255,0.02)',
-                        color: 'var(--text-2)',
-                        cursor: 'not-allowed',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        fontSize: '0.825rem',
-                        padding: '0.5rem 0.85rem'
-                      }}
-                    >
-                      <span style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '5px',
-                        padding: '2px 8px',
-                        borderRadius: '99px',
-                        background: curPriority.bg,
-                        border: `1px solid ${curPriority.border}`,
-                        color: curPriority.color,
-                        fontSize: '0.72rem',
-                        fontWeight: 700,
-                      }}>
-                        <Tag size={12} /> {curPriority.value} Priority
-                      </span>
-                    </motion.div>
-                  </AnimatePresence>
+                  <label className="input-label" htmlFor="t-opened">Opened Date</label>
+                  <input
+                    id="t-opened"
+                    type="text"
+                    readOnly
+                    className="input"
+                    value={new Date().toLocaleString()}
+                    style={{ background: 'rgba(255,255,255,0.02)', color: 'var(--text-2)', cursor: 'not-allowed', fontSize: '0.8rem', padding: '0.45rem 0.75rem' }}
+                  />
                 </div>
+
+                <div>
+                  <label className="input-label" htmlFor="t-state">Incident State</label>
+                  <div style={{ position: 'relative' }}>
+                    <select
+                      id="t-state"
+                      value={form.state}
+                      onChange={e => setForm({ ...form, state: e.target.value })}
+                      className="input"
+                      style={{ paddingRight: '2rem', cursor: 'pointer', fontSize: '0.825rem', padding: '0.5rem 0.85rem' }}
+                    >
+                      <option value="New" style={{ background: '#0c0f1d' }}>New</option>
+                      <option value="In Progress" style={{ background: '#0c0f1d' }}>In Progress</option>
+                      <option value="On Hold" style={{ background: '#0c0f1d' }}>On Hold</option>
+                      <option value="Resolved" style={{ background: '#0c0f1d' }}>Resolved</option>
+                    </select>
+                    <ChevronDown size={13} style={{ position: 'absolute', right: '0.7rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-3)' }} />
+                  </div>
+                </div>
+
                 <div>
                   <label className="input-label" htmlFor="t-impact">Impact</label>
                   <div style={{ position: 'relative' }}>
@@ -385,6 +375,7 @@ export default function RaiseTicket({ onSuccess }) {
                     <ChevronDown size={13} style={{ position: 'absolute', right: '0.7rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-3)' }} />
                   </div>
                 </div>
+
                 <div>
                   <label className="input-label" htmlFor="t-urgency">Urgency</label>
                   <div style={{ position: 'relative' }}>
@@ -402,69 +393,47 @@ export default function RaiseTicket({ onSuccess }) {
                     <ChevronDown size={13} style={{ position: 'absolute', right: '0.7rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-3)' }} />
                   </div>
                 </div>
+
+                <div>
+                  <label className="input-label">Calculated Priority</label>
+                  <div className="input" style={{ background: 'rgba(255,255,255,0.02)', color: 'var(--text-2)', cursor: 'not-allowed', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.825rem', padding: '0.5rem 0.85rem' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '2px 8px', borderRadius: '99px', background: curPriority.bg, border: `1px solid ${curPriority.border}`, color: curPriority.color, fontSize: '0.72rem', fontWeight: 700 }}>
+                      <Tag size={12} /> {curPriority.value} Priority
+                    </span>
+                  </div>
+                </div>
+
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', margin: '0.5rem 0' }} />
+
+                <p style={{ fontSize: '0.72rem', fontWeight: 700, color: '#fb923c', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 4px 0' }}>
+                  Assignments (System Controlled)
+                </p>
+
+                <div>
+                  <label className="input-label" htmlFor="t-assgroup">Assignment Group</label>
+                  <input
+                    id="t-assgroup"
+                    type="text"
+                    readOnly
+                    className="input"
+                    value={form.assigned_group || '—'}
+                    style={{ background: 'rgba(255,255,255,0.02)', color: 'var(--text-3)', cursor: 'not-allowed', fontSize: '0.8rem', padding: '0.45rem 0.75rem' }}
+                  />
+                </div>
+
+                <div>
+                  <label className="input-label" htmlFor="t-assstaff">Assigned To (Staff)</label>
+                  <input
+                    id="t-assstaff"
+                    type="text"
+                    readOnly
+                    className="input"
+                    value={form.assigned_staff || '—'}
+                    style={{ background: 'rgba(255,255,255,0.02)', color: 'var(--text-3)', cursor: 'not-allowed', fontSize: '0.8rem', padding: '0.45rem 0.75rem' }}
+                  />
+                </div>
               </div>
-            </motion.div>
-
-            {/* Ticket Type (Select) */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.16, duration: 0.3 }}
-            >
-              <label className="input-label" htmlFor="t-type">Ticket Type</label>
-              <div style={{ position: 'relative' }}>
-                <select
-                  id="t-type"
-                  value={form.ticket_type}
-                  onChange={e => setForm({ ...form, ticket_type: e.target.value })}
-                  className="input"
-                  style={{ paddingRight: '2rem', cursor: 'pointer', fontSize: '0.825rem', padding: '0.5rem 0.85rem' }}
-                >
-                  <option value="Incident" style={{ background: '#0c0f1d' }}>Incident</option>
-                  <option value="Request" style={{ background: '#0c0f1d' }}>Request</option>
-                </select>
-                <ChevronDown size={13} style={{ position: 'absolute', right: '0.7rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-3)' }} />
-              </div>
-            </motion.div>
-
-            {/* Subject */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.18, duration: 0.3 }}
-            >
-              <label className="input-label" htmlFor="t-subject" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <FileText size={11} /> Subject <span style={{ color: '#f87171', marginLeft: '1px' }}>*</span>
-              </label>
-              <input
-                id="t-subject"
-                type="text"
-                required
-                placeholder="Brief summary"
-                value={form.subject}
-                onChange={e => setForm({ ...form, subject: e.target.value })}
-                className="input"
-                style={{ fontSize: '0.825rem', padding: '0.5rem 0.85rem' }}
-              />
-            </motion.div>
-
-            {/* Short Description */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.3 }}
-            >
-              <label className="input-label" htmlFor="t-sdesc">Short Description</label>
-              <input
-                id="t-sdesc"
-                type="text"
-                placeholder="One sentence summary"
-                value={form.short_description}
-                onChange={e => setForm({ ...form, short_description: e.target.value })}
-                className="input"
-                style={{ fontSize: '0.825rem', padding: '0.5rem 0.85rem' }}
-              />
-            </motion.div>
+            </div>
 
             {/* Description */}
             <motion.div
@@ -553,7 +522,6 @@ export default function RaiseTicket({ onSuccess }) {
                 }
               </motion.button>
             </motion.div>
-
           </form>
         </div>
       </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../services/api";
 import { 
-  X, Clock, MessageSquare, ChevronRight, TicketIcon, 
+  X, Clock, MessageSquare, ChevronRight, ChevronDown, TicketIcon, 
   Send, Search, Filter, Plus, Calendar, AlertCircle, 
   CornerDownRight, ShieldAlert, Lock, RotateCcw,
   CheckCircle2, Play, Pause, Bookmark

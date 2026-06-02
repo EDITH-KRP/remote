@@ -72,6 +72,9 @@ export default function ServiceNowLayout({ children }) {
     if (currentPath.startsWith("/admin")) {
       return ["Service Desk", "Control Center"];
     }
+    if (currentPath.startsWith("/assigned")) {
+      return ["Service Desk", "My Assigned Tickets"];
+    }
     const paths = {
       "/": ["Service Portal", "Home"],
       "/dashboard": ["Self-Service", "Dashboard"],
@@ -98,11 +101,12 @@ export default function ServiceNowLayout({ children }) {
         ]
       }
     ]),
-    ...(user?.role === "admin" ? [
+    ...(user?.role === "admin" || user?.role === "support" ? [
       {
         title: "ITIL Service Desk",
         items: [
-          { to: "/admin", label: "Admin Control Center", icon: <ShieldCheck size={13} /> }
+          ...(user?.role === "admin" ? [{ to: "/admin", label: "Admin Control Center", icon: <ShieldCheck size={13} /> }] : []),
+          { to: "/assigned", label: "My Assigned Tickets", icon: <List size={13} /> }
         ]
       }
     ] : [])

@@ -11,9 +11,9 @@ const priorityMatrix = {
 };
 
 const priorities = [
-  { value: 'Low',      dot: '🟢', color: '#34d399', bg: 'rgba(52,211,153,0.1)',  border: 'rgba(52,211,153,0.25)'  },
-  { value: 'Medium',   dot: '🟡', color: '#fbbf24', bg: 'rgba(251,191,36,0.1)',  border: 'rgba(251,191,36,0.25)'  },
-  { value: 'High',     dot: '🟠', color: '#fb923c', bg: 'rgba(251,146,60,0.1)',  border: 'rgba(251,146,60,0.25)'  },
+  { value: 'Low', dot: '🟢', color: '#34d399', bg: 'rgba(52,211,153,0.1)', border: 'rgba(52,211,153,0.25)' },
+  { value: 'Medium', dot: '🟡', color: '#fbbf24', bg: 'rgba(251,191,36,0.1)', border: 'rgba(251,191,36,0.25)' },
+  { value: 'High', dot: '🟠', color: '#fb923c', bg: 'rgba(251,146,60,0.1)', border: 'rgba(251,146,60,0.25)' },
   { value: 'Critical', dot: '🔴', color: '#f87171', bg: 'rgba(248,113,113,0.1)', border: 'rgba(248,113,113,0.25)' },
 ];
 
@@ -21,11 +21,11 @@ export default function RaiseTicket({ onSuccess }) {
   const { user } = React.useContext(AuthContext);
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
-  const [form, setForm] = useState({ 
+  const [form, setForm] = useState({
     ticket_type: 'Incident',
-    subject: '', 
+    subject: '',
     short_description: '',
-    description: '', 
+    description: '',
     note: '',
     category_id: '',
     sub_category_id: '',
@@ -34,22 +34,22 @@ export default function RaiseTicket({ onSuccess }) {
     urgency: 'Low'
   });
   const [attachment, setAttachment] = useState(null);
-  const [loading, setLoading]   = useState(false);
-  const [success, setSuccess]   = useState(null);
-  const [error, setError]       = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(null);
+  const [error, setError] = useState(null);
   const [charCount, setCharCount] = useState(0);
 
   useEffect(() => {
     api.get('/tickets/categories')
       .then(r => setCategories(r.data))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   useEffect(() => {
     if (form.category_id) {
       api.get(`/tickets/sub-categories?category_id=${form.category_id}`)
         .then(r => setSubCategories(r.data))
-        .catch(() => {});
+        .catch(() => { });
     } else {
       setSubCategories([]);
     }
@@ -73,15 +73,15 @@ export default function RaiseTicket({ onSuccess }) {
       if (attachment) formData.append('attachment', attachment);
 
       const res = await api.post('/tickets/create', formData, {
-        headers: { 
+        headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
       setSuccess(`Ticket ${res.data.ticket_number} submitted successfully!`);
-      setForm({ 
-        ticket_type: 'Incident', subject: '', short_description: '', 
-        description: '', note: '', category_id: '', sub_category_id: '', 
-        state: 'New', impact: 'Low', urgency: 'Low' 
+      setForm({
+        ticket_type: 'Incident', subject: '', short_description: '',
+        description: '', note: '', category_id: '', sub_category_id: '',
+        state: 'New', impact: 'Low', urgency: 'Low'
       });
       setAttachment(null);
       setCharCount(0);
@@ -395,7 +395,7 @@ export default function RaiseTicket({ onSuccess }) {
                 </div>
 
                 <div>
-                  <label className="input-label">Calculated Priority</label>
+                  <label className="input-label">Priority</label>
                   <div className="input" style={{ background: 'rgba(255,255,255,0.02)', color: 'var(--text-2)', cursor: 'not-allowed', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.825rem', padding: '0.5rem 0.85rem' }}>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '2px 8px', borderRadius: '99px', background: curPriority.bg, border: `1px solid ${curPriority.border}`, color: curPriority.color, fontSize: '0.72rem', fontWeight: 700 }}>
                       <Tag size={12} /> {curPriority.value} Priority

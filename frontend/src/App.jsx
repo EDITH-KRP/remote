@@ -14,6 +14,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Home from './pages/Home';
 import ServiceNowLayout from './components/ServiceNowLayout';
+import AssignedTickets from './pages/AssignedTickets';
 import { Toaster } from 'react-hot-toast';
 
 const PrivateRoute = ({ children, adminOnly = false }) => {
@@ -77,6 +78,7 @@ function AppContent() {
           <Route path="/raise-ticket" element={<PrivateRoute><RaiseTicket /></PrivateRoute>} />
           <Route path="/my-tickets"   element={<PrivateRoute><MyTickets /></PrivateRoute>} />
           <Route path="/profile"      element={<PrivateRoute><Profile /></PrivateRoute>} />
+          <Route path="/assigned"     element={<PrivateRoute><AssignedTickets /></PrivateRoute>} />
           <Route path="/admin"        element={<PrivateRoute adminOnly><AdminPanel /></PrivateRoute>} />
         </Routes>
       </div>

@@ -179,7 +179,7 @@ exports.getActivity = async (req, res) => {
     const whereCreated = { created_at: { [Op.gte]: date } };
     const whereResolved = { status: ['Resolved', 'Closed'], updated_at: { [Op.gte]: date } };
 
-    if (user.role !== 'admin') {
+    if (user.role !== 'admin' && user.role !== 'support') {
       whereCreated.user_id = user.id;
       whereResolved.user_id = user.id;
     }
@@ -227,7 +227,7 @@ exports.getTickets = async (req, res) => {
       { model: Category, as: 'category' }
     ];
 
-    if (user.role === 'admin' && req.query.all === 'true') {
+    if ((user.role === 'admin' || user.role === 'support') && req.query.all === 'true') {
       tickets = await Ticket.findAll({ include, order: [['created_at', 'DESC']] });
     } else {
       tickets = await Ticket.findAll({ where: { user_id: user.id }, include, order: [['created_at', 'DESC']] });

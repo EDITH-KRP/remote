@@ -1,0 +1,2443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ServiceNow-aligned ITIL Support Desk Presentation</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Colors - Dark Theme (Default) */
+            --bg-primary: #020617;
+            --bg-secondary: #0b0f19;
+            --card-bg: rgba(15, 23, 42, 0.65);
+            --card-border: rgba(148, 163, 184, 0.15);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #475569;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #2563eb;
+            --accent-glow: rgba(59, 130, 246, 0.18);
+            --accent-success: #10b981;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+            --accent-p1: #ef4444; /* Critical */
+            --accent-p2: #f97316; /* High */
+            --accent-p3: #f59e0b; /* Medium */
+            --accent-p4: #10b981; /* Low */
+            
+            /* Glassmorphism */
+            --glass-blur: blur(16px);
+            --shadow-premium: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+            --font-display: 'Outfit', sans-serif;
+            --font-code: 'Fira Code', monospace;
+            
+            --transition-speed: 0.4s;
+        }
+
+        .light-theme {
+            /* Colors - Light Theme */
+            --bg-primary: #f8fafc;
+            --bg-secondary: #f1f5f9;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --card-border: rgba(15, 23, 42, 0.08);
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --accent-primary: #2563eb;
+            --accent-secondary: #3b82f6;
+            --accent-glow: rgba(37, 99, 235, 0.08);
+            --accent-success: #059669;
+            --accent-warning: #d97706;
+            --accent-danger: #dc2626;
+            --shadow-premium: 0 20px 40px -15px rgba(15, 23, 42, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-display);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        /* Abstract Tech Background Elements */
+        .bg-grid {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(to right, var(--card-border) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--card-border) 1px, transparent 1px);
+            background-size: 80px 80px;
+            opacity: 0.15;
+            z-index: 1;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .bg-glow-1 {
+            position: absolute;
+            top: -10%;
+            left: -10%;
+            width: 60%;
+            height: 60%;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            z-index: 1;
+            pointer-events: none;
+            filter: blur(80px);
+        }
+
+        .bg-glow-2 {
+            position: absolute;
+            bottom: -10%;
+            right: -10%;
+            width: 60%;
+            height: 60%;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
+            z-index: 1;
+            pointer-events: none;
+            filter: blur(80px);
+        }
+
+        /* Application Layout */
+        .app-container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Floating Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            border-bottom: 1px solid var(--card-border);
+            backdrop-filter: var(--glass-blur);
+            background-color: rgba(2, 6, 23, 0.3);
+            z-index: 100;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px var(--accent-primary);
+        }
+
+        .brand-logo svg {
+            width: 18px;
+            height: 18px;
+            stroke: #ffffff;
+            stroke-width: 2.5;
+            fill: none;
+        }
+
+        .brand-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: linear-gradient(to right, var(--text-primary), var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-meta {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .meta-pill {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 6px 14px;
+            border-radius: 99px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pill-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--accent-success);
+            box-shadow: 0 0 8px var(--accent-success);
+            animation: pulse 1.8s infinite;
+        }
+
+        /* Presentation Workspace & Slides */
+        .presentation-viewport {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            overflow: hidden;
+        }
+
+        .slides-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 1300px;
+            max-height: 760px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transform: translateX(60px) scale(0.98);
+            pointer-events: none;
+            transition: opacity var(--transition-speed) cubic-bezier(0.16, 1, 0.3, 1),
+                        transform var(--transition-speed) cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+            pointer-events: auto;
+            z-index: 20;
+        }
+
+        .slide.previous {
+            transform: translateX(-60px) scale(0.98);
+        }
+
+        /* Common Slide Layouts */
+        .slide-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        .slide-content-full {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+        }
+
+        .slide-title-area {
+            margin-bottom: 24px;
+        }
+
+        .slide-subtitle {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent-primary);
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .slide-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.2;
+        }
+
+        .slide-title span {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card-premium {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: var(--shadow-premium);
+            backdrop-filter: var(--glass-blur);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card-premium:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 25px 50px -12px rgba(59, 130, 246, 0.08);
+        }
+
+        /* -------------------------------------------------------------
+           SLIDE-SPECIFIC DESIGNS
+        ------------------------------------------------------------- */
+        
+        /* SLIDE 1: Title Slide */
+        .slide-hero {
+            text-align: center;
+            max-width: 850px;
+            margin: 0 auto;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: rgba(59, 130, 246, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            padding: 8px 18px;
+            border-radius: 99px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent-primary);
+            margin-bottom: 24px;
+        }
+
+        .slide-hero h1 {
+            font-size: 3.8rem;
+            font-weight: 850;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            letter-spacing: -1.5px;
+        }
+
+        .slide-hero h1 span {
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-desc {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+
+        .hero-ctas {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            color: #ffffff;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-display);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.6);
+        }
+
+        .btn-secondary {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+            font-family: var(--font-display);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: var(--text-secondary);
+        }
+
+        /* SLIDE 2: Problem Statement */
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .problem-card {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .problem-icon-wrapper {
+            width: 46px;
+            height: 46px;
+            border-radius: 10px;
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-danger);
+        }
+
+        .problem-card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .problem-card p {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .problem-summary-banner {
+            margin-top: 30px;
+            background-color: rgba(239, 68, 68, 0.05);
+            border: 1px dashed rgba(239, 68, 68, 0.25);
+            padding: 16px 24px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.95rem;
+            color: #fca5a5;
+        }
+
+        .problem-summary-banner svg {
+            color: var(--accent-danger);
+            flex-shrink: 0;
+        }
+
+        /* SLIDE 3: Solution modules */
+        .solution-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .solution-card {
+            display: flex;
+            gap: 20px;
+            padding: 24px;
+            align-items: flex-start;
+        }
+
+        .solution-icon-wrapper {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            background-color: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-success);
+            flex-shrink: 0;
+        }
+
+        .solution-card-body h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .solution-card-body p {
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* SLIDE 4: Tech Stack */
+        .tech-categories {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            width: 100%;
+        }
+
+        .tech-category-card {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding: 22px;
+        }
+
+        .tech-category-card h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 8px;
+            margin-bottom: 4px;
+        }
+
+        .tech-badge-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tech-badge {
+            background-color: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--card-border);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .tech-badge:hover {
+            background-color: rgba(59, 130, 246, 0.08);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .tech-badge svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* SLIDE 5: Interactive System Architecture */
+        .architecture-layout {
+            display: grid;
+            grid-template-columns: 1.3fr 0.7fr;
+            gap: 30px;
+            height: 100%;
+            align-items: stretch;
+        }
+
+        .arch-svg-container {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .arch-svg-container svg {
+            width: 100%;
+            height: 100%;
+            max-height: 480px;
+        }
+
+        .arch-interactive-node {
+            cursor: pointer;
+            transition: filter 0.2s ease;
+        }
+
+        .arch-interactive-node:hover {
+            filter: brightness(1.2) drop-shadow(0 0 8px var(--accent-primary));
+        }
+
+        .arch-interactive-node.active rect,
+        .arch-interactive-node.active polygon,
+        .arch-interactive-node.active circle {
+            stroke: var(--accent-primary) !important;
+            stroke-width: 2.5px !important;
+            fill: rgba(59, 130, 246, 0.15) !important;
+        }
+
+        .arch-flow-path {
+            stroke-dasharray: 8;
+            animation: dash 30s linear infinite;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -1000;
+            }
+        }
+
+        .arch-tooltip-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 30px;
+            height: 100%;
+        }
+
+        .tooltip-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .tooltip-icon {
+            width: 42px;
+            height: 42px;
+            background-color: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-primary);
+        }
+
+        .tooltip-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .tooltip-content {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 24px;
+            min-height: 150px;
+        }
+
+        .tooltip-tech-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tooltip-tech-badge {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            font-family: var(--font-code);
+            color: var(--text-primary);
+        }
+
+        .arch-helper {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        /* SLIDE 6: Automated Workflows */
+        .workflow-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .workflow-timeline::before {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 10px;
+            bottom: 10px;
+            width: 2px;
+            background-color: var(--card-border);
+        }
+
+        .workflow-step {
+            position: relative;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .workflow-step::before {
+            content: '';
+            position: absolute;
+            left: -19px;
+            top: 6px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--accent-primary);
+            border: 3px solid var(--bg-primary);
+            box-shadow: 0 0 8px var(--accent-primary);
+        }
+
+        .workflow-step-num {
+            font-family: var(--font-code);
+            font-weight: 700;
+            color: var(--accent-primary);
+            font-size: 0.95rem;
+            background-color: rgba(59, 130, 246, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .workflow-step-body h4 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .workflow-step-body p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.45;
+        }
+
+        /* SLIDE 7: Interactive ITIL Priority Matrix */
+        .matrix-container {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 30px;
+            height: 100%;
+        }
+
+        .matrix-table-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 6px;
+            margin-top: 15px;
+        }
+
+        .matrix-table th, .matrix-table td {
+            padding: 12px;
+            text-align: center;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .matrix-table th {
+            font-weight: 600;
+            color: var(--text-secondary);
+            background-color: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+        }
+
+        .matrix-table th.axis-label {
+            color: var(--accent-primary);
+            font-weight: 700;
+            background-color: transparent;
+            border: none;
+        }
+
+        .matrix-cell {
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--card-border);
+            transition: all 0.2s ease;
+            font-family: var(--font-code);
+        }
+
+        .matrix-cell:hover {
+            transform: scale(1.04);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Priority Colors */
+        .cell-p1 {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+        .cell-p1.active {
+            background-color: var(--accent-danger);
+            color: #ffffff;
+            border-color: #ef4444;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .cell-p2 {
+            background-color: rgba(249, 115, 22, 0.15);
+            color: #ffedd5;
+            border-color: rgba(249, 115, 22, 0.3);
+        }
+        .cell-p2.active {
+            background-color: var(--accent-p2);
+            color: #ffffff;
+            border-color: #f97316;
+            box-shadow: 0 0 15px rgba(249, 115, 22, 0.4);
+        }
+
+        .cell-p3 {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: #fef3c7;
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+        .cell-p3.active {
+            background-color: var(--accent-warning);
+            color: #ffffff;
+            border-color: #f59e0b;
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+        }
+
+        .cell-p4 {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: #d1fae5;
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+        .cell-p4.active {
+            background-color: var(--accent-success);
+            color: #ffffff;
+            border-color: #10b981;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .calculator-result-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 30px;
+            height: 100%;
+        }
+
+        .calc-header {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+
+        .calc-input-summary {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .calc-input-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .calc-input-item span:last-child {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .calc-badge-display {
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-bottom: 24px;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+        }
+
+        .calc-badge-display.p1 {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.3);
+            box-shadow: inset 0 0 15px rgba(239, 68, 68, 0.1);
+        }
+        .calc-badge-display.p2 {
+            background-color: rgba(249, 115, 22, 0.15);
+            color: #f97316;
+            border-color: rgba(249, 115, 22, 0.3);
+        }
+        .calc-badge-display.p3 {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+        .calc-badge-display.p4 {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .calc-sla-info {
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .calc-sla-info strong {
+            color: var(--text-primary);
+        }
+
+        /* SLIDE 8: Analytics & Performance Metrics */
+        .analytics-layout {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            height: 100%;
+            align-items: stretch;
+        }
+
+        .chart-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            position: relative;
+        }
+
+        .chart-title-sm {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .svg-chart-wrapper {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Donut Chart Styling */
+        .donut-segment {
+            cursor: pointer;
+            transition: stroke-width 0.2s ease, filter 0.2s ease;
+        }
+
+        .donut-segment:hover {
+            stroke-width: 22;
+            filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.15));
+        }
+
+        .donut-center-text {
+            text-anchor: middle;
+            dominant-baseline: middle;
+            font-family: var(--font-display);
+        }
+
+        .donut-center-num {
+            font-size: 20px;
+            font-weight: 800;
+            fill: var(--text-primary);
+        }
+
+        .donut-center-label {
+            font-size: 9px;
+            font-weight: 500;
+            fill: var(--text-secondary);
+        }
+
+        /* Bar Chart Styling */
+        .chart-bar {
+            cursor: pointer;
+            transition: fill 0.2s ease, filter 0.2s ease;
+        }
+
+        .chart-bar:hover {
+            fill: var(--accent-secondary);
+            filter: drop-shadow(0 0 6px var(--accent-glow));
+        }
+
+        .bar-label {
+            font-family: var(--font-display);
+            font-size: 9px;
+            font-weight: 600;
+            fill: var(--text-secondary);
+            text-anchor: middle;
+        }
+
+        .bar-val {
+            font-family: var(--font-code);
+            font-size: 8px;
+            font-weight: 700;
+            fill: var(--text-primary);
+            text-anchor: middle;
+        }
+
+        .chart-legend {
+            width: 100%;
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-color-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color-box {
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+        }
+
+        .analytics-metric-grid {
+            display: grid;
+            grid-template-rows: repeat(3, 1fr);
+            gap: 16px;
+            height: 100%;
+        }
+
+        .metric-mini-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: var(--shadow-premium);
+        }
+
+        .metric-mini-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background-color: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            color: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .metric-mini-info h5 {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+
+        .metric-mini-info h4 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            font-family: var(--font-code);
+        }
+
+        /* SLIDE 9: Roadmap & Conclusion */
+        .roadmap-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .roadmap-card {
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .roadmap-phase {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-family: var(--font-code);
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            background-color: rgba(59, 130, 246, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .roadmap-card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-top: 10px;
+        }
+
+        .roadmap-card p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .roadmap-card ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .roadmap-card ul li {
+            position: relative;
+            padding-left: 14px;
+        }
+
+        .roadmap-card ul li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent-primary);
+            font-weight: 700;
+        }
+
+        /* Bottom Controls Bar */
+        .bottom-controls-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            border-top: 1px solid var(--card-border);
+            backdrop-filter: var(--glass-blur);
+            background-color: rgba(2, 6, 23, 0.3);
+            z-index: 100;
+        }
+
+        .controls-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .nav-btn {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: var(--accent-primary);
+        }
+
+        .nav-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .slide-counter {
+            font-family: var(--font-code);
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .slide-counter span {
+            color: var(--text-primary);
+        }
+
+        .progress-container {
+            flex: 1;
+            max-width: 450px;
+            height: 4px;
+            background-color: var(--card-border);
+            border-radius: 99px;
+            overflow: hidden;
+            margin: 0 30px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 11.11%;
+            background: linear-gradient(to right, var(--accent-primary), var(--accent-success));
+            border-radius: 99px;
+            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .controls-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toggle-btn {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-secondary);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: var(--font-display);
+        }
+
+        .toggle-btn:hover {
+            color: var(--text-primary);
+            border-color: var(--accent-primary);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .toggle-btn svg {
+            width: 15px;
+            height: 15px;
+        }
+
+        /* Keyboard Help Tooltip */
+        .kbd-guide {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .kbd-key {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-bottom: 2.5px solid var(--card-border);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: var(--font-code);
+            font-weight: 700;
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+        }
+
+        /* Left Quick Nav Dots */
+        .quick-nav-dots {
+            position: absolute;
+            left: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .quick-nav-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--card-border);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+
+        .quick-nav-dot:hover {
+            background-color: var(--text-secondary);
+            transform: scale(1.3);
+        }
+
+        .quick-nav-dot.active {
+            background-color: var(--accent-primary);
+            transform: scale(1.4);
+            box-shadow: 0 0 8px var(--accent-primary);
+        }
+
+        .quick-nav-tooltip {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%) translateX(-10px);
+            background-color: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .quick-nav-dot:hover .quick-nav-tooltip {
+            opacity: 1;
+            transform: translateY(-50%) translateX(0);
+        }
+
+        /* General Keyframe Animations */
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+            }
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+
+        /* Responsive scaling adjustments */
+        @media (max-width: 1200px) {
+            .slide-title { font-size: 1.8rem; }
+            .slide-hero h1 { font-size: 3rem; }
+            .problem-grid { grid-template-columns: 1fr; gap: 12px; }
+            .tech-categories { grid-template-columns: 1fr 1fr; }
+            .matrix-container { grid-template-columns: 1fr; gap: 20px; }
+            .architecture-layout { grid-template-columns: 1fr; gap: 20px; }
+            .analytics-layout { grid-template-columns: 1fr; gap: 20px; }
+            .roadmap-grid { grid-template-columns: 1fr; }
+            .slides-container { max-height: 90vh; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Grid lines for abstract UI aesthetic -->
+    <div class="bg-grid"></div>
+    <div class="bg-glow-1"></div>
+    <div class="bg-glow-2"></div>
+
+    <div class="app-container">
+        
+        <!-- Application Header -->
+        <header>
+            <div class="header-brand">
+                <div class="brand-logo">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor"/>
+                    </svg>
+                </div>
+                <div class="brand-title">ITIL Support Desk Portal</div>
+            </div>
+            
+            <div class="header-meta">
+                <div class="meta-pill">
+                    <div class="pill-dot"></div>
+                    <span>ServiceNow Aligned</span>
+                </div>
+                <div class="meta-pill">
+                    <span>Client Server Architecture</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Left Side Floating Slide Dot Navigation -->
+        <div class="quick-nav-dots">
+            <div class="quick-nav-dot active" data-slide="1">
+                <div class="quick-nav-tooltip">Title & Overview</div>
+            </div>
+            <div class="quick-nav-dot" data-slide="2">
+                <div class="quick-nav-tooltip">Problem Statement</div>
+            </div>
+            <div class="quick-nav-dot" data-slide="3">
+                <div class="quick-nav-tooltip">The Solution</div>
+            </div>
+            <div class="quick-nav-dot" data-slide="4">
+                <div class="quick-nav-tooltip">Technology Stack</div>
+            </div>
+            <div class="quick-nav-dot" data-slide="5">
+                <div class="quick-nav-tooltip">System Architecture</div>
+            </div>
+            <div class="quick-nav-dot" data-slide="6">
+                <div class="quick-nav-tooltip">Core Workflows</div>
+            </div>
+            <div class="quick-nav-dot" data-slide="7">
+                <div class="quick-nav-tooltip">ITIL Priority Matrix</div>
+            </div>
+            <div class="quick-nav-dot" data-slide="8">
+                <div class="quick-nav-tooltip">Analytics & Metrics</div>
+            </div>
+            <div class="quick-nav-dot" data-slide="9">
+                <div class="quick-nav-tooltip">Conclusion & Roadmap</div>
+            </div>
+        </div>
+
+        <!-- Main Slide Viewport -->
+        <div class="presentation-viewport">
+            <div class="slides-container">
+                
+                <!-- ==================== SLIDE 1 ==================== -->
+                <div class="slide active" id="slide-1">
+                    <div class="slide-hero">
+                        <div class="hero-badge">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            <span>Live Production-Ready Service Desk Platform</span>
+                        </div>
+                        <h1>Enterprise <span>Service Desk & Support Management</span></h1>
+                        <p class="hero-desc">
+                            A highly-secured, decoupled, real-time client-server application engineered around ITIL best practices. Aligns seamless incident submission with dynamic auto-prioritization, auditing, and Socket.io communication.
+                        </p>
+                        
+                        <div class="hero-ctas">
+                            <button class="btn-primary" onclick="nextSlide()">
+                                Start Presentation
+                                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    <polyline points="12 5 19 12 12 19"></polyline>
+                                </svg>
+                            </button>
+                            <button class="btn-secondary" onclick="goToSlide(5)">View Architecture</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== SLIDE 2 ==================== -->
+                <div class="slide" id="slide-2">
+                    <div class="slide-content-full">
+                        <div class="slide-title-area">
+                            <div class="slide-subtitle">Siloed Operations</div>
+                            <h2 class="slide-title">The Corporate <span>IT Service Bottlenecks</span></h2>
+                        </div>
+                        
+                        <div class="problem-grid">
+                            <div class="card-premium problem-card">
+                                <div class="problem-icon-wrapper">
+                                    <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none">
+                                        <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon>
+                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                    </svg>
+                                </div>
+                                <h3>Arbitrary Incident Prioritization</h3>
+                                <p>Standard ticketing systems lack logical business matrices. Critical infrastructure outages are treated with the same urgency as minor font alignments, triggering SLA breeches.</p>
+                            </div>
+                            
+                            <div class="card-premium problem-card">
+                                <div class="problem-icon-wrapper">
+                                    <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none">
+                                        <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                                        <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                                        <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                                        <line x1="6" y1="18" x2="6.01" y2="18"></line>
+                                    </svg>
+                                </div>
+                                <h3>Stale Data & Static REST Polling</h3>
+                                <p>Support staff rely on refreshing pages manually to discover new ticket submissions, resulting in long queue lag times, double-assignment conflicts, and delayed chat replies.</p>
+                            </div>
+                            
+                            <div class="card-premium problem-card">
+                                <div class="problem-icon-wrapper">
+                                    <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                    </svg>
+                                </div>
+                                <h3>Non-Compliant Employee Profiling</h3>
+                                <p>Out-of-date directories lead to orphaned tickets without employee phone numbers or backup emails, making off-system follow-up during critical outages impossible.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="problem-summary-banner">
+                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                            <span><strong>SLA Impact:</strong> Traditional response delays reduce organizational productivity and violate standard operational compliance targets.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== SLIDE 3 ==================== -->
+                <div class="slide" id="slide-3">
+                    <div class="slide-content-full">
+                        <div class="slide-title-area">
+                            <div class="slide-subtitle">Modern IT Service Model</div>
+                            <h2 class="slide-title">Unified <span>ServiceNow Aligned Solution</span></h2>
+                        </div>
+                        
+                        <div class="solution-grid">
+                            <div class="card-premium solution-card">
+                                <div class="solution-icon-wrapper">
+                                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                        <polyline points="16 11 18 13 22 9"></polyline>
+                                    </svg>
+                                </div>
+                                <div class="solution-card-body">
+                                    <h3>Compliance Profile Guarding</h3>
+                                    <p>Strict route guards block employees from raising tickets until corporate profiles (Employee ID, alternate contact, phone) are successfully updated and verified in SQLite/PostgreSQL.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="card-premium solution-card">
+                                <div class="solution-icon-wrapper">
+                                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <line x1="9" y1="3" x2="9" y2="21"></line>
+                                        <line x1="15" y1="3" x2="15" y2="21"></line>
+                                        <line x1="3" y1="9" x2="21" y2="9"></line>
+                                        <line x1="3" y1="15" x2="21" y2="15"></line>
+                                    </svg>
+                                </div>
+                                <div class="solution-card-body">
+                                    <h3>ITIL Role-Based Dashboards</h3>
+                                    <p>Distinct, tailor-made interfaces: Employees submit and audit their own tickets; ITIL Admins process queues with a visual drag-and-drop Kanban Board and support drawer.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="card-premium solution-card">
+                                <div class="solution-icon-wrapper">
+                                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
+                                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                                        <polyline points="2 17 12 22 22 17"></polyline>
+                                        <polyline points="2 12 12 17 22 12"></polyline>
+                                    </svg>
+                                </div>
+                                <div class="solution-card-body">
+                                    <h3>Automated Priority Assessment</h3>
+                                    <p>Computes incident severity dynamically upon submission via a 3x3 ITIL matrix of corporate <strong>Impact</strong> and emergency <strong>Urgency</strong>, ensuring deterministic SLA response tags.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="card-premium solution-card">
+                                <div class="solution-icon-wrapper">
+                                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
+                                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                    </svg>
+                                </div>
+                                <div class="solution-card-body">
+                                    <h3>Real-Time Collaborative Chats</h3>
+                                    <p>Equipped with bi-directional Socket.io streams, staff and employees exchange work notes, upload file attachments, and audit reassignments without hitting refresh once.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== SLIDE 4 ==================== -->
+                <div class="slide" id="slide-4">
+                    <div class="slide-content-full">
+                        <div class="slide-title-area">
+                            <div class="slide-subtitle">Modern Stack</div>
+                            <h2 class="slide-title">Structured <span>Production Technology Stack</span></h2>
+                        </div>
+                        
+                        <div class="tech-categories">
+                            <div class="card-premium tech-category-card">
+                                <h3>Frontend Client</h3>
+                                <div class="tech-badge-list">
+                                    <div class="tech-badge">React 19</div>
+                                    <div class="tech-badge">Vite 8</div>
+                                    <div class="tech-badge">ES Modules</div>
+                                    <div class="tech-badge">React Router v7</div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-premium tech-category-card">
+                                <h3>Styling & UX</h3>
+                                <div class="tech-badge-list">
+                                    <div class="tech-badge">Vanilla CSS</div>
+                                    <div class="tech-badge">Tailwind CSS</div>
+                                    <div class="tech-badge">Framer Motion</div>
+                                    <div class="tech-badge">Lucide React</div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-premium tech-category-card">
+                                <h3>Real-Time / API</h3>
+                                <div class="tech-badge-list">
+                                    <div class="tech-badge">Socket.io</div>
+                                    <div class="tech-badge">Axios</div>
+                                    <div class="tech-badge">Recharts</div>
+                                    <div class="tech-badge">Dnd Kit</div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-premium tech-category-card">
+                                <h3>Backend Service</h3>
+                                <div class="tech-badge-list">
+                                    <div class="tech-badge">Node.js</div>
+                                    <div class="tech-badge">Express</div>
+                                    <div class="tech-badge">Sequelize</div>
+                                    <div class="tech-badge">PostgreSQL / SQLite</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Mini details about security and integrations -->
+                        <div class="card-premium" style="margin-top: 30px; padding: 20px; display: flex; justify-content: space-around; gap: 20px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" style="color: var(--accent-primary);">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                </svg>
+                                <span style="font-size: 0.9rem; font-weight: 500;"><strong>Security Layer:</strong> JWT Authorization, rate limiters, bcryptjs hashing, Helmet CORS protections</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" style="color: var(--accent-success);">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                    <polyline points="22,6 12,13 2,6"></polyline>
+                                </svg>
+                                <span style="font-size: 0.9rem; font-weight: 500;"><strong>SMTP Alerts:</strong> Nodemailer transactional notification engine on ticket changes</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== SLIDE 5 ==================== -->
+                <div class="slide" id="slide-5">
+                    <div class="slide-content-full">
+                        <div class="slide-title-area">
+                            <div class="slide-subtitle">System Layout</div>
+                            <h2 class="slide-title">Interactive <span>Full-Stack Architecture</span></h2>
+                        </div>
+                        
+                        <div class="architecture-layout">
+                            <!-- Visual Dynamic SVG -->
+                            <div class="arch-svg-container">
+                                <svg viewBox="0 0 620 460">
+                                    <defs>
+                                        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                            <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(148, 163, 184, 0.5)" />
+                                        </marker>
+                                        <marker id="arrow-glow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b82f6" />
+                                        </marker>
+                                    </defs>
+                                    
+                                    <!-- SUBGRAPH FRONTPAGE -->
+                                    <rect x="10" y="10" width="180" height="430" rx="12" fill="rgba(255, 255, 255, 0.01)" stroke="var(--card-border)" stroke-dasharray="4" />
+                                    <text x="25" y="32" font-family="Outfit" font-size="11" font-weight="700" fill="var(--text-muted)" letter-spacing="1">REACT CLIENT SPA</text>
+                                    
+                                    <!-- React UI Page Node -->
+                                    <g id="node-react" class="arch-interactive-node active" onclick="highlightArchNode('react')">
+                                        <rect x="25" y="55" width="150" height="55" rx="8" fill="var(--card-bg)" stroke="var(--card-border)" stroke-width="1" />
+                                        <text x="35" y="78" font-family="Outfit" font-size="12" font-weight="600" fill="var(--text-primary)">React 19 Pages</text>
+                                        <text x="35" y="94" font-family="Fira Code" font-size="9" fill="var(--accent-primary)">Dashboard / Kanban</text>
+                                    </g>
+                                    
+                                    <!-- Axios Node -->
+                                    <g id="node-axios" class="arch-interactive-node" onclick="highlightArchNode('axios')">
+                                        <rect x="25" y="195" width="150" height="55" rx="8" fill="var(--card-bg)" stroke="var(--card-border)" stroke-width="1" />
+                                        <text x="35" y="218" font-family="Outfit" font-size="12" font-weight="600" fill="var(--text-primary)">Axios API Client</text>
+                                        <text x="35" y="234" font-family="Fira Code" font-size="9" fill="var(--text-secondary)">REST Interceptors</text>
+                                    </g>
+                                    
+                                    <!-- Socket Client Node -->
+                                    <g id="node-socket-client" class="arch-interactive-node" onclick="highlightArchNode('socket-client')">
+                                        <rect x="25" y="335" width="150" height="55" rx="8" fill="var(--card-bg)" stroke="var(--card-border)" stroke-width="1" />
+                                        <text x="35" y="358" font-family="Outfit" font-size="12" font-weight="600" fill="var(--text-primary)">Socket.io Client</text>
+                                        <text x="35" y="374" font-family="Fira Code" font-size="9" fill="var(--accent-success)">Real-Time Push</text>
+                                    </g>
+                                    
+                                    <!-- SUBGRAPH BACKEND -->
+                                    <rect x="270" y="10" width="180" height="430" rx="12" fill="rgba(255, 255, 255, 0.01)" stroke="var(--card-border)" stroke-dasharray="4" />
+                                    <text x="285" y="32" font-family="Outfit" font-size="11" font-weight="700" fill="var(--text-muted)" letter-spacing="1">EXPRESS SERVER</text>
+                                    
+                                    <!-- Express Router / Controllers Node -->
+                                    <g id="node-express" class="arch-interactive-node" onclick="highlightArchNode('express')">
+                                        <rect x="285" y="55" width="150" height="55" rx="8" fill="var(--card-bg)" stroke="var(--card-border)" stroke-width="1" />
+                                        <text x="295" y="78" font-family="Outfit" font-size="12" font-weight="600" fill="var(--text-primary)">Express API Router</text>
+                                        <text x="295" y="94" font-family="Fira Code" font-size="9" fill="var(--text-secondary)">REST Controller</text>
+                                    </g>
+                                    
+                                    <!-- Middleware Node -->
+                                    <g id="node-middleware" class="arch-interactive-node" onclick="highlightArchNode('middleware')">
+                                        <rect x="285" y="195" width="150" height="55" rx="8" fill="var(--card-bg)" stroke="var(--card-border)" stroke-width="1" />
+                                        <text x="295" y="218" font-family="Outfit" font-size="12" font-weight="600" fill="var(--text-primary)">Auth Middleware</text>
+                                        <text x="295" y="234" font-family="Fira Code" font-size="9" fill="var(--accent-danger)">JWT Validation</text>
+                                    </g>
+                                    
+                                    <!-- Socket Server Node -->
+                                    <g id="node-socket-server" class="arch-interactive-node" onclick="highlightArchNode('socket-server')">
+                                        <rect x="285" y="335" width="150" height="55" rx="8" fill="var(--card-bg)" stroke="var(--card-border)" stroke-width="1" />
+                                        <text x="295" y="358" font-family="Outfit" font-size="12" font-weight="600" fill="var(--text-primary)">Socket.io Server</text>
+                                        <text x="295" y="374" font-family="Fira Code" font-size="9" fill="var(--accent-success)">Push Notifications</text>
+                                    </g>
+                                    
+                                    <!-- SUBGRAPH DATA -->
+                                    <rect x="500" y="10" width="110" height="430" rx="12" fill="rgba(255, 255, 255, 0.01)" stroke="var(--card-border)" stroke-dasharray="4" />
+                                    <text x="515" y="32" font-family="Outfit" font-size="11" font-weight="700" fill="var(--text-muted)" letter-spacing="1">PERSISTENCE</text>
+                                    
+                                    <!-- Sequelize ORM -->
+                                    <g id="node-sequelize" class="arch-interactive-node" onclick="highlightArchNode('sequelize')">
+                                        <rect x="510" y="125" width="90" height="55" rx="8" fill="var(--card-bg)" stroke="var(--card-border)" stroke-width="1" />
+                                        <text x="520" y="148" font-family="Outfit" font-size="12" font-weight="600" fill="var(--text-primary)">Sequelize</text>
+                                        <text x="520" y="164" font-family="Fira Code" font-size="9" fill="var(--accent-primary)">ORM Models</text>
+                                    </g>
+                                    
+                                    <!-- Database Node -->
+                                    <g id="node-db" class="arch-interactive-node" onclick="highlightArchNode('db')">
+                                        <rect x="510" y="265" width="90" height="55" rx="8" fill="var(--card-bg)" stroke="var(--card-border)" stroke-width="1" />
+                                        <text x="520" y="288" font-family="Outfit" font-size="12" font-weight="600" fill="var(--text-primary)">PostgreSQL</text>
+                                        <text x="520" y="304" font-family="Fira Code" font-size="9" fill="var(--text-secondary)">SQLite / SQL</text>
+                                    </g>
+                                    
+                                    <!-- Connector Arrows -->
+                                    <!-- React -> Axios -->
+                                    <path d="M 100 110 L 100 195" stroke="var(--card-border)" stroke-width="1.5" marker-end="url(#arrow)" fill="none" />
+                                    <!-- React -> Socket.io Client -->
+                                    <path d="M 160 110 L 160 335" stroke="var(--card-border)" stroke-width="1.5" marker-end="url(#arrow)" fill="none" />
+                                    <!-- Axios -> Middleware (REST HTTP) -->
+                                    <path id="flow-http" class="arch-flow-path" d="M 175 222 L 285 222" stroke="var(--accent-primary)" stroke-width="2" marker-end="url(#arrow-glow)" fill="none" />
+                                    <!-- Middleware -> Express Router -->
+                                    <path d="M 360 195 L 360 110" stroke="var(--card-border)" stroke-width="1.5" marker-end="url(#arrow)" fill="none" />
+                                    <!-- Express -> Sequelize -->
+                                    <path d="M 435 82 L 555 125" stroke="var(--card-border)" stroke-width="1.5" marker-end="url(#arrow)" fill="none" />
+                                    <!-- Sequelize -> DB -->
+                                    <path d="M 555 180 L 555 265" stroke="var(--card-border)" stroke-width="1.5" marker-end="url(#arrow)" fill="none" />
+                                    <!-- Express -> Socket Server -->
+                                    <path d="M 320 110 L 320 335" stroke="var(--card-border)" stroke-width="1.5" marker-end="url(#arrow)" fill="none" />
+                                    <!-- Socket Client <-> Socket Server (WebSockets Bi-directional) -->
+                                    <path id="flow-ws" class="arch-flow-path" d="M 175 362 L 285 362" stroke="var(--accent-success)" stroke-width="2" marker-end="url(#arrow-glow)" fill="none" />
+                                </svg>
+                                
+                                <div class="arch-helper" style="position: absolute; bottom: 10px; left: 20px;">
+                                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                    </svg>
+                                    <span>Click nodes to inspect architectural roles</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Dynamic Content Info Card -->
+                            <div class="card-premium arch-tooltip-card" id="arch-tooltip-card">
+                                <div>
+                                    <div class="tooltip-header">
+                                        <div class="tooltip-icon" id="arch-tooltip-icon">
+                                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none">
+                                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                                <line x1="9" y1="3" x2="9" y2="21"></line>
+                                            </svg>
+                                        </div>
+                                        <h3 class="tooltip-title" id="arch-tooltip-title">React UI Pages</h3>
+                                    </div>
+                                    <p class="tooltip-content" id="arch-tooltip-content">
+                                        The user interface layer built on React 19 SPA rendering. Utilizes context states (AuthContext, ThemeContext) to manage global authentication tokens and CSS-driven styling variables. Coordinates layout views for user submissions and custom ITIL admin panels.
+                                    </p>
+                                </div>
+                                <div class="tooltip-tech-list" id="arch-tooltip-techs">
+                                    <span class="tooltip-tech-badge">React 19</span>
+                                    <span class="tooltip-tech-badge">Vite 8</span>
+                                    <span class="tooltip-tech-badge">SPA Context</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== SLIDE 6 ==================== -->
+                <div class="slide" id="slide-6">
+                    <div class="slide-grid-2">
+                        <div class="slide-content-full">
+                            <div class="slide-title-area">
+                                <div class="slide-subtitle">Workflow Flows</div>
+                                <h2 class="slide-title">Logical <span>Service Desk Data Flows</span></h2>
+                            </div>
+                            <p class="hero-desc" style="font-size: 1.05rem; margin-bottom: 25px;">
+                                A seamless sequence tracking database modifications and triggering automated real-time reactions on critical state adjustments.
+                            </p>
+                            <div class="card-premium" style="display: flex; flex-direction: column; gap: 16px;">
+                                <div style="display: flex; gap: 14px; align-items: center; border-bottom: 1px solid var(--card-border); padding-bottom: 12px;">
+                                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" style="color: var(--accent-success);">
+                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                        <polyline points="22,6 12,13 2,6"></polyline>
+                                    </svg>
+                                    <h3 style="font-size: 1.15rem; font-weight: 700;">Transactional Mail Trigger</h3>
+                                </div>
+                                <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.5;">
+                                    Whenever a ticket is created or updated in the backend, <strong>Nodemailer</strong> initiates an asynchronous SMTP payload. It dispatches a formatted corporate confirmation to the employee's alternate email address to prevent service gaps.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="workflow-timeline">
+                            <div class="workflow-step">
+                                <div class="workflow-step-num">Step 1</div>
+                                <div class="workflow-step-body">
+                                    <h4>Incident Form Submission</h4>
+                                    <p>Employee inputs category and describes details, attaching file objects via Multipart headers.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="workflow-step">
+                                <div class="workflow-step-num">Step 2</div>
+                                <div class="workflow-step-body">
+                                    <h4>Dynamic Severity Processing</h4>
+                                    <p>The system evaluates urgency and impact ratings against the ITIL priority rules instantly.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="workflow-step">
+                                <div class="workflow-step-num">Step 3</div>
+                                <div class="workflow-step-body">
+                                    <h4>Sequelize ORM Persistence</h4>
+                                    <p>A new SQLite/PostgreSQL ticket entry is saved along with structured audit logs tracking the changes.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="workflow-step">
+                                <div class="workflow-step-num">Step 4</div>
+                                <div class="workflow-step-body">
+                                    <h4>Websocket Broadcast Event</h4>
+                                    <p>Socket.io emits a refresh broadcast (`tickets:update`). Connected ITIL drawers reload silently.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== SLIDE 7 ==================== -->
+                <div class="slide" id="slide-7">
+                    <div class="slide-content-full">
+                        <div class="slide-title-area">
+                            <div class="slide-subtitle">Unique Selling Point</div>
+                            <h2 class="slide-title">Interactive <span>ITIL Priority Matrix</span></h2>
+                        </div>
+                        
+                        <div class="matrix-container">
+                            <div class="card-premium matrix-table-card">
+                                <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.5;">
+                                    Calculates incident priorities deterministically. Click any grid cell representing different urgency/impact configurations to calculate severity limits.
+                                </p>
+                                
+                                <table class="matrix-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="axis-label">Impact \ Urgency</th>
+                                            <th>High Urgency</th>
+                                            <th>Medium Urgency</th>
+                                            <th>Low Urgency</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="axis-label" style="font-weight: 600; text-align: left;">High Impact</td>
+                                            <td class="matrix-cell cell-p1 active" onclick="calculatePriority('high', 'high', this)">P1 - Critical</td>
+                                            <td class="matrix-cell cell-p2" onclick="calculatePriority('high', 'medium', this)">P2 - High</td>
+                                            <td class="matrix-cell cell-p2" onclick="calculatePriority('high', 'low', this)">P2 - High</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="axis-label" style="font-weight: 600; text-align: left;">Medium Impact</td>
+                                            <td class="matrix-cell cell-p2" onclick="calculatePriority('medium', 'high', this)">P2 - High</td>
+                                            <td class="matrix-cell cell-p3" onclick="calculatePriority('medium', 'medium', this)">P3 - Medium</td>
+                                            <td class="matrix-cell cell-p3" onclick="calculatePriority('medium', 'low', this)">P3 - Medium</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="axis-label" style="font-weight: 600; text-align: left;">Low Impact</td>
+                                            <td class="matrix-cell cell-p3" onclick="calculatePriority('low', 'high', this)">P3 - Medium</td>
+                                            <td class="matrix-cell cell-p4" onclick="calculatePriority('low', 'medium', this)">P4 - Low</td>
+                                            <td class="matrix-cell cell-p4" onclick="calculatePriority('low', 'low', this)">P4 - Low</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="card-premium calculator-result-card">
+                                <div>
+                                    <div class="calc-header">Dynamic Priority Output</div>
+                                    <div class="calc-input-summary">
+                                        <div class="calc-input-item">
+                                            <span>User Impact Selection:</span>
+                                            <span id="display-impact">High</span>
+                                        </div>
+                                        <div class="calc-input-item">
+                                            <span>User Urgency Selection:</span>
+                                            <span id="display-urgency">High</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="calc-badge-display p1" id="calc-priority-badge">
+                                        PRIORITY 1 - CRITICAL
+                                    </div>
+                                </div>
+                                
+                                <div class="calc-sla-info" id="calc-sla-info">
+                                    <strong>SLA Target:</strong> Resolution within <strong style="color: var(--accent-danger);">1 Hour</strong>.<br>
+                                    High priority warning email generated. Triggers automatic notification alerts across admin dashboards instantly.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== SLIDE 8 ==================== -->
+                <div class="slide" id="slide-8">
+                    <div class="slide-content-full">
+                        <div class="slide-title-area">
+                            <div class="slide-subtitle">Live Analytics</div>
+                            <h2 class="slide-title">Interactive <span>Support Analytics & Metrics</span></h2>
+                        </div>
+                        
+                        <div class="analytics-layout">
+                            <!-- Donut Chart -->
+                            <div class="card-premium chart-card">
+                                <h4 class="chart-title-sm">Incidents by Category</h4>
+                                <div class="svg-chart-wrapper">
+                                    <svg viewBox="0 0 200 200" width="100%" height="100%">
+                                        <!-- Donut slices using stroke-dasharray -->
+                                        <!-- Software: 40% (125.6) -->
+                                        <circle class="donut-segment" cx="100" cy="100" r="50" fill="none" stroke="var(--accent-primary)" stroke-width="18" stroke-dasharray="125.6 188.56" stroke-dashoffset="78.5" onclick="updateDonutDetail('Software', '40%', '#3b82f6')" />
+                                        <!-- Network: 25% (78.5) -->
+                                        <circle class="donut-segment" cx="100" cy="100" r="50" fill="none" stroke="var(--accent-success)" stroke-width="18" stroke-dasharray="78.5 235.66" stroke-dashoffset="-47.1" onclick="updateDonutDetail('Network', '25%', '#10b981')" />
+                                        <!-- Hardware: 15% (47.1) -->
+                                        <circle class="donut-segment" cx="100" cy="100" r="50" fill="none" stroke="var(--accent-warning)" stroke-width="18" stroke-dasharray="47.1 267.06" stroke-dashoffset="-125.6" onclick="updateDonutDetail('Hardware', '15%', '#f59e0b')" />
+                                        <!-- Access: 12% (37.7) -->
+                                        <circle class="donut-segment" cx="100" cy="100" r="50" fill="none" stroke="var(--accent-danger)" stroke-width="18" stroke-dasharray="37.7 276.46" stroke-dashoffset="-172.7" onclick="updateDonutDetail('Access', '12%', '#ef4444')" />
+                                        <!-- Database: 8% (25.1) -->
+                                        <circle class="donut-segment" cx="100" cy="100" r="50" fill="none" stroke="#8b5cf6" stroke-width="18" stroke-dasharray="25.1 289.06" stroke-dashoffset="-210.4" onclick="updateDonutDetail('Database', '8%', '#8b5cf6')" />
+                                        
+                                        <!-- Inner circle for donut hole -->
+                                        <circle cx="100" cy="100" r="40" fill="var(--card-bg)" />
+                                        
+                                        <!-- Inner text -->
+                                        <text class="donut-center-text" x="100" y="96">
+                                            <tspan class="donut-center-num" id="donut-val">40%</tspan>
+                                        </text>
+                                        <text class="donut-center-text" x="100" y="112">
+                                            <tspan class="donut-center-label" id="donut-label">Software</tspan>
+                                        </text>
+                                    </svg>
+                                </div>
+                                <div class="chart-legend">
+                                    <div class="legend-item"><div class="legend-color-label"><div class="legend-color-box" style="background-color: var(--accent-primary);"></div>Software</div><span>40%</span></div>
+                                    <div class="legend-item"><div class="legend-color-label"><div class="legend-color-box" style="background-color: var(--accent-success);"></div>Network</div><span>25%</span></div>
+                                    <div class="legend-item"><div class="legend-color-label"><div class="legend-color-box" style="background-color: var(--accent-warning);"></div>Hardware</div><span>15%</span></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Bar Chart -->
+                            <div class="card-premium chart-card">
+                                <h4 class="chart-title-sm">Resolution Time by Priority (hrs)</h4>
+                                <div class="svg-chart-wrapper">
+                                    <svg viewBox="0 0 200 200" width="100%" height="100%">
+                                        <!-- Axes -->
+                                        <line x1="30" y1="20" x2="30" y2="170" stroke="var(--card-border)" stroke-width="1.5" />
+                                        <line x1="30" y1="170" x2="190" y2="170" stroke="var(--card-border)" stroke-width="1.5" />
+                                        
+                                        <!-- Y grid lines & ticks -->
+                                        <line x1="30" y1="130" x2="190" y2="130" stroke="var(--card-border)" stroke-width="0.5" stroke-dasharray="2" />
+                                        <line x1="30" y1="90" x2="190" y2="90" stroke="var(--card-border)" stroke-width="0.5" stroke-dasharray="2" />
+                                        <line x1="30" y1="50" x2="190" y2="50" stroke="var(--card-border)" stroke-width="0.5" stroke-dasharray="2" />
+                                        
+                                        <!-- Critical (P1): 1hr (mapped to height 15) -->
+                                        <rect class="chart-bar" x="42" y="155" width="22" height="15" fill="var(--accent-p1)" rx="3" onclick="updateBarDetail('P1 Critical', '1.0 Hours', 'SLA: Outages are prioritized by dedicated staff immediately.')" />
+                                        <text class="bar-label" x="53" y="182">P1</text>
+                                        <text class="bar-val" x="53" y="150">1.0h</text>
+                                        
+                                        <!-- High (P2): 4.5hrs (mapped to height 45) -->
+                                        <rect class="chart-bar" x="78" y="125" width="22" height="45" fill="var(--accent-p2)" rx="3" onclick="updateBarDetail('P2 High', '4.5 Hours', 'SLA: Processed with secondary escalation targets.')" />
+                                        <text class="bar-label" x="89" y="182">P2</text>
+                                        <text class="bar-val" x="89" y="120">4.5h</text>
+                                        
+                                        <!-- Medium (P3): 12hrs (mapped to height 90) -->
+                                        <rect class="chart-bar" x="114" y="80" width="22" height="90" fill="var(--accent-p3)" rx="3" onclick="updateBarDetail('P3 Medium', '12.0 Hours', 'SLA: Standard hardware replacements and system configurations.')" />
+                                        <text class="bar-label" x="125" y="182">P3</text>
+                                        <text class="bar-val" x="125" y="75">12.0h</text>
+                                        
+                                        <!-- Low (P4): 24hrs (mapped to height 135) -->
+                                        <rect class="chart-bar" x="150" y="35" width="22" height="135" fill="var(--accent-p4)" rx="3" onclick="updateBarDetail('P4 Low', '24.0 Hours', 'SLA: Minor requests handled during regular weekly updates.')" />
+                                        <text class="bar-label" x="161" y="182">P4</text>
+                                        <text class="bar-val" x="161" y="30">24.0h</text>
+                                    </svg>
+                                </div>
+                                <div style="width: 100%; text-align: center; font-size: 0.78rem; color: var(--text-muted); margin-top: 10px;" id="bar-summary-text">
+                                    Click priority bars to audit SLA compliance details
+                                </div>
+                            </div>
+                            
+                            <!-- Static Counters -->
+                            <div class="analytics-metric-grid">
+                                <div class="metric-mini-card">
+                                    <div class="metric-mini-icon">
+                                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <polyline points="12 6 12 12 14 14"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div class="metric-mini-info">
+                                        <h5>Avg Incident Lifetime</h5>
+                                        <h4>4.2 Hours</h4>
+                                    </div>
+                                </div>
+                                
+                                <div class="metric-mini-card">
+                                    <div class="metric-mini-icon" style="background-color: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); color: var(--accent-success);">
+                                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div class="metric-mini-info">
+                                        <h5>SLA Success Rate</h5>
+                                        <h4>98.4%</h4>
+                                    </div>
+                                </div>
+                                
+                                <div class="metric-mini-card">
+                                    <div class="metric-mini-icon" style="background-color: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.2); color: #8b5cf6;">
+                                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                                            <path d="M5.12 19A9 9 0 0 1 18 12c0 2.22-.8 4.24-2.12 5.8"></path>
+                                            <path d="M3.6 15A9 9 0 0 1 12 3v18"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="metric-mini-info">
+                                        <h5>Active Websockets</h5>
+                                        <h4>24 Connected</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== SLIDE 9 ==================== -->
+                <div class="slide" id="slide-9">
+                    <div class="slide-content-full">
+                        <div class="slide-title-area">
+                            <div class="slide-subtitle">Evolution Path</div>
+                            <h2 class="slide-title">Future <span>Development Roadmap & USP</span></h2>
+                        </div>
+                        
+                        <div class="roadmap-grid">
+                            <div class="card-premium roadmap-card">
+                                <div class="roadmap-phase">PHASE 1</div>
+                                <h3>AI Ticket Routing</h3>
+                                <p>Automated priority tagging and category selection using local LLM vector evaluation on incident description paragraphs.</p>
+                                <ul>
+                                    <li>Automated assignment mapping</li>
+                                    <li>Sentiment audit triggers</li>
+                                    <li>Predictive response models</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="card-premium roadmap-card">
+                                <div class="roadmap-phase">PHASE 2</div>
+                                <h3>SLA Breach Alerts</h3>
+                                <p>Live color shifts and notification alerts when ticket resolution approaches contractual targets.</p>
+                                <ul>
+                                    <li>Automated warning prompts</li>
+                                    <li>Email escalation triggers</li>
+                                    <li>Mobile push triggers</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="card-premium roadmap-card">
+                                <div class="roadmap-phase">PHASE 3</div>
+                                <h3>Third-Party Adapters</h3>
+                                <p>Out-of-the-box adapters mapping REST models into official enterprise platforms like ServiceNow and Jira.</p>
+                                <ul>
+                                    <li>Bi-directional integrations</li>
+                                    <li>Identity mapping filters</li>
+                                    <li>Audit synchronization</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- Core USP Summary Banner -->
+                        <div class="card-premium" style="margin-top: 30px; padding: 22px; background: linear-gradient(to right, rgba(59, 130, 246, 0.05), rgba(16, 185, 129, 0.05)); display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; color: var(--text-primary);">Why This System Wins:</h4>
+                                <p style="font-size: 0.88rem; color: var(--text-secondary);">Decoupled stack with strict JWT profile guards, dynamic ITIL mapping, zero-polling reactive UI, and seamless auditing.</p>
+                            </div>
+                            <button class="btn-primary" onclick="goToSlide(1)">
+                                Restart Deck
+                                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
+                                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Bottom Slide Control Navigation Bar -->
+        <div class="bottom-controls-bar">
+            <div class="controls-left">
+                <button class="nav-btn" onclick="prevSlide()" title="Previous Slide (Left Arrow)">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+                
+                <div class="slide-counter">
+                    <span id="current-slide-num">1</span> / <span id="total-slides-num">9</span>
+                </div>
+                
+                <button class="nav-btn" onclick="nextSlide()" title="Next Slide (Right Arrow / Spacebar)">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="presentation-progress"></div>
+            </div>
+            
+            <div class="controls-right">
+                <div class="kbd-guide">
+                    <span class="kbd-key">←</span>
+                    <span class="kbd-key">→</span>
+                    <span class="kbd-key">Space</span>
+                    <span>to navigate</span>
+                </div>
+                
+                <button class="toggle-btn" onclick="toggleTheme()" id="theme-toggle-btn" style="margin-left: 15px;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" id="theme-icon">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <span id="theme-text">Light Theme</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Presentation Controller Logic -->
+    <script>
+        const totalSlides = 9;
+        let currentSlide = 1;
+        
+        // Architecture Diagram details dictionary
+        const archDetails = {
+            'react': {
+                title: 'React UI Pages',
+                content: 'The user interface layer built on React 19 SPA rendering. Utilizes context states (AuthContext, ThemeContext) to manage global authentication tokens and CSS-driven styling variables. Coordinates layout views for user submissions and custom ITIL admin panels.',
+                techs: ['React 19', 'Vite 8', 'SPA Context', 'Lucide React']
+            },
+            'axios': {
+                title: 'Axios REST Client',
+                content: 'Manages outgoing asynchronous RESTful operations over HTTP/HTTPS. Integrated with request interceptors that inject JWT authorization headers dynamically to all endpoints, handling session failures and timeout policies gracefully.',
+                techs: ['Axios API', 'HTTP Interceptors', 'Bearer Auth', 'CORS Settings']
+            },
+            'socket-client': {
+                title: 'Socket.io WebSocket Client',
+                content: 'Establishes persistent, low-latency, full-duplex WebSocket client linkages. Reactively listens for incident refresh events and direct employee messaging streams to refresh lists on-screen instantly with zero manual polling.',
+                techs: ['socket.io-client', 'WebSockets', 'Real-time Listeners', 'Async Refresh']
+            },
+            'express': {
+                title: 'Express API Server',
+                content: 'A scalable Node.js Express server routing RESTful endpoints securely. Validates incoming request structures, parses multipart file buffers via Multer middleware, and invokes Sequelize ORM queries.',
+                techs: ['Node.js', 'Express 5', 'REST Controllers', 'Multipart Forms']
+            },
+            'middleware': {
+                title: 'JWT Authentication Middleware',
+                content: 'A custom validation gate checking HTTP authorization headers. Evaluates signature keys and expiration bounds of bearer JWT tokens. Decodes credentials to extract matching user records before granting controller execution.',
+                techs: ['JWT Verification', 'bcryptjs Hashing', 'Stateless Gate', 'API Security']
+            },
+            'socket-server': {
+                title: 'Socket.io Server Engine',
+                content: 'Aggregates open client socket sessions securely. Triggers and pushes targeted real-time event updates to employees or support staff whenever ticket states are modified or work notes are saved.',
+                techs: ['Socket.io', 'Bi-directional Streams', 'Event Broadcaster', 'Express Sync']
+            },
+            'sequelize': {
+                title: 'Sequelize ORM Mapping',
+                content: 'Translates JavaScript entities into schema commands securely using promise-based parameters. Establishes robust foreign key relations, cascading deletions, audit triggers, and category divisions dynamically.',
+                techs: ['Sequelize 6', 'Relational Schemas', 'Transaction Audits', 'ORM Dialects']
+            },
+            'db': {
+                title: 'Relational Database Layer',
+                content: 'Stores persistent application states. Configured for local lightweight SQLite development or robust Supabase/Neon PostgreSQL clusters in production. Preserves indexed ticket states and encrypted credentials.',
+                techs: ['PostgreSQL', 'SQLite Database', 'Hashed Credentials', 'Referential Integrities']
+            }
+        };
+
+        // Initialize slideshow
+        function initSlides() {
+            // Load saved slide if available
+            const savedSlide = sessionStorage.getItem('support_desk_ppt_active_slide');
+            if (savedSlide && !isNaN(savedSlide)) {
+                currentSlide = parseInt(savedSlide);
+                if (currentSlide < 1 || currentSlide > totalSlides) currentSlide = 1;
+            }
+            updateSlideView();
+        }
+
+        // Render current slide
+        function updateSlideView() {
+            // Hide all slides
+            document.querySelectorAll('.slide').forEach((slide, idx) => {
+                slide.classList.remove('active', 'previous');
+                const slideNum = idx + 1;
+                if (slideNum < currentSlide) {
+                    slide.classList.add('previous');
+                }
+            });
+
+            // Show active slide
+            const activeSlide = document.getElementById(`slide-${currentSlide}`);
+            if (activeSlide) activeSlide.classList.add('active');
+
+            // Update counter and progress bar
+            document.getElementById('current-slide-num').innerText = currentSlide;
+            const progressPct = (currentSlide / totalSlides) * 100;
+            document.getElementById('presentation-progress').style.width = `${progressPct}%`;
+
+            // Update quick nav dots
+            document.querySelectorAll('.quick-nav-dot').forEach((dot, idx) => {
+                if (idx + 1 === currentSlide) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+
+            // Save active slide
+            sessionStorage.setItem('support_desk_ppt_active_slide', currentSlide);
+        }
+
+        // Slide progression
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updateSlideView();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateSlideView();
+            }
+        }
+
+        function goToSlide(slideNum) {
+            if (slideNum >= 1 && slideNum <= totalSlides) {
+                currentSlide = slideNum;
+                updateSlideView();
+            }
+        }
+
+        // Keyboard navigation setup
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                e.preventDefault();
+                prevSlide();
+            }
+        });
+
+        // Click handler for quick nav dots
+        document.querySelectorAll('.quick-nav-dot').forEach(dot => {
+            dot.addEventListener('click', () => {
+                const targetSlide = parseInt(dot.getAttribute('data-slide'));
+                goToSlide(targetSlide);
+            });
+        });
+
+        // Theme Toggle Handler
+        function toggleTheme() {
+            const body = document.body;
+            const themeBtn = document.getElementById('theme-toggle-btn');
+            const themeIcon = document.getElementById('theme-icon');
+            const themeText = document.getElementById('theme-text');
+
+            if (body.classList.contains('light-theme')) {
+                body.classList.remove('light-theme');
+                themeText.innerText = 'Light Theme';
+                themeIcon.innerHTML = `
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                `;
+            } else {
+                body.classList.add('light-theme');
+                themeText.innerText = 'Dark Theme';
+                themeIcon.innerHTML = `
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                `;
+            }
+        }
+
+        // System Architecture Interactive Node Hitting
+        function highlightArchNode(nodeKey) {
+            // Remove active classes
+            document.querySelectorAll('.arch-interactive-node').forEach(node => {
+                node.classList.remove('active');
+            });
+
+            // Activate current node
+            const activeNode = document.getElementById(`node-${nodeKey}`);
+            if (activeNode) activeNode.classList.add('active');
+
+            // Update details block
+            const data = archDetails[nodeKey];
+            if (data) {
+                document.getElementById('arch-tooltip-title').innerText = data.title;
+                document.getElementById('arch-tooltip-content').innerText = data.content;
+                
+                // Redraw badges
+                const badgeContainer = document.getElementById('arch-tooltip-techs');
+                badgeContainer.innerHTML = '';
+                data.techs.forEach(tech => {
+                    const span = document.createElement('span');
+                    span.className = 'tooltip-tech-badge';
+                    span.innerText = tech;
+                    badgeContainer.appendChild(span);
+                });
+
+                // Dynamically update details card icon based on node color
+                const iconContainer = document.getElementById('arch-tooltip-icon');
+                if (nodeKey.includes('socket')) {
+                    iconContainer.style.color = 'var(--accent-success)';
+                    iconContainer.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+                    iconContainer.style.borderColor = 'rgba(16, 185, 129, 0.2)';
+                } else if (nodeKey === 'middleware') {
+                    iconContainer.style.color = 'var(--accent-danger)';
+                    iconContainer.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                    iconContainer.style.borderColor = 'rgba(239, 68, 68, 0.2)';
+                } else {
+                    iconContainer.style.color = 'var(--accent-primary)';
+                    iconContainer.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+                    iconContainer.style.borderColor = 'rgba(59, 130, 246, 0.2)';
+                }
+            }
+        }
+
+        // ITIL Priority Calculator Simulator
+        function calculatePriority(impact, urgency, cellElement) {
+            // Uncheck previous active cells
+            document.querySelectorAll('.matrix-cell').forEach(cell => {
+                cell.classList.remove('active');
+            });
+
+            // Set current active cell
+            cellElement.classList.add('active');
+
+            // Render selectors
+            document.getElementById('display-impact').innerText = impact.charAt(0).toUpperCase() + impact.slice(1);
+            document.getElementById('display-urgency').innerText = urgency.charAt(0).toUpperCase() + urgency.slice(1);
+
+            const badge = document.getElementById('calc-priority-badge');
+            const slaText = document.getElementById('calc-sla-info');
+            badge.className = 'calc-badge-display'; // clear status classes
+
+            // Decision Logic
+            if (impact === 'high' && urgency === 'high') {
+                badge.innerText = 'PRIORITY 1 - CRITICAL';
+                badge.classList.add('p1');
+                slaText.innerHTML = `<strong>SLA Target:</strong> Resolution within <strong style="color: var(--accent-danger);">1 Hour</strong>.<br>High priority warning email generated. Triggers automatic notification alerts across admin dashboards instantly.`;
+            } else if (
+                (impact === 'high' && urgency === 'medium') || 
+                (impact === 'high' && urgency === 'low') || 
+                (impact === 'medium' && urgency === 'high')
+            ) {
+                badge.innerText = 'PRIORITY 2 - HIGH';
+                badge.classList.add('p2');
+                slaText.innerHTML = `<strong>SLA Target:</strong> Resolution within <strong style="color: #f97316;">4 Hours</strong>.<br>Escalated routing triggers. Email generated automatically to assigned staff member to ensure quick resolution.`;
+            } else if (
+                (impact === 'medium' && urgency === 'medium') || 
+                (impact === 'medium' && urgency === 'low') || 
+                (impact === 'low' && urgency === 'high')
+            ) {
+                badge.innerText = 'PRIORITY 3 - MEDIUM';
+                badge.classList.add('p3');
+                slaText.innerHTML = `<strong>SLA Target:</strong> Resolution within <strong style="color: #f59e0b;">12 Hours</strong>.<br>Standard operational tier. Added to weekly support sprint queues. Standard client email receipts dispatched.`;
+            } else {
+                badge.innerText = 'PRIORITY 4 - LOW';
+                badge.classList.add('p4');
+                slaText.innerHTML = `<strong>SLA Target:</strong> Resolution within <strong style="color: #10b981;">24 Hours</strong>.<br>Routine administrative incident. General priority queues mapping. Resolution managed alongside generic minor adjustments.`;
+            }
+        }
+
+        // SVG Donut Chart slice hover event updates
+        function updateDonutDetail(category, percentage, colorHex) {
+            document.getElementById('donut-val').innerText = percentage;
+            document.getElementById('donut-val').style.fill = colorHex;
+            document.getElementById('donut-label').innerText = category;
+        }
+
+        // SVG Bar Chart hover event updates
+        function updateBarDetail(priority, resolutionTime, description) {
+            const container = document.getElementById('bar-summary-text');
+            container.innerHTML = `<strong style="color: var(--text-primary);">${priority} (${resolutionTime}):</strong> ${description}`;
+        }
+
+        // Trigger bootstrap initialization on content load
+        window.addEventListener('DOMContentLoaded', initSlides);
+    </script>
+</body>
+</html>

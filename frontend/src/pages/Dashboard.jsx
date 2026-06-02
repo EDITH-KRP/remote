@@ -56,7 +56,7 @@ const makeStats = (tickets) => [
     accent: 'rgba(41,62,64,0.25)',
   },
   {
-    label: 'Open', value: tickets.filter(t => t.status === 'Open').length, icon: Clock,
+    label: 'Open', value: tickets.filter(t => ['Open', 'Assigned'].includes(t.status)).length, icon: Clock,
     gradient: 'linear-gradient(135deg,#f59e0b,#d97706)',
     glow: '0 4px 12px rgba(245,158,11,0.3)',  glowBg: 'rgba(245,158,11,0.08)',
     accent: 'rgba(245,158,11,0.25)',
@@ -137,8 +137,9 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   const loadData = () => {
+    const url = (user?.role === 'admin' || user?.role === 'support') ? '/tickets?all=true' : '/tickets';
     Promise.all([
-      api.get('/tickets'),
+      api.get(url),
       api.get('/tickets/activity?range=7')
     ]).then(([tRes, aRes]) => {
       setTickets(tRes.data);

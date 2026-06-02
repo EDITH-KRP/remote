@@ -29,6 +29,7 @@ router.get('/sub-categories', adminController.handleSubCategories);
 
 router.post('/create', upload.single('attachment'), ticketController.createTicket);
 router.get('/activity', ticketController.getActivity);
+router.get('/assigned', ticketController.getAssignedTickets);
 router.get('/', ticketController.getTickets);
 router.get('/:id', ticketController.getTicketById);
 router.put('/:id', ticketController.updateTicket);

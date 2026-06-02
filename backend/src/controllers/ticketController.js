@@ -241,6 +241,24 @@ exports.getTickets = async (req, res) => {
   }
 };
 
+exports.getAssignedTickets = async (req, res) => {
+  try {
+    const include = [
+      { model: User,     as: 'author',         attributes: ['full_name'] },
+      { model: User,     as: 'assigned_staff',  attributes: ['full_name'] },
+      { model: Category, as: 'category' }
+    ];
+    const tickets = await Ticket.findAll({
+      where: { assigned_staff_id: req.userId },
+      include,
+      order: [['created_at', 'DESC']]
+    });
+    res.status(200).json(tickets.map(formatTicket));
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
 exports.getTicketById = async (req, res) => {
   try {
     const ticket = await Ticket.findByPk(req.params.id, {

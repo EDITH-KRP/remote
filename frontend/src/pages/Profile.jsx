@@ -18,6 +18,21 @@ export default function Profile() {
   });
   const [loading, setLoading] = useState(false);
   const location = useLocation();
+  const [tickets, setTickets] = useState([]);
+  const [ticketsLoading, setTicketsLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      setTicketsLoading(true);
+      const endpoint = (user.role === "support" || user.role === "admin")
+        ? "/tickets/assigned"
+        : "/tickets";
+      api.get(endpoint)
+        .then(res => setTickets(res.data))
+        .catch(err => console.error(err))
+        .finally(() => setTicketsLoading(false));
+    }
+  }, [user]);
 
   useEffect(() => {
     if (user) {
@@ -209,6 +224,79 @@ export default function Profile() {
           </div>
         </div>
 
+      </div>
+
+      {/* ── My Assigned Tasks / Open Incidents Section ── */}
+      <div style={{ marginTop: "2rem" }}>
+        <div style={{ background: "rgba(10,12,22,0.82)", border: "1px solid rgba(99,102,241,0.12)", borderRadius: "var(--r-lg)", padding: "2rem", backdropFilter: "blur(20px)" }}>
+          <h3 style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--text-1)", marginBottom: "1.25rem", display: "flex", alignItems: "center", gap: "8px" }}>
+            <Bookmark size={16} style={{ color: "var(--p3)" }} />
+            {user?.role === "support" || user?.role === "admin" ? "My Assigned Incidents & Tasks" : "My Open Requests & Incidents"}
+            <span style={{ fontSize: "0.75rem", background: "rgba(99,102,241,0.15)", color: "var(--p3)", padding: "2px 8px", borderRadius: "99px", fontWeight: 700 }}>{tickets.length}</span>
+          </h3>
+
+          {ticketsLoading ? (
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px", padding: "2rem" }}>
+              <div className="spinner" style={{ width: "28px", height: "28px", borderWidth: "2.5px" }} />
+              <p style={{ color: "var(--text-3)", fontSize: "0.8rem" }}>Loading incidents...</p>
+            </div>
+          ) : tickets.length === 0 ? (
+            <div style={{ padding: "3rem 1.5rem", textAlign: "center", background: "rgba(255,255,255,0.01)", border: "1px dashed rgba(255,255,255,0.1)", borderRadius: "var(--r-md)" }}>
+              <p style={{ color: "var(--text-3)", fontSize: "0.85rem", margin: 0 }}>No active tickets or incidents found.</p>
+            </div>
+          ) : (
+            <div style={{ overflowX: "auto" }}>
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th style={{ paddingLeft: "1.25rem" }}>Number</th>
+                    <th>Subject</th>
+                    <th>{user?.role === "support" || user?.role === "admin" ? "Caller" : "Assigned To"}</th>
+                    <th>Priority</th>
+                    <th style={{ paddingRight: "1.25rem" }}>State</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tickets.map(t => {
+                    const statusColors = {
+                      Open:          "badge-blue",
+                      Assigned:      "badge-yellow",
+                      "In Progress": "badge-blue",
+                      Resolved:      "badge-green",
+                      Closed:        "badge-gray",
+                      New:           "badge-yellow"
+                    };
+                    const priorityColors = {
+                      Low: "badge-green",
+                      Medium: "badge-yellow",
+                      High: "badge-red",
+                      Critical: "badge-red"
+                    };
+                    return (
+                      <tr key={t.id}>
+                        <td style={{ paddingLeft: "1.25rem" }}><span className="ticket-chip">{t.ticket_number}</span></td>
+                        <td style={{ color: "var(--text-1)", fontWeight: 600, fontSize: "0.85rem" }}>{t.subject}</td>
+                        <td style={{ color: "var(--text-2)", fontSize: "0.825rem" }}>
+                          {user?.role === "support" || user?.role === "admin" ? t.author_name || "Guest" : t.assigned_staff_name || "—"}
+                        </td>
+                        <td>
+                          <span className={`badge ${priorityColors[t.priority] || 'badge-gray'}`} style={{ fontSize: "0.7rem", fontWeight: 700 }}>
+                            {t.priority}
+                          </span>
+                        </td>
+                        <td style={{ paddingRight: "1.25rem" }}>
+                          <span className={`badge ${statusColors[t.status || t.state] || 'badge-gray'}`} style={{ fontSize: "0.7rem", fontWeight: 700 }}>
+                            {t.status || t.state}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
 
     </motion.div>

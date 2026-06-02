@@ -262,7 +262,10 @@ exports.getTicketById = async (req, res) => {
     const ticket = await Ticket.findByPk(req.params.id, {
       include: [
         { model: TicketLog, as: 'logs' },
-        { model: Feedback,  as: 'feedback' }
+        { model: Feedback,  as: 'feedback' },
+        { model: User,      as: 'author',         attributes: ['id', 'full_name', 'email', 'role'] },
+        { model: User,      as: 'assigned_staff',  attributes: ['id', 'full_name', 'role'] },
+        { model: Category,  as: 'category' }
       ]
     });
     if (!ticket) return res.status(404).json({ message: 'Ticket not found' });

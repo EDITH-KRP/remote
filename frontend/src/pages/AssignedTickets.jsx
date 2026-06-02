@@ -242,7 +242,7 @@ export default function AssignedTickets() {
                       </span>
                     </td>
                     <td style={{ color: "var(--text-2)", fontSize: "0.78rem" }}>
-                      {new Date(t.createdAt).toLocaleDateString()}
+                      {new Date(t.createdAt || t.created_at).toLocaleDateString()}
                     </td>
                     <td style={{ fontWeight: 600, color: "var(--text-1)", maxWidth: "240px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {t.subject}
@@ -354,7 +354,7 @@ export default function AssignedTickets() {
                 </div>
                 <div style={serviceNowFieldStyle}>
                   <span style={serviceNowLabelStyle}>Opened At</span>
-                  <span style={serviceNowValueStyle}>{new Date(detailedTicket.createdAt).toLocaleDateString()} {new Date(detailedTicket.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  <span style={serviceNowValueStyle}>{new Date(detailedTicket.createdAt || detailedTicket.created_at).toLocaleDateString()} {new Date(detailedTicket.createdAt || detailedTicket.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
 
                 <div style={serviceNowFieldStyle}>
@@ -469,7 +469,7 @@ export default function AssignedTickets() {
                                 {c.author?.full_name} 
                                 {c.is_internal && <span style={{ marginLeft: "6px", fontSize: "0.625rem", color: "#fb923c", background: "rgba(245,158,11,0.15)", padding: "1px 5px", borderRadius: "3px" }}><Lock size={9} style={{ display:"inline", marginRight:"2px" }}/> Work Note</span>}
                               </span>
-                              <span style={{ fontSize: "0.68rem", color: "var(--text-3)" }}>{new Date(c.createdAt).toLocaleDateString()} {new Date(c.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                              <span style={{ fontSize: "0.68rem", color: "var(--text-3)" }}>{new Date(c.createdAt || c.created_at).toLocaleDateString()} {new Date(c.createdAt || c.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             </div>
                             <p style={{ fontSize: "0.81rem", color: "var(--text-2)", whiteSpace: "pre-wrap", lineHeight: 1.4, margin: 0 }}>{c.body}</p>
                           </div>

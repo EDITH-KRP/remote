@@ -100,7 +100,7 @@ export default function AdminPanel() {
     if (!silent) setLoading(true);
     try {
       const [tR, uR, rR, aR, actR] = await Promise.all([
-        api.get("/tickets"),
+        api.get("/tickets?all=true"),
         api.get("/admin/users"),
         api.get("/admin/reports"),
         api.get("/admin/available-staff"),
